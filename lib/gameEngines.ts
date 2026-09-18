@@ -37,7 +37,7 @@ const SLOT_PAYTABLE: Record<SlotSymbol, Record<number, number>> = {
   plum:   { 3: 15, 4: 40, 5: 105 },
   bell:   { 3: 25, 4: 70, 5: 165 },
   gem:    { 3: 38, 4: 105, 5: 300 },
-  bar:    { 3: 100, 4: 300, 5: 900 },
+  bar:    { 3: 110, 4: 330, 5: 990 },
   seven:  { 3: 75, 4: 225, 5: 675 },
 };
 
