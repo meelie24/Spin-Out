@@ -7,6 +7,7 @@ export interface AnimatedOutcome {
   netCents: number;
   balanceCents: number;
   actionCount: number;
+  decision?: string;
 }
 
 export interface RealityGameBridge {
@@ -249,12 +250,23 @@ export async function mountRealityGame(
 
     private animateLottery(outcome: AnimatedOutcome, P: PhaserModule) {
       const colors: Record<OutcomeBand, number> = { loss:0x715548, 'partial-loss':0x947254, push:0x9a855b, win:0xb5924d, 'big-win':0xd5b56f };
-      this.ticketCells.forEach((cell: any, i) => this.tweens.add({ targets: cell, alpha: .25, duration: options.reducedMotion ? 0 : 110, delay: i * 35, yoyo: true, onYoyo: () => cell.setFillStyle(colors[outcome.band]) }));
-      return options.reducedMotion ? Promise.resolve() : new Promise<void>(resolve => window.setTimeout(resolve, 650));
+      this.ticketCells.forEach((cell: any, i) => {
+        this.tweens.add({
+          targets: cell,
+          alpha: { from: .3, to: 1 },
+          scaleX: { from: .88, to: 1 },
+          duration: options.reducedMotion ? 0 : 150,
+          delay: i * 55,
+          ease: 'Power2',
+          onStart: () => cell.setFillStyle(colors[outcome.band]),
+        });
+      });
+      return options.reducedMotion ? Promise.resolve() : new Promise<void>(resolve => window.setTimeout(resolve, 720));
     }
 
     private animateSports(outcome: AnimatedOutcome, P: PhaserModule) {
-      const target = this.sportsRows[outcome.actionCount % this.sportsRows.length];
+      const sportsIndex = outcome.decision === 'North Harbor' ? 0 : outcome.decision === 'Cedar City' ? 1 : outcome.decision === 'Riverside' ? 2 : outcome.actionCount % this.sportsRows.length;
+      const target = this.sportsRows[sportsIndex];
       if (target) this.tweens.add({ targets: target, alpha: { from: 1, to: .38 }, duration: options.reducedMotion ? 0 : 220, yoyo: true, repeat: 1 });
       return options.reducedMotion ? Promise.resolve() : new Promise<void>(resolve => window.setTimeout(resolve, 500));
     }
