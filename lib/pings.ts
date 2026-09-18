@@ -89,7 +89,7 @@ export function buildPingCandidates(profile: RealityProfile, snapshot: RunSnapsh
       level: 4,
       factual: true,
       message: `That's the ${limitRounds} you chose.`,
-      detail: 'Are you still done here?',
+      detail: 'Still stopping here?',
     });
   }
 
