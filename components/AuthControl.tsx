@@ -29,8 +29,7 @@ export function AuthControl() {
     first?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setOpen(false);
-        window.setTimeout(() => trigger.current?.focus(), 0);
+        closeDialog();
         return;
       }
       if (event.key !== 'Tab' || !node) return;
@@ -46,6 +45,11 @@ export function AuthControl() {
   }, [open]);
 
   if (!configured) return null;
+
+  const closeDialog = () => {
+    trigger.current?.focus();
+    setOpen(false);
+  };
 
   const signIn = async () => {
     const supabase = createBrowserSupabase();
@@ -69,7 +73,7 @@ export function AuthControl() {
 
   return <>
     <button ref={trigger} className="bare-link" type="button" onClick={() => { setStatus(null); setOpen(true); }}>Sign in</button>
-    {open ? <div className="modal-backdrop" role="presentation" onMouseDown={() => setOpen(false)}>
+    {open ? <div className="modal-backdrop" role="presentation" onMouseDown={closeDialog}>
       <section ref={dialog} className="glass-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title" onMouseDown={e => e.stopPropagation()}>
         <p className="kicker">Account</p>
         <h2 id="auth-title">Sign in</h2>
@@ -77,7 +81,7 @@ export function AuthControl() {
         <label>Email<input value={email} onChange={e => setEmail(e.target.value)} type="email" autoComplete="email" placeholder="you@example.com"/></label>
         {status ? <p role="status" className="provider-note">{status}</p> : null}
         <div className="modal-actions">
-          <button className="soft-button" type="button" onClick={() => { setOpen(false); window.setTimeout(() => trigger.current?.focus(), 0); }}>Cancel</button>
+          <button className="soft-button" type="button" onClick={closeDialog}>Cancel</button>
           <button className="primary-button" type="button" disabled={!email.includes('@')} onClick={signIn}>Email sign-in link</button>
         </div>
       </section>
