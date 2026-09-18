@@ -84,6 +84,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     () => restoredRun?.gameState?.poker ?? null,
   );
   const ended = useRef(false);
+  const actionLock = useRef(false);
   const lease = useRef<ReturnType<typeof createRunLease> | null>(null);
   const lastDismissedPing = useRef<{ type: string; dismissedAt: number; balanceAt: number; stakeAt: number } | null>(null);
   const stakes = useMemo(() => stakeOptionsFor(profile.intendedWagerCents), [profile.intendedWagerCents]);
@@ -326,11 +327,12 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   };
 
   const act = async () => {
-    if (blockedByOtherTab || animating || ping || ended.current) return;
+    if (blockedByOtherTab || animating || ping || ended.current || actionLock.current) return;
+    actionLock.current = true;
 
     if (profile.gamblingType === 'poker') {
       if (!pokerRound) {
-        if (run.balanceCents < run.stakeCents) return;
+        if (run.balanceCents < run.stakeCents) { actionLock.current = false; return; }
         setAnimating(true);
         spinAudio.click();
         const dealt = dealPoker(random01);
@@ -354,7 +356,10 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
         game.current?.setBalance(balanceCents);
         game.current?.setPokerHand(state.hand, state.held);
         track('poker_deal', { stake: state.wagerCents, balance: balanceCents });
-        window.setTimeout(() => setAnimating(false), reducedMotion ? 0 : 280);
+        window.setTimeout(() => {
+          actionLock.current = false;
+          setAnimating(false);
+        }, reducedMotion ? 0 : 280);
         return;
       }
 
@@ -365,17 +370,25 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       const balanceCents = run.balanceCents + payoutCents;
       const heldCards = pokerRound.held.map((held, index) => held ? index + 1 : null).filter(Boolean).join(',');
       setPokerRound(null);
-      await completeOutcome(result.outcome, balanceCents, heldCards ? 'held ' + heldCards : 'draw all', pokerRound.balanceBeforeCents);
+      try {
+        await completeOutcome(result.outcome, balanceCents, heldCards ? 'held ' + heldCards : 'draw all', pokerRound.balanceBeforeCents);
+      } finally {
+        actionLock.current = false;
+      }
       return;
     }
 
-    if (run.balanceCents < run.stakeCents) return;
+    if (run.balanceCents < run.stakeCents) { actionLock.current = false; return; }
     setAnimating(true);
     const duration = profile.gamblingType === 'casino' ? 1500 : profile.gamblingType === 'slots' || profile.gamblingType === 'other' ? 1200 : profile.gamblingType === 'lottery' ? 820 : 520;
     spinAudio.spin(duration, profile.gamblingType);
     const outcome = resolveSimpleGame(profile.gamblingType, random01, run.stakeCents, gameDecision);
     const balanceCents = Math.max(0, run.balanceCents + outcome.netCents);
-    await completeOutcome(outcome, balanceCents, gameDecision || undefined);
+    try {
+      await completeOutcome(outcome, balanceCents, gameDecision || undefined);
+    } finally {
+      actionLock.current = false;
+    }
   };
 
   const togglePokerHold = (index: number) => {
