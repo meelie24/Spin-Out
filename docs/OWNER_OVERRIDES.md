@@ -20,3 +20,11 @@ These instructions were explicitly given after the current master prompt and the
    - Research each game category and compare against actual gameplay/walkthrough material.
    - Game logic must produce the visible result.
    - Do not reuse one generic outcome table for unrelated games.
+
+4. **Netlify native GitHub integration is the release/deployment path.**
+   - Do not use Vercel for Spin Out.
+   - Connect the GitHub repository directly to Netlify and let Netlify clone, build and deploy the complete repository.
+   - Verify the exact `release/final-production-pass` candidate on a Netlify branch deploy before promoting it.
+   - Do not merge `main` merely to obtain a deployment.
+   - After the release candidate passes deployed browser/auth/payment verification, promote that exact verified candidate and then connect the final custom domain through Netlify/the registrar.
+   - Any older Vercel references in planning or implementation documents are stale and must not control release decisions.
