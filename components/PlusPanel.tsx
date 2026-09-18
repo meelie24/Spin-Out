@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 import { PayPalSubscription } from './PayPalSubscription';
 import { loadData, updateData, type BillingState } from '@/lib/storage';
@@ -67,8 +68,8 @@ export function PlusPanel({ onClose }: { onClose: () => void }) {
 
       {state === 'premium' ? <>
         <p className="provider-state">Spin Out+ is active on this device.</p>
-        <p className="provider-note">Manage or cancel the subscription from your PayPal account. Core Reality Runs remain available if Plus ends.</p>
-        <a className="soft-button" href="https://www.paypal.com/myaccount/autopay/" target="_blank" rel="noreferrer">Manage subscription</a>
+        <p className="provider-note">Your full history and trends are ready. Core Reality Runs remain available if Plus ends.</p>
+        <div className="plus-live-actions"><Link className="primary-button" href="/plus" onClick={onClose}>Open Plus</Link><a className="soft-button" href="https://www.paypal.com/myaccount/autopay/" target="_blank" rel="noreferrer">Manage subscription</a></div>
       </> : null}
 
       {state === 'canceled' ? <>
