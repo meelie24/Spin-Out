@@ -10,7 +10,7 @@ export default async function PlusPage() {
   if (!supabase) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} nowMs={Date.now()} />;
 
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} />;
+  if (!auth.user) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} nowMs={Date.now()} />;
 
   const [entitlementResult, runsResult] = await Promise.all([
     supabase.from('entitlements').select('status').eq('user_id', auth.user.id).maybeSingle(),
