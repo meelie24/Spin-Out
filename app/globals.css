@@ -1354,3 +1354,23 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
 @media(max-width:620px){
   .insight-card-grid{grid-template-columns:1fr}
 }
+
+
+/* Reality Receipt refinements */
+.exit-receipt.receipt-four{grid-template-columns:repeat(4,1fr)}
+.exit-translation{
+  margin:10px 0 18px;
+  color:#766052;
+  font-size:13px;
+  line-height:1.5;
+}
+.receipt-left{
+  margin:18px 0 14px;
+  color:#3f2c24;
+  font-size:26px;
+  letter-spacing:-.035em;
+  font-weight:620;
+}
+@media(max-width:560px){
+  .exit-receipt.receipt-four{grid-template-columns:1fr 1fr}
+}
