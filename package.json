@@ -8,7 +8,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:core": "vitest run tests/*.test.ts",
+    "test:core": "tsc -p tsconfig.core.json && node --test .core-test/tests/*.test.js",
     "qa": "node qa/smoke.mjs"
   },
   "dependencies": {
