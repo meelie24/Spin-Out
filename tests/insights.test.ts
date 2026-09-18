@@ -40,6 +40,13 @@ function run(id:string, patch:Partial<RunRecord>={}):RunRecord {
   };
 }
 
+test('historical runs without newer arrays do not break insight analysis', () => {
+  const legacy = run('legacy') as RunRecord & { timeline?: RunRecord['timeline']; pings?: RunRecord['pings'] };
+  delete legacy.timeline;
+  delete legacy.pings;
+  assert.doesNotThrow(() => buildRealityInsights([legacy, legacy, legacy]));
+});
+
 test('one session never becomes a Trigger Fingerprint', () => {
   const insights=buildRealityInsights([run('1')]);
   assert.equal(insights.fingerprint.length,0);
