@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RealityGame, type RealityGameHandle } from './RealityGame';
 import { RealityPing } from './RealityPing';
 import { XRayMoment } from './XRayMoment';
+import { LongRunExperience } from './LongRunExperience';
 import { buildPingCandidates, selectPing } from '@/lib/pings';
 import { computeReality, formatMoney, shouldAutoEnd, stakeOptionsFor, daysUntil, isFinancialContextStale } from '@/lib/engine';
 import { dealPoker, drawPoker, resolveSimpleGame, SPORTS_MARKETS, type ResolvedGameOutcome } from '@/lib/gameEngines';
@@ -11,6 +12,7 @@ import { clearActiveRun, loadData, saveActiveRun, track, updateData } from '@/li
 import { spinAudio } from '@/lib/audio';
 import { createRunLease } from '@/lib/runLease';
 import { decideIntervention, initialDirectorState, interventionFamily, type AmbientMode, type InterventionSurface } from '@/lib/realityEngine/director';
+import { simulateLongRun, type LongRunResult } from '@/lib/realityEngine/longRun';
 import type { ActiveRun, ExitReason, PingCandidate, RealityProfile, SessionLimit } from '@/lib/types';
 
 export interface RunEndData {
@@ -127,6 +129,7 @@ export function RealityRun({
   const [ping, setPing] = useState<PingCandidate | null>(null);
   const [interventionSurface, setInterventionSurface] = useState<InterventionSurface | null>(null);
   const [ambientMode, setAmbientMode] = useState<AmbientMode>(() => restoredRun?.directorState?.ambientMode ?? 'normal');
+  const [longRun, setLongRun] = useState<LongRunResult | null>(null);
   const [muted, setMuted] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(() =>
     typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
@@ -307,7 +310,7 @@ export function RealityRun({
     const decision = decideIntervention({
       now: Date.now(),
       candidates: representatives,
-      foregroundOpen: Boolean(ping),
+      foregroundOpen: Boolean(ping || longRun),
       state: next.directorState ?? initialDirectorState(),
     });
 
@@ -368,7 +371,7 @@ export function RealityRun({
       family: decision.foreground.family,
     });
     return true;
-  }, [ping, profile]);
+  }, [longRun, ping, profile]);
 
   const notePostPingContinuation = (next: ActiveRun, outcome: ResolvedGameOutcome) => {
     const recentPing = lastDismissedPing.current;
@@ -472,7 +475,7 @@ export function RealityRun({
   };
 
   const act = async () => {
-    if (blockedByOtherTab || animating || ping || ended.current || actionLock.current) return;
+    if (blockedByOtherTab || animating || ping || longRun || ended.current || actionLock.current) return;
     actionLock.current = true;
 
     if (profile.gamblingType === 'poker') {
@@ -537,7 +540,7 @@ export function RealityRun({
   };
 
   const togglePokerHold = (index: number) => {
-    if (!pokerRound || animating || ping || blockedByOtherTab) return;
+    if (!pokerRound || animating || ping || longRun || blockedByOtherTab) return;
     spinAudio.click();
     const held = pokerRound.held.map((value, i) => i === index ? !value : value);
     const nextRound = { ...pokerRound, held };
@@ -550,7 +553,7 @@ export function RealityRun({
   };
 
   const setStake = (direction: -1 | 1) => {
-    if (blockedByOtherTab || animating || ping || pokerRound) return;
+    if (blockedByOtherTab || animating || ping || longRun || pokerRound) return;
     const current = runRef.current;
     const currentIndex = stakes.indexOf(current.stakeCents as never);
     const index = Math.max(0, Math.min(stakes.length - 1, (currentIndex < 0 ? 1 : currentIndex) + direction));
@@ -658,6 +661,26 @@ export function RealityRun({
   const dismissPing = () => closePing(false);
   const leaveFromPing = () => closePing(true);
 
+  const openLongRun = () => {
+    if (animating || longRun) return;
+    const seed = Math.floor(random01() * 2 ** 32);
+    const result = simulateLongRun({
+      gameType: profile.gamblingType,
+      stakeCents: runRef.current.stakeCents,
+      decision: gameDecision,
+      seed,
+    });
+    setLongRun(result);
+    track('long_run_opened', { game: profile.gamblingType, stake: runRef.current.stakeCents });
+  };
+
+  const gameLabel = profile.gamblingType === 'slots' ? 'Slots'
+    : profile.gamblingType === 'sports' ? 'Sportsbook'
+    : profile.gamblingType === 'casino' ? 'Roulette'
+    : profile.gamblingType === 'poker' ? 'Video Poker'
+    : profile.gamblingType === 'lottery' ? 'Scratch'
+    : 'Reality Run';
+
   const financeFresh = !isFinancialContextStale(profile);
   const days = financeFresh ? daysUntil(profile.nextIncomeDate) : null;
   const obligation = profile.obligationType === 'rent' ? 'RENT'
@@ -701,16 +724,22 @@ export function RealityRun({
           <div className="bulbs bulbs-right" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
           <RealityGame ref={game} gameType={profile.gamblingType} reducedMotion={reducedMotion} initialBalanceCents={run.balanceCents}/>
           {ping && interventionSurface === 'xray'
-            ? <XRayMoment insight={ping} onContinue={dismissPing} onExit={leaveFromPing} />
+            ? <XRayMoment
+                insight={ping}
+                onContinue={dismissPing}
+                onExit={leaveFromPing}
+                onRunLong={['near-miss','win-after-losses','loss-streak'].includes(ping.type) ? openLongRun : undefined}
+              />
             : ping
               ? <RealityPing ping={ping} reducedMotion={reducedMotion} onDismiss={dismissPing} onExit={leaveFromPing}/>
               : null}
-          {!ping?.requiresChoice ? <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button> : null}
+          {longRun ? <LongRunExperience result={longRun} gameLabel={gameLabel} onClose={() => setLongRun(null)} /> : null}
+          {!ping?.requiresChoice && !longRun ? <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button> : null}
         </div>
 
         {profile.gamblingType === 'sports' ? <>
           <div className="game-decision sports-picks" role="group" aria-label="Fictional moneyline market">
-            {sportsChoices.map(choice => <button key={choice.name} type="button" className={gameDecision === choice.name ? 'is-on' : ''} onClick={() => setGameDecision(choice.name)} disabled={animating || Boolean(ping)}>
+            {sportsChoices.map(choice => <button key={choice.name} type="button" className={gameDecision === choice.name ? 'is-on' : ''} onClick={() => setGameDecision(choice.name)} disabled={animating || Boolean(ping) || Boolean(longRun)}>
               <span>{choice.name}</span><strong>{choice.odds.toFixed(2)}</strong>
             </button>)}
           </div>
@@ -722,11 +751,11 @@ export function RealityRun({
         </> : null}
 
         {profile.gamblingType === 'casino' ? <div className="game-decision" role="group" aria-label="Roulette color">
-          {['Red','Black'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}
+          {['Red','Black'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping) || Boolean(longRun)}>{name}</button>)}
         </div> : null}
 
         {profile.gamblingType === 'poker' && pokerRound ? <div className="game-decision poker-holds" role="group" aria-label="Cards to hold">
-          {pokerRound.hand.map((code, index) => <button key={index} type="button" className={pokerRound.held[index] ? 'is-on' : ''} onClick={() => togglePokerHold(index)} disabled={animating || Boolean(ping)}>
+          {pokerRound.hand.map((code, index) => <button key={index} type="button" className={pokerRound.held[index] ? 'is-on' : ''} onClick={() => togglePokerHold(index)} disabled={animating || Boolean(ping) || Boolean(longRun)}>
             <span>{cardLabel(code)}</span><strong>{pokerRound.held[index] ? 'HELD' : 'Hold'}</strong>
           </button>)}
         </div> : null}
@@ -741,7 +770,10 @@ export function RealityRun({
             {animating ? '...' : actionLabel(profile.gamblingType, Boolean(pokerRound))}
           </button>
         </div>
-        <p className="run-fineprint">Simulation. Leave whenever you want.</p>
+        <div className="run-secondary">
+          <button type="button" onClick={openLongRun} disabled={animating || Boolean(ping) || Boolean(longRun)}>Run 10,000</button>
+          <p className="run-fineprint">Simulation. Leave whenever you want.</p>
+        </div>
       </section>
     </main>
   );
