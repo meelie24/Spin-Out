@@ -644,11 +644,11 @@ try {
   }, { p: contextProfile });
   const contextPage = await contextHome.newPage();
   await contextPage.goto(base, { waitUntil: 'domcontentloaded' });
-  await contextPage.getByText(/Payday's tomorrow\\./i).waitFor();
-  await contextPage.screenshot({ path: \`\${out}/payday-shield-390.png\`, fullPage: true });
+  await contextPage.getByText(/Payday's tomorrow\./i).waitFor();
+  await contextPage.screenshot({ path: `${out}/payday-shield-390.png`, fullPage: true });
   await contextPage.getByRole('button', { name: 'My reality' }).click();
   await contextPage.getByRole('heading', { name: /What should Spin Out keep in mind/i }).waitFor();
-  await contextPage.screenshot({ path: \`\${out}/my-reality-390.png\`, fullPage: true });
+  await contextPage.screenshot({ path: `${out}/my-reality-390.png`, fullPage: true });
   await contextHome.close();
 
   // Reduced motion stays playable.
