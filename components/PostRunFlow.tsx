@@ -18,7 +18,7 @@ function average(values: number[]) {
 }
 
 export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile; end: RunEndData; onDone: () => void }) {
-  const initialRuns = useMemo(() => loadData().runs, []);
+  const [initialRuns] = useState<RunRecord[]>(() => loadData().runs);
   const [stage, setStage] = useState<'exit-receipt'|'urge'|'urge-shift'|'outcome'|'amount'|'summary'>('exit-receipt');
   const [endingUrge, setEndingUrge] = useState<number | null>(null);
   const [actualWagerCents, setActualWagerCents] = useState(0);
