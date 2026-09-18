@@ -76,47 +76,43 @@ These are comparison points, not evidence that Spin Out will convert at the same
 
 ## Payment-provider decision
 
-### Current implementation: PayPal subscriptions
+### Current implementation: RevenueCat + Paddle Billing
 
-The codebase implements PayPal Subscriptions as the first production checkout path.
+RevenueCat is now the canonical paid-entitlement layer for Spin Out+. The web application uses RevenueCat's `@revenuecat/purchases-js` SDK with the authenticated Supabase user ID as the stable App User ID and one entitlement named `premium`.
 
-PayPal's current developer documentation supports fixed recurring subscription plans through its JavaScript SDK and Subscriptions API.
+Paddle Billing is the first billing engine to configure and test with that RevenueCat web integration. RevenueCat's current Web SDK documentation explicitly supports Paddle Billing, and RevenueCat's Paddle guide states that Paddle remains the billing engine and merchant of record while RevenueCat maps the purchase to entitlements.
 
 References:
-https://developer.paypal.com/platforms/subscriptions/
-https://developer.paypal.com/platforms/subscriptions/integrate/
-https://developer.paypal.com/subscriptions/pricing-plan
+https://www.revenuecat.com/docs/web/web-billing/web-sdk
+https://www.revenuecat.com/docs/web/integrations/paddle
+https://www.revenuecat.com/docs/web/overview
 
-The integration does not mark Plus active from a client-side callback alone. The server verifies the subscription ID, expected plan ID, and subscription status through PayPal before the browser stores premium state.
+The required sandbox setup is:
 
-### Merchant-review warning
+1. Paddle sandbox account.
+2. Monthly and annual subscription products/prices in Paddle.
+3. RevenueCat Paddle web configuration connected to that sandbox account.
+4. Paddle products imported into RevenueCat.
+5. One RevenueCat entitlement: `premium`.
+6. Current offering with monthly and annual packages.
+7. RevenueCat Web SDK public key configured in Spin Out.
+8. Real sandbox checkout tests using an authenticated Spin Out user.
 
-Spin Out does not accept wagers, deposits, prizes, or redeemable balances. Its “deposit” is explicitly simulated and no real money enters the Reality Run.
+RevenueCat's Paddle documentation specifically requires real sandbox purchases for lifecycle testing. Paddle's webhook simulator is ignored by RevenueCat for entitlement changes, so simulated webhook events must not be treated as purchase verification.
 
-However, payment providers often use broad gambling-risk classifications. Because Spin Out intentionally presents casino-like simulation, merchant approval must be confirmed before live collection begins.
+### Merchant-review condition
 
-Do not describe provider approval as guaranteed.
+Spin Out does not accept real-money wagers, game deposits, prizes, withdrawals, or redeemable game credits. Subscription payment purchases access to software. The product nevertheless uses realistic simulated gambling interfaces, so the actual product must be submitted accurately to Paddle and merchant approval must be confirmed before production payment activation.
 
-### Providers not selected
+Do not misrepresent the product to obtain approval. If Paddle declines the product, preserve the RevenueCat/access abstraction and move to another legitimate supported billing engine rather than bypassing the decision.
 
-Lemon Squeezy explicitly lists gambling among prohibited regulated products:
-https://docs.lemonsqueezy.com/help/getting-started/prohibited-products
+### One-run Plus trial
 
-Paddle restricts gambling, lotteries, games of chance, and related categories:
-https://www.paddle.com/help/start/intro-to-paddle/what-am-i-not-allowed-to-sell-on-paddle
+The earlier 48-hour trial concept has been superseded by the owner.
 
-FastSpring lists gambling services among prohibited sales:
-https://developer.fastspring.com/docs/manage-your-products
+An authenticated account's **first Reality Run** receives the complete Spin Out+ access layer for that one run, with the same 15-minute maximum as the Reality Run itself. The claim is server-bound to the first run ID and game. Once consumed, later runs use Core unless RevenueCat reports the `premium` entitlement active.
 
-Stripe treats gambling and gambling-like activity as restricted/high-risk and may require approval:
-https://stripe.com/legal/restricted-businesses
-https://support.stripe.com/questions/prohibited-and-restricted-businesses-list-faqs
-
-Gumroad's current policy is nuanced: educational and record-keeping gambling products can be allowed, while casino-branded storefronts and products that drive wagers are prohibited. Spin Out's highly immersive casino-style interface creates unnecessary classification risk for that provider:
-https://gumroad.com/prohibited
-
-Payhip prohibits gambling activities involving monetary or material prizes, but its broader provider dependencies still make pre-approval prudent:
-https://help.payhip.com/article/205-what-products-are-not-allowed-on-payhip
+This is separate from a provider-managed subscription trial; no Paddle trial period is required for the one-run product trial.
 
 ## Subscription UX rules
 
@@ -290,19 +286,22 @@ Start with pilot conversations and quote based on:
 
 ## What still requires an external account
 
-Code can be production-ready without pretending external merchant setup exists.
+The repository can implement the integration without pretending provider setup exists.
 
-Live Plus checkout requires:
+Live/sandbox Plus checkout still requires:
 
-- approved PayPal Business merchant account
-- PayPal product
-- $4.99 monthly plan
-- $29.99 yearly plan
-- production client ID
-- production secret
-- monthly/yearly plan IDs
-- provider review/approval for the actual Spin Out product
+- Paddle sandbox merchant account
+- $4.99 monthly Paddle price
+- $29.99 yearly Paddle price
+- RevenueCat project and Paddle web configuration
+- Paddle products imported into RevenueCat
+- `premium` entitlement
+- current offering with monthly and annual packages
+- RevenueCat Web SDK public key
+- server-side RevenueCat secret API key
+- successful, cancelled, and failed real sandbox purchase tests
+- Paddle production review/approval and live credentials before accepting live payments
 
-Deployment also requires a hosting account and control of the `spinitout.com` DNS.
+Deployment also requires a full-stack host connected directly to the GitHub repository plus final control of the chosen custom-domain DNS.
 
-Until those credentials are connected, the app deliberately shows pricing without a fake payment button.
+Until the sandbox/provider configuration is connected, the application must present the integration as unavailable rather than inventing a successful subscription.
