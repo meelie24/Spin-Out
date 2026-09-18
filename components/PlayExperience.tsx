@@ -8,7 +8,7 @@ import { RealityRun, type RunEndData } from './RealityRun';
 import { PostRunFlow } from './PostRunFlow';
 import { clearActiveRun, loadActiveRun, loadData, updateData } from '@/lib/storage';
 import { shouldAutoEnd } from '@/lib/engine';
-import type { ActiveRun, GamblingType, RealityProfile } from '@/lib/types';
+import type { ActiveRun, GamblingType, RealityProfile, SessionLimit } from '@/lib/types';
 
 interface ActiveEnvelope { profile: RealityProfile; run: ActiveRun }
 
@@ -20,6 +20,7 @@ export function PlayExperience({ initialGame = null }: { initialGame?: GamblingT
   const [profile, setProfile] = useState<RealityProfile | null>(null);
   const [restored, setRestored] = useState<ActiveRun | null>(null);
   const [end, setEnd] = useState<RunEndData | null>(null);
+  const [sessionLimit, setSessionLimit] = useState<SessionLimit>({ rounds: null, minutes: null });
 
   useEffect(() => {
     let cancelled = false;
@@ -47,8 +48,8 @@ export function PlayExperience({ initialGame = null }: { initialGame?: GamblingT
 
   if (stage === 'loading') return <main className="loading-page"><span className="loading-dot"/>Loading</main>;
   if (stage === 'setup') return <RealitySetup existing={profile} initialGame={initialGame} onComplete={next => { setProfile(next); updateData(data => ({ ...data, profile: next })); setStage('deposit'); }} />;
-  if (stage === 'deposit' && profile) return <FakeDeposit profile={profile} onComplete={() => setStage('run')} />;
-  if (stage === 'run' && profile) return <RealityRun profile={profile} restoredRun={restored} onEnd={data => { setEnd(data); setRestored(null); setStage('post'); }} />;
+  if (stage === 'deposit' && profile) return <FakeDeposit profile={profile} onComplete={limit => { setSessionLimit(limit); setStage('run'); }} />;
+  if (stage === 'run' && profile) return <RealityRun profile={profile} restoredRun={restored} sessionLimit={sessionLimit} onEnd={data => { setEnd(data); setRestored(null); setStage('post'); }} />;
   if (stage === 'post' && profile && end) return <PostRunFlow profile={profile} end={end} onDone={() => router.push('/')} />;
   return <main className="plain-page"><h1>Couldn’t start the run.</h1><button className="primary-button" type="button" onClick={() => { clearActiveRun(); setStage('setup'); }}>Start over</button></main>;
 }
