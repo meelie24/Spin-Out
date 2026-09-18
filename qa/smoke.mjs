@@ -467,7 +467,7 @@ try {
     }
 
     await envPage.waitForFunction(() => {
-      const ping = document.querySelector('.reality-ping');
+      const ping = document.querySelector('.reality-ping, .xray-moment');
       const button = document.querySelector('.game-action');
       return Boolean(ping) || (button instanceof HTMLButtonElement && !button.disabled);
     }, null, { timeout: gameType === 'casino' ? 9000 : 7000 });
@@ -558,12 +558,67 @@ try {
   await stakePage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await stakePage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await stakePage.getByRole('button', { name: 'Raise practice stake' }).click();
-  const stakePing = stakePage.locator('.reality-ping');
+  const stakePing = stakePage.locator('.xray-moment');
   await stakePing.waitFor({ timeout: 5000 });
-  assert(await stakePing.getByText(/You lost, then raised it\./i).isVisible(), 'stake-escalation Ping did not fire immediately');
+  assert(await stakePing.getByText(/You lost, then raised it\./i).isVisible(), 'stake-escalation X-Ray did not fire immediately');
   const afterStake = await stakePage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
   assert(afterStake?.actionCount === 3, 'stake-escalation intervention required another play before firing');
   await stakeContext.close();
+
+  // Overload scenario: many qualifying conditions still produce only one foreground intervention.
+  const overloadContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const overloadProfile = profile('slots', {
+    triggerType: 'win-it-back',
+    nextIncomeDate: isoFromNow(1),
+    difficultTimes: ['payday'],
+    paydayPlanActions: ['move-bill-money','open-spinout'],
+    obligationType: 'car',
+    obligationAmountCents: 43_000,
+    obligationDueDate: isoFromNow(4),
+  });
+  const overloadRun = runFor(overloadProfile, {
+    initialBalanceCents: 30_000,
+    balanceCents: 16_000,
+    previousBalanceCents: 18_000,
+    stakeCents: 4_000,
+    previousStakeCents: 2_000,
+    actionCount: 6,
+    chosenLimitRounds: 5,
+    lastPingAction: 2,
+    lastNetCents: -2_000,
+    consecutiveLosses: 3,
+    actionIntervalsMs: [1600,1400,1200,1100],
+    totalStakedCents: 24_000,
+  });
+  await seedActive(overloadContext, overloadProfile, overloadRun);
+  const overloadPage = await overloadContext.newPage();
+  await overloadPage.goto(\`\${base}/play\`, { waitUntil: 'domcontentloaded' });
+  await overloadPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await waitActionReady(overloadPage);
+  await overloadPage.locator('.game-action').click();
+  await overloadPage.locator('.reality-ping,.xray-moment').waitFor({ timeout: 9000 });
+  assert(await overloadPage.locator('.reality-ping,.xray-moment').count() === 1, 'overload scenario stacked foreground interventions');
+  assert(await overloadPage.getByText(/You decided on 5\\. This is 7\\./i).isVisible(), 'overload scenario did not prioritize the chosen limit');
+  assert(await overloadPage.locator('.run-shell.ambient-strong').count() === 1, 'overload scenario did not apply quiet ambient escalation');
+  assert(await overloadPage.locator('.payday-shield-card').count() === 0, 'Payday Shield appeared during active gameplay');
+  await overloadContext.close();
+
+  // Run 10,000 is built into the game and must not mutate the live session.
+  const longContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const longProfile = profile('slots');
+  const longRunState = runFor(longProfile, { actionCount: 2, balanceCents: 8_000 });
+  await seedActive(longContext, longProfile, longRunState);
+  const longPage = await longContext.newPage();
+  await longPage.goto(\`\${base}/play\`, { waitUntil: 'domcontentloaded' });
+  await longPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await longPage.getByRole('button', { name: 'Run 10,000' }).click();
+  await longPage.locator('.longrun-panel').waitFor({ timeout: 5000 });
+  await longPage.getByText(/After 10,000 runs/i).waitFor({ timeout: 5000 });
+  const duringLong = await longPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
+  assert(duringLong?.actionCount === 2 && duringLong?.balanceCents === 8000, 'Run 10,000 mutated the live Reality Run');
+  await longPage.getByRole('button', { name: 'Close' }).click();
+  await longPage.locator('.longrun-panel').waitFor({ state: 'detached' });
+  await longContext.close();
 
   // Reduced motion stays playable.
   const reduced = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
@@ -575,7 +630,7 @@ try {
   await waitActionReady(rp);
   await rp.locator('.game-action').click();
   await rp.waitForFunction(() => {
-    const ping = document.querySelector('.reality-ping');
+    const ping = document.querySelector('.reality-ping, .xray-moment');
     const button = document.querySelector('.game-action');
     return Boolean(ping) || (button instanceof HTMLButtonElement && !button.disabled);
   }, null, { timeout: 4000 });
