@@ -16,6 +16,7 @@
     "lib/gameEngines.ts",
     "lib/realityEngine/director.ts",
     "lib/realityEngine/insights.ts",
+    "lib/realityEngine/receipt.ts",
     "tests/*.test.ts",
     "types/node-shim.d.ts"
   ]
