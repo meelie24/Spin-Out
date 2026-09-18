@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, 'rebuild/**']
+    branches: [main, 'rebuild/**', 'release/**']
   pull_request:
 
 jobs:
@@ -17,6 +17,7 @@ jobs:
       - run: npm install
       - run: npm run test:core
       - run: npm run typecheck
+      - run: npm run lint
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - name: Run browser QA
