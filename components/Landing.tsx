@@ -15,22 +15,23 @@ const games: Array<{
   name: string;
   eyebrow: string;
   description: string;
+  purpose: string;
   symbols: string[];
   tone: string;
 }> = [
-  { id: 'slots', name: 'Slots', eyebrow: '5 reels · 5 lines', description: 'Weighted reel stops, visible paylines and a real paytable.', symbols: ['/symbols/seven.svg','/symbols/bar.svg','/symbols/cherry.svg'], tone: 'slots' },
-  { id: 'sports', name: 'Sportsbook', eyebrow: 'Moneyline', description: 'Fictional events with real odds, bet-slip math and potential return.', symbols: ['/symbols/sports-ticket.svg','/symbols/cash-coin.svg','/symbols/gem.svg'], tone: 'sports' },
-  { id: 'casino', name: 'Roulette', eyebrow: 'Single zero', description: 'A 37-pocket European wheel with red and black even-money bets.', symbols: ['/symbols/roulette.svg','/symbols/cash-coin.svg','/symbols/gem.svg'], tone: 'casino' },
-  { id: 'poker', name: 'Video Poker', eyebrow: 'Jacks or Better', description: 'Deal five, choose individual holds, draw and resolve the hand.', symbols: ['/symbols/cards.svg','/symbols/bar.svg','/symbols/gem.svg'], tone: 'poker' },
-  { id: 'lottery', name: 'Scratch', eyebrow: 'Match 3', description: 'A predetermined nine-panel ticket revealed in sequence.', symbols: ['/symbols/scratch-ticket.svg','/symbols/seven.svg','/symbols/cash-coin.svg'], tone: 'lottery' },
-  { id: 'other', name: 'Something else', eyebrow: 'Reality Run', description: 'Use the slot-style simulation when your real game is not listed.', symbols: ['/symbols/fu.svg','/symbols/sycee.svg','/symbols/cash-coin.svg'], tone: 'other' },
+  { id: 'slots', name: 'Slots', eyebrow: '5 reels · 5 lines', description: 'Weighted reel stops, visible paylines and a real paytable.', purpose: 'See what keeps you chasing.', symbols: ['/symbols/seven.svg','/symbols/bar.svg','/symbols/cherry.svg'], tone: 'slots' },
+  { id: 'sports', name: 'Sportsbook', eyebrow: 'Moneyline', description: 'Fictional events with real odds, bet-slip math and potential return.', purpose: 'Catch what the odds make you reach for.', symbols: ['/symbols/sports-ticket.svg','/symbols/cash-coin.svg','/symbols/gem.svg'], tone: 'sports' },
+  { id: 'casino', name: 'Roulette', eyebrow: 'Single zero', description: 'A 37-pocket European wheel with red and black even-money bets.', purpose: 'Practice leaving while you still want another round.', symbols: ['/symbols/roulette.svg','/symbols/cash-coin.svg','/symbols/gem.svg'], tone: 'casino' },
+  { id: 'poker', name: 'Video Poker', eyebrow: 'Jacks or Better', description: 'Deal five, choose individual holds, draw and resolve the hand.', purpose: 'See what a win makes you want to do next.', symbols: ['/symbols/cards.svg','/symbols/bar.svg','/symbols/gem.svg'], tone: 'poker' },
+  { id: 'lottery', name: 'Scratch', eyebrow: 'Match 3', description: 'A predetermined nine-panel ticket revealed in sequence.', purpose: 'Catch what “almost” does to you.', symbols: ['/symbols/scratch-ticket.svg','/symbols/seven.svg','/symbols/cash-coin.svg'], tone: 'lottery' },
+  { id: 'other', name: 'Something else', eyebrow: 'Reality Run', description: 'Use the slot-style simulation when your real game is not listed.', purpose: 'Practice stopping before one more becomes another.', symbols: ['/symbols/fu.svg','/symbols/sycee.svg','/symbols/cash-coin.svg'], tone: 'other' },
 ];
 
 const prompts = [
-  { id: 'money', label: 'That money already has a job.', detail: 'Tap to clear' },
-  { id: 'chase', label: 'If it goes, what replaces it?', detail: 'Tap to clear' },
-  { id: 'exit', label: 'You can leave before it starts.', detail: 'Tap to clear' },
-  { id: 'one-more', label: '“One more” is still another decision.', detail: 'Tap to clear' },
+  { id: 'money', label: 'What usually happens after “one more”?', detail: 'Reality Ping · tap to clear' },
+  { id: 'chase', label: 'How much are you actually trying to get back?', detail: 'Reality Ping · tap to clear' },
+  { id: 'exit', label: 'When do you usually realize you’ve gone too far?', detail: 'Reality Ping · tap to clear' },
+  { id: 'one-more', label: 'What made you open this today?', detail: 'Reality Ping · tap to clear' },
 ];
 
 const motif = [
@@ -228,7 +229,7 @@ export function Landing() {
                 <div className="game-symbols" aria-hidden="true">
                   {game.symbols.map((symbol, symbolIndex) => <Image src={symbol} alt="" width={64} height={64} key={symbolIndex} />)}
                 </div>
-                <div className="game-card-copy"><h3>{game.name}</h3><p>{game.description}</p></div>
+                <div className="game-card-copy"><h3>{game.name}</h3><p>{game.description}</p><small className="game-purpose">{game.purpose}</small></div>
                 <div className="game-enter"><span>Enter Reality Run</span><b>↗</b></div>
               </Link>
             ))}
@@ -246,7 +247,7 @@ export function Landing() {
                 <div className="game-symbols" aria-hidden="true">
                   {game.symbols.map((symbol, symbolIndex) => <Image src={symbol} alt="" width={64} height={64} key={symbolIndex} />)}
                 </div>
-                <div className="game-card-copy"><h3>{game.name}</h3><p>{game.description}</p></div>
+                <div className="game-card-copy"><h3>{game.name}</h3><p>{game.description}</p><small className="game-purpose">{game.purpose}</small></div>
                 <div className="game-enter"><span>Enter Reality Run</span><b>↗</b></div>
               </Link>
             ))}
