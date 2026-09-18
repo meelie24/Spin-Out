@@ -3,6 +3,7 @@ import {
   drawPoker,
   evaluateJacksOrBetter,
   resolveSimpleGame,
+  expectedReturnRate,
   type CardCode,
 } from '../gameEngines';
 import type { GamblingType, OutcomeBand } from '../types';
@@ -27,6 +28,9 @@ export interface LongRunResult {
   longestLossStreak: number;
   samples: LongRunSample[];
   strategyNote: string | null;
+  modelReturnRate: number;
+  expectedNetCents: number;
+  expectationBasis: string;
 }
 
 export interface LongRunOptions {
@@ -156,6 +160,9 @@ export function simulateLongRun(options: LongRunOptions): LongRunResult {
   }
 
   const totalStakedCents=stakeCents*10_000;
+  const engineRate = expectedReturnRate(options.gameType, options.decision ?? '');
+  const modelReturnRate = engineRate ?? .9715;
+  const expectedNetCents = Math.round(totalStakedCents * (modelReturnRate - 1));
   return {
     runs:10_000,
     totalStakedCents,
@@ -172,5 +179,10 @@ export function simulateLongRun(options: LongRunOptions): LongRunResult {
     strategyNote:options.gameType==='poker'
       ? 'Video poker uses one fixed Jacks-or-Better hold strategy for all 10,000 hands.'
       : null,
+    modelReturnRate,
+    expectedNetCents,
+    expectationBasis:options.gameType==='poker'
+      ? 'Fixed-strategy benchmark'
+      : 'Calibrated game model',
   };
 }
