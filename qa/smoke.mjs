@@ -241,14 +241,12 @@ try {
   await page.screenshot({ path: `${out}/quit-reason-390.png`, fullPage: true });
   await page.getByRole('button', { name: 'Skip' }).click();
   await page.locator('input[name="available"]').fill('850');
-  await page.getByRole('button', { name: 'Use' }).click();
   await page.getByRole('button', { name: 'Next week' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: /^Car$/ }).click();
   await page.locator('input[name="amount"]').fill('430');
   await page.getByRole('button', { name: 'This week' }).click();
   await page.getByRole('button', { name: /Lock it in/ }).click();
-  await page.getByRole('button', { name: 'Skip' }).click();
-  await page.getByRole('button', { name: 'Savings' }).click();
   await page.getByRole('button', { name: '8' }).click();
 
   const loadButton = page.getByRole('button', { name: /Load \$100/ });
@@ -342,7 +340,7 @@ try {
   await ping.waitFor({ state: 'detached' });
   await pingContext.close();
 
-  // First-run alternate path: unknown cash/income, no urgent obligation, lender+goal skipped.
+  // First-run alternate path: unknown cash/income and no urgent obligation.
   const unknownContext = await browser.newContext({ viewport: { width: 375, height: 667 } });
   const unknown = await unknownContext.newPage();
   await unknown.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
@@ -351,12 +349,11 @@ try {
   await unknown.getByRole('button', { name: /Bored/ }).click();
   await unknown.getByRole('heading', { name: /Why are you trying to stop/i }).waitFor();
   await unknown.getByRole('button', { name: 'Skip' }).click();
-  await unknown.getByRole('button', { name: 'Not sure' }).click();
-  await unknown.getByRole('button', { name: 'Not sure' }).click();
+  await unknown.getByRole('button', { name: /Not sure on the amount/i }).click();
+  await unknown.getByRole('button', { name: 'Not sure', exact: true }).click();
+  await unknown.getByRole('button', { name: 'Continue' }).click();
   await unknown.getByRole('button', { name: /Nothing urgent/ }).click();
-  await unknown.getByRole('heading', { name: /If you came up short/i }).waitFor();
-  await unknown.getByRole('button', { name: 'Skip' }).click();
-  await unknown.getByRole('button', { name: 'Skip' }).click();
+  await unknown.getByRole('button', { name: '3' }).waitFor();
   await unknown.getByRole('button', { name: '3' }).click();
   await unknown.getByRole('button', { name: /Load \$20/ }).waitFor();
   await unknownContext.close();
@@ -370,7 +367,7 @@ try {
   await stale.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await stale.getByRole('button', { name: '$50', exact: true }).click();
   await stale.getByRole('button', { name: /Win it back/ }).click();
-  await stale.getByRole('heading', { name: /How much have you actually got/i }).waitFor();
+  await stale.getByRole('heading', { name: /Until more money comes in/i }).waitFor();
   await stale.screenshot({ path: `${out}/stale-returning-390.png`, fullPage: true });
   await staleContext.close();
 
