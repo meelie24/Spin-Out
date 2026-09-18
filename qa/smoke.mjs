@@ -132,7 +132,8 @@ try {
     const context = await browser.newContext({ viewport: { width, height } });
     const page = await context.newPage();
     await page.goto(base, { waitUntil: 'networkidle' });
-    await page.getByRole('link', { name: /^Start$/i }).waitFor();
+    await page.getByRole('link', { name: /Enter Reality Run/i }).first().waitFor();
+    assert(await page.getByRole('link', { name: /Enter Reality Run/i }).count() === 6, `${name}: homepage did not expose all six game choices`);
     await noHorizontalOverflow(page, name);
     await page.screenshot({ path: `${out}/home-${name}.png`, fullPage: true });
     if (name === 'desktop-1440' || name === 'mobile-390') await assertA11y(page, name);
