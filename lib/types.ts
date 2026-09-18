@@ -3,6 +3,8 @@ export type TriggerType = 'win-money' | 'win-it-back' | 'bored' | 'rush' | 'swit
 export type ObligationType = 'rent' | 'car' | 'groceries' | 'credit-card' | 'utilities' | 'childcare' | 'loan' | 'insurance' | 'phone' | 'other' | 'none';
 export type OutcomeBand = 'loss' | 'partial-loss' | 'push' | 'win' | 'big-win';
 export type ExitReason = 'voluntary' | 'timeout' | 'balance';
+export type DifficultTime = 'payday' | 'friday-night' | 'late-night' | 'after-drinking' | 'after-argument' | 'bored' | 'stressed' | 'alone' | 'custom';
+export type PaydayPlanAction = 'open-spinout' | 'move-bill-money' | 'move-savings' | 'message-someone' | 'use-gambling-block' | 'custom';
 
 export interface SessionLimit {
   rounds: number | null;
@@ -26,6 +28,10 @@ export interface RealityProfile {
   recentLenderAmountCents: number | null;
   personalMoneyGoal: string | null;
   additionalMoneyGoal?: string | null;
+  difficultTimes?: DifficultTime[];
+  difficultTimeCustom?: string | null;
+  paydayPlanActions?: PaydayPlanAction[];
+  paydayPlanCustom?: string | null;
   startingUrge: number;
   financialContextUpdatedAt: string;
   createdAt: string;
