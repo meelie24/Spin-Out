@@ -68,8 +68,8 @@ export function PlusPanel({ onClose }: { onClose: () => void }) {
   return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
     <section ref={dialog} className="glass-dialog plus-dialog" role="dialog" aria-modal="true" aria-labelledby="plus-title" onMouseDown={e => e.stopPropagation()}>
       <p className="kicker">Spin Out+</p>
-      <h2 id="plus-title">Keep the history that matters.</h2>
-      <p className="provider-note">Reality Runs stay free. Plus adds full history, Money Kept trends, time-to-exit trends and weekly readouts.</p>
+      <h2 id="plus-title">Full history and trends.</h2>
+      <p className="provider-note">Reality Runs stay free. Plus adds full history, Money Kept trends, exit-time trends and weekly readouts.</p>
 
       {!checked ? <p className="provider-note">Checking access…</p> : null}
 
