@@ -136,6 +136,13 @@ try {
   await page.getByRole('button', { name: 'No' }).click();
   await page.locator('.money-kept').waitFor();
   await page.screenshot({ path: `${out}/money-kept-390.png`, fullPage: true });
+  await page.getByRole('button', { name: 'Spin Out+' }).click();
+  await page.getByRole('heading', { name: /Keep the deeper history/i }).waitFor();
+  assert(await page.getByText('$4.99').isVisible(), 'monthly Plus price missing');
+  assert(await page.getByText('$29.99').isVisible(), 'yearly Plus price missing');
+  assert(await page.getByText(/No fake payment button is shown/i).isVisible(), 'unconfigured billing state is not honest');
+  assert(await page.getByRole('button', { name: /Preview Plus/i }).count() === 0, 'fake Plus preview control returned');
+  await page.screenshot({ path: `${out}/plus-390.png`, fullPage: true });
   await context.close();
 
   // Reduced motion remains playable.
