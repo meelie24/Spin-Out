@@ -31,7 +31,11 @@ export const RealityGame = forwardRef<RealityGameHandle, { gameType: GamblingTyp
         else { bridge.current = mounted; setReady(true); }
       })();
       return () => { cancelled = true; bridge.current?.destroy(); bridge.current = null; if (host.current) host.current.innerHTML = ''; };
-    }, [gameType, reducedMotion, initialBalanceCents]);
+    }, [gameType, reducedMotion]);
+
+    useEffect(() => {
+      bridge.current?.setContext(initialBalanceCents);
+    }, [initialBalanceCents]);
 
     return <div className="phaser-stage" data-ready={ready ? 'true' : 'false'} ref={host}>{!ready ? <div className="game-loading">Building the table…</div> : null}</div>;
   },
