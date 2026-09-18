@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RealityGame, type RealityGameHandle } from './RealityGame';
 import { RealityPing } from './RealityPing';
 import { buildPingCandidates, selectPing } from '@/lib/pings';
-import { computeReality, formatMoney, sampleOutcome, shouldAutoEnd, stakeOptionsFor, daysUntil, isFinancialContextStale } from '@/lib/engine';
+import { computeReality, formatMoney, shouldAutoEnd, stakeOptionsFor, daysUntil, isFinancialContextStale } from '@/lib/engine';
+import { dealPoker, drawPoker, resolveSimpleGame, SPORTS_MARKETS, type ResolvedGameOutcome } from '@/lib/gameEngines';
 import { clearActiveRun, loadData, saveActiveRun, track, updateData } from '@/lib/storage';
 import { spinAudio } from '@/lib/audio';
 import { createRunLease } from '@/lib/runLease';
@@ -23,16 +24,23 @@ function random01() {
   return a[0] / 2 ** 32;
 }
 
-function actionLabel(type: RealityProfile['gamblingType']) {
-  if (type === 'sports') return 'Place';
-  if (type === 'poker') return 'Deal';
+function actionLabel(type: RealityProfile['gamblingType'], pokerHolding: boolean) {
+  if (type === 'sports') return 'Place bet';
+  if (type === 'poker') return pokerHolding ? 'Draw' : 'Deal';
   if (type === 'lottery') return 'Scratch';
   return 'Spin';
 }
+
 function exitLabel(type: RealityProfile['gamblingType']) {
   if (type === 'slots') return 'Cash Out';
   if (type === 'poker' || type === 'casino') return 'Leave Table';
   return 'Leave';
+}
+
+function cardLabel(code: string) {
+  const suit = code.slice(-1);
+  const rank = code.slice(0,-1);
+  return rank + (suit === 'S' ? '♠' : suit === 'H' ? '♥' : suit === 'D' ? '♦' : '♣');
 }
 
 function freshRun(profile: RealityProfile): ActiveRun {
@@ -69,7 +77,12 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   const [pendingBalanceEnd, setPendingBalanceEnd] = useState(false);
   const [blockedByOtherTab, setBlockedByOtherTab] = useState(false);
   const [accessMode, setAccessMode] = useState<'checking'|'trial'|'paid'|'core'>('checking');
-  const [gameDecision, setGameDecision] = useState<string>(() => profile.gamblingType === 'sports' ? 'North Harbor' : profile.gamblingType === 'casino' ? 'Red' : profile.gamblingType === 'poker' ? 'Hold' : '');
+  const [gameDecision, setGameDecision] = useState<string>(() =>
+    profile.gamblingType === 'sports' ? SPORTS_MARKETS[0].home : profile.gamblingType === 'casino' ? 'Red' : ''
+  );
+  const [pokerRound, setPokerRound] = useState<NonNullable<NonNullable<ActiveRun['gameState']>['poker']> | null>(
+    () => restoredRun?.gameState?.poker ?? null,
+  );
   const ended = useRef(false);
   const lease = useRef<ReturnType<typeof createRunLease> | null>(null);
   const lastDismissedPing = useRef<{ type: string; dismissedAt: number; balanceAt: number; stakeAt: number } | null>(null);
@@ -77,7 +90,14 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   const reality = useMemo(() => computeReality(profile, run.balanceCents), [profile, run.balanceCents]);
   const intensity = Math.min(1, reality.simulatedLossCents / Math.max(profile.intendedWagerCents, 1));
 
-  useEffect(() => { runRef.current = run; saveActiveRun({ profile, run }); }, [profile, run]);
+  useEffect(() => {
+    runRef.current = run;
+    saveActiveRun({ profile, run });
+  }, [profile, run]);
+
+  useEffect(() => {
+    if (pokerRound) game.current?.setPokerHand(pokerRound.hand, pokerRound.held);
+  }, [pokerRound]);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +116,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       .catch(() => { if (!cancelled) setAccessMode('core'); });
     return () => { cancelled = true; };
   }, [profile.gamblingType]);
+
   useEffect(() => {
     lease.current = createRunLease(runRef.current.id);
     const claim = lease.current.claim();
@@ -122,10 +143,15 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
 
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    const sync = () => setReducedMotion(Boolean(media?.matches)); sync(); media?.addEventListener?.('change', sync);
+    const sync = () => setReducedMotion(Boolean(media?.matches));
+    sync();
+    media?.addEventListener?.('change', sync);
     spinAudio.startAmbient();
     track('session_start', { game: profile.gamblingType, trigger: profile.triggerType, intended: profile.intendedWagerCents });
-    return () => { media?.removeEventListener?.('change', sync); spinAudio.stopAmbient(); };
+    return () => {
+      media?.removeEventListener?.('change', sync);
+      spinAudio.stopAmbient();
+    };
   }, [profile.gamblingType, profile.triggerType, profile.intendedWagerCents]);
 
   const finish = useCallback((reason: ExitReason) => {
@@ -154,18 +180,26 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     }
     clearActiveRun();
     spinAudio.stopAmbient();
-    track(reason === 'voluntary' ? 'session_voluntary_exit' : reason === 'timeout' ? 'session_timeout' : 'credits_exhausted', { actions: current.actionCount, timeToExitSeconds, balance: current.balanceCents, largestLoss: current.largestLossCents, pings: current.pings.length });
+    track(reason === 'voluntary' ? 'session_voluntary_exit' : reason === 'timeout' ? 'session_timeout' : 'credits_exhausted', {
+      actions: current.actionCount,
+      timeToExitSeconds,
+      balance: current.balanceCents,
+      largestLoss: current.largestLossCents,
+      pings: current.pings.length,
+    });
     onEnd({ run: current, reason, endedAt, timeToExitSeconds });
   }, [onEnd]);
 
   useEffect(() => {
-    if (run.balanceCents < stakes[0] && !ended.current) {
+    if (!pokerRound && run.balanceCents < stakes[0] && !ended.current) {
       const timer = window.setTimeout(() => finish('balance'), 80);
       return () => window.clearTimeout(timer);
     }
-    const timer = window.setInterval(() => { if (shouldAutoEnd(runRef.current.startedAt, Date.now())) finish('timeout'); }, 1000);
+    const timer = window.setInterval(() => {
+      if (shouldAutoEnd(runRef.current.startedAt, Date.now())) finish('timeout');
+    }, 1000);
     return () => window.clearInterval(timer);
-  }, [finish, run.balanceCents, stakes]);
+  }, [finish, pokerRound, run.balanceCents, stakes]);
 
   const showPing = useCallback((next: ActiveRun) => {
     const data = loadData();
@@ -188,38 +222,43 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       ...next,
       lastPingAction: next.actionCount,
       pings: [...next.pings, pingRecord],
-      timeline: [...next.timeline, { kind: 'ping-shown', at: shownAt, balanceCents: next.balanceCents, stakeCents: next.stakeCents, pingType: chosen.type }],
+      timeline: [...next.timeline, {
+        kind: 'ping-shown',
+        at: shownAt,
+        balanceCents: next.balanceCents,
+        stakeCents: next.stakeCents,
+        pingType: chosen.type,
+      }],
     };
-    setRun(updated); runRef.current = updated;
+    setRun(updated);
+    runRef.current = updated;
     updateData(current => {
       const old = current.pingLearning[chosen.type] ?? { shown: 0, exitsAfter: 0 };
-      return { ...current, pingLearning: { ...current.pingLearning, [chosen.type]: { ...old, shown: old.shown + 1 } } };
+      return {
+        ...current,
+        pingLearning: {
+          ...current.pingLearning,
+          [chosen.type]: { ...old, shown: old.shown + 1 },
+        },
+      };
     });
-    spinAudio.ping(); setPing(chosen); track('reality_ping', { type: chosen.type, level: chosen.level });
+    spinAudio.ping();
+    setPing(chosen);
+    track('reality_ping', { type: chosen.type, level: chosen.level });
     return true;
   }, [profile]);
 
-  const act = async () => {
-    if (blockedByOtherTab || animating || ping || ended.current || run.balanceCents < run.stakeCents) return;
-    setAnimating(true);
-    spinAudio.spin(860);
-    const outcome = sampleOutcome(random01(), run.stakeCents);
-    const balanceCents = Math.max(0, run.balanceCents + outcome.netCents);
-    const next: ActiveRun = {
-      ...run,
-      previousBalanceCents: run.balanceCents,
-      balanceCents,
-      previousStakeCents: run.stakeCents,
-      actionCount: run.actionCount + 1,
-      lastNetCents: outcome.netCents,
-      largestLossCents: Math.max(run.largestLossCents, Math.max(0, run.initialBalanceCents - balanceCents)),
-      simulatedLossesCents: run.simulatedLossesCents + Math.max(0, -outcome.netCents),
-      simulatedRecoveriesCents: run.simulatedRecoveriesCents + Math.max(0, outcome.netCents),
-      timeline: [...run.timeline, { kind: 'action', at: Date.now(), balanceCents, stakeCents: run.stakeCents, netCents: outcome.netCents, decision: gameDecision || undefined }],
-    };
-    setRun(next); runRef.current = next;
+  const notePostPingContinuation = (next: ActiveRun, outcome: ResolvedGameOutcome) => {
     const recentPing = lastDismissedPing.current;
-    track('run_action', { action: next.actionCount, net: outcome.netCents, balance: balanceCents, stake: next.stakeCents, afterPing: recentPing?.type ?? null, msAfterPing: recentPing ? Math.max(0, Date.now() - recentPing.dismissedAt) : null });
+    track('run_action', {
+      action: next.actionCount,
+      net: outcome.netCents,
+      balance: next.balanceCents,
+      stake: next.stakeCents,
+      game: profile.gamblingType,
+      afterPing: recentPing?.type ?? null,
+      msAfterPing: recentPing ? Math.max(0, Date.now() - recentPing.dismissedAt) : null,
+    });
     if (recentPing) {
       updateData(data => {
         const old = data.pingLearning[recentPing.type] ?? { shown: 0, exitsAfter: 0 };
@@ -233,27 +272,138 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       });
     }
     lastDismissedPing.current = null;
-    await game.current?.playOutcome({ ...outcome, balanceCents, actionCount: next.actionCount, decision: gameDecision || undefined });
+  };
+
+  const completeOutcome = async (
+    outcome: ResolvedGameOutcome,
+    balanceCents: number,
+    decision?: string,
+    previousBalanceOverride?: number,
+  ) => {
+    const current = runRef.current;
+    const previousBalance = previousBalanceOverride ?? current.balanceCents;
+    const next: ActiveRun = {
+      ...current,
+      previousBalanceCents: previousBalance,
+      balanceCents,
+      previousStakeCents: current.stakeCents,
+      actionCount: current.actionCount + 1,
+      lastNetCents: outcome.netCents,
+      largestLossCents: Math.max(current.largestLossCents, Math.max(0, current.initialBalanceCents - balanceCents)),
+      simulatedLossesCents: current.simulatedLossesCents + Math.max(0, -outcome.netCents),
+      simulatedRecoveriesCents: current.simulatedRecoveriesCents + Math.max(0, outcome.netCents),
+      timeline: [...current.timeline, {
+        kind: 'action',
+        at: Date.now(),
+        balanceCents,
+        stakeCents: current.stakeCents,
+        netCents: outcome.netCents,
+        decision,
+      }],
+      gameState: undefined,
+    };
+    setRun(next);
+    runRef.current = next;
+    notePostPingContinuation(next, outcome);
+
+    await game.current?.playOutcome({
+      ...outcome,
+      balanceCents,
+      actionCount: next.actionCount,
+      decision,
+    });
+
     spinAudio.result(outcome.netCents);
     setAnimating(false);
     if (ended.current) return;
+
     const showed = showPing(next);
-    const minStake = stakes[0];
-    if (balanceCents < minStake) {
+    if (balanceCents < stakes[0]) {
       if (showed) setPendingBalanceEnd(true);
       else window.setTimeout(() => finish('balance'), reducedMotion ? 0 : 260);
     }
   };
 
+  const act = async () => {
+    if (blockedByOtherTab || animating || ping || ended.current) return;
+
+    if (profile.gamblingType === 'poker') {
+      if (!pokerRound) {
+        if (run.balanceCents < run.stakeCents) return;
+        setAnimating(true);
+        spinAudio.click();
+        const dealt = dealPoker(random01);
+        const balanceCents = run.balanceCents - run.stakeCents;
+        const state = {
+          ...dealt,
+          phase: 'hold' as const,
+          wagerCents: run.stakeCents,
+          balanceBeforeCents: run.balanceCents,
+        };
+        const next: ActiveRun = {
+          ...run,
+          previousBalanceCents: run.balanceCents,
+          balanceCents,
+          largestLossCents: Math.max(run.largestLossCents, Math.max(0, run.initialBalanceCents - balanceCents)),
+          gameState: { poker: state },
+        };
+        setPokerRound(state);
+        setRun(next);
+        runRef.current = next;
+        game.current?.setBalance(balanceCents);
+        game.current?.setPokerHand(state.hand, state.held);
+        track('poker_deal', { stake: state.wagerCents, balance: balanceCents });
+        window.setTimeout(() => setAnimating(false), reducedMotion ? 0 : 280);
+        return;
+      }
+
+      setAnimating(true);
+      spinAudio.spin(520);
+      const result = drawPoker(pokerRound.hand, pokerRound.deck, pokerRound.held, pokerRound.wagerCents);
+      const payoutCents = result.outcome.netCents + pokerRound.wagerCents;
+      const balanceCents = run.balanceCents + payoutCents;
+      const heldCards = pokerRound.held.map((held, index) => held ? index + 1 : null).filter(Boolean).join(',');
+      setPokerRound(null);
+      await completeOutcome(result.outcome, balanceCents, heldCards ? 'held ' + heldCards : 'draw all', pokerRound.balanceBeforeCents);
+      return;
+    }
+
+    if (run.balanceCents < run.stakeCents) return;
+    setAnimating(true);
+    const duration = profile.gamblingType === 'casino' ? 1500 : profile.gamblingType === 'slots' || profile.gamblingType === 'other' ? 1200 : profile.gamblingType === 'lottery' ? 820 : 520;
+    spinAudio.spin(duration);
+    const outcome = resolveSimpleGame(profile.gamblingType, random01, run.stakeCents, gameDecision);
+    const balanceCents = Math.max(0, run.balanceCents + outcome.netCents);
+    await completeOutcome(outcome, balanceCents, gameDecision || undefined);
+  };
+
+  const togglePokerHold = (index: number) => {
+    if (!pokerRound || animating || ping || blockedByOtherTab) return;
+    spinAudio.click();
+    const held = pokerRound.held.map((value, i) => i === index ? !value : value);
+    const nextRound = { ...pokerRound, held };
+    setPokerRound(nextRound);
+    game.current?.setPokerHand(nextRound.hand, held);
+    setRun(current => ({
+      ...current,
+      gameState: { poker: nextRound },
+    }));
+  };
+
   const setStake = (direction: -1 | 1) => {
-    if (blockedByOtherTab || animating || ping) return;
+    if (blockedByOtherTab || animating || ping || pokerRound) return;
     const currentIndex = stakes.indexOf(run.stakeCents as never);
     const index = Math.max(0, Math.min(stakes.length - 1, (currentIndex < 0 ? 1 : currentIndex) + direction));
     const nextStake = stakes[index];
     if (nextStake > run.balanceCents) return;
     spinAudio.click();
     const recentPing = lastDismissedPing.current;
-    track('stake_changed', { from: run.stakeCents, to: nextStake, balance: run.balanceCents, afterPing: recentPing?.type ?? null });
+    track('stake_changed', {
+      from: run.stakeCents,
+      to: nextStake,
+      balance: run.balanceCents,
+      afterPing: recentPing?.type ?? null,
+    });
     if (recentPing) {
       updateData(data => {
         const old = data.pingLearning[recentPing.type] ?? { shown: 0, exitsAfter: 0 };
@@ -271,7 +421,12 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       ...current,
       previousStakeCents: current.stakeCents,
       stakeCents: nextStake,
-      timeline: [...current.timeline, { kind: 'stake', at: Date.now(), balanceCents: current.balanceCents, stakeCents: nextStake }],
+      timeline: [...current.timeline, {
+        kind: 'stake',
+        at: Date.now(),
+        balanceCents: current.balanceCents,
+        stakeCents: nextStake,
+      }],
     }));
   };
 
@@ -279,21 +434,46 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     const now = Date.now();
     if (ping) {
       const record = runRef.current.pings[runRef.current.pings.length - 1];
-      track('reality_ping_dismissed', { type: ping.type, dwellMs: record ? Math.max(0, now - record.shownAt) : 0 });
-      lastDismissedPing.current = { type: ping.type, dismissedAt: now, balanceAt: runRef.current.balanceCents, stakeAt: runRef.current.stakeCents };
+      track('reality_ping_dismissed', {
+        type: ping.type,
+        dwellMs: record ? Math.max(0, now - record.shownAt) : 0,
+      });
+      lastDismissedPing.current = {
+        type: ping.type,
+        dismissedAt: now,
+        balanceAt: runRef.current.balanceCents,
+        stakeAt: runRef.current.stakeCents,
+      };
     }
     setPing(null);
     setRun(current => ({
       ...current,
       pings: current.pings.map((p, i) => i === current.pings.length - 1 ? { ...p, dismissedAt: now } : p),
-      timeline: [...current.timeline, { kind: 'ping-dismissed', at: now, balanceCents: current.balanceCents, stakeCents: current.stakeCents, pingType: ping?.type }],
+      timeline: [...current.timeline, {
+        kind: 'ping-dismissed',
+        at: now,
+        balanceCents: current.balanceCents,
+        stakeCents: current.stakeCents,
+        pingType: ping?.type,
+      }],
     }));
-    if (pendingBalanceEnd) { setPendingBalanceEnd(false); window.setTimeout(() => finish('balance'), 80); }
+    if (pendingBalanceEnd) {
+      setPendingBalanceEnd(false);
+      window.setTimeout(() => finish('balance'), 80);
+    }
   };
 
   const financeFresh = !isFinancialContextStale(profile);
   const days = financeFresh ? daysUntil(profile.nextIncomeDate) : null;
-  const obligation = profile.obligationType === 'rent' ? 'RENT' : profile.obligationType === 'car' ? 'CAR PAYMENT' : profile.obligationType === 'none' ? null : profile.obligationType.replace('-', ' ').toUpperCase();
+  const obligation = profile.obligationType === 'rent' ? 'RENT'
+    : profile.obligationType === 'car' ? 'CAR PAYMENT'
+    : profile.obligationType === 'none' ? null
+    : profile.obligationType.replace('-', ' ').toUpperCase();
+
+  const sportsChoices = SPORTS_MARKETS.flatMap(market => [
+    { name:market.home, odds:market.homeOdds },
+    { name:market.away, odds:market.awayOdds },
+  ]);
 
   return (
     <main className="run-shell" style={{ '--reality': intensity } as React.CSSProperties}>
@@ -309,6 +489,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
 
       <section className="run-card" aria-label="Reality Run">
         {blockedByOtherTab ? <div className="tab-lock" role="dialog" aria-modal="true" aria-label="Reality Run open in another tab"><strong>Reality Run is open in another tab.</strong><button type="button" onClick={() => { const ok = lease.current?.claim(true) ?? true; setBlockedByOtherTab(!ok); }}>Use this tab</button></div> : null}
+
         <div className="run-hud">
           <div><span>Balance</span><strong>{formatMoney(run.balanceCents)}</strong></div>
           <div><span>Stake</span><strong>{formatMoney(run.stakeCents)}</strong></div>
@@ -326,16 +507,31 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
           <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button>
         </div>
 
-        {profile.gamblingType === 'sports' ? <div className="game-decision" role="group" aria-label="Fictional market selection">{['North Harbor','Cedar City','Riverside'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}</div> : null}
-        {profile.gamblingType === 'casino' ? <div className="game-decision" role="group" aria-label="Table choice">{['Red','Black'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}</div> : null}
-        {profile.gamblingType === 'poker' ? <div className="game-decision" role="group" aria-label="Poker decision">{['Hold','Draw'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}</div> : null}
+        {profile.gamblingType === 'sports' ? <div className="game-decision sports-picks" role="group" aria-label="Fictional moneyline market">
+          {sportsChoices.map(choice => <button key={choice.name} type="button" className={gameDecision === choice.name ? 'is-on' : ''} onClick={() => setGameDecision(choice.name)} disabled={animating || Boolean(ping)}>
+            <span>{choice.name}</span><strong>{choice.odds.toFixed(2)}</strong>
+          </button>)}
+        </div> : null}
+
+        {profile.gamblingType === 'casino' ? <div className="game-decision" role="group" aria-label="Roulette color">
+          {['Red','Black'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}
+        </div> : null}
+
+        {profile.gamblingType === 'poker' && pokerRound ? <div className="game-decision poker-holds" role="group" aria-label="Cards to hold">
+          {pokerRound.hand.map((code, index) => <button key={index} type="button" className={pokerRound.held[index] ? 'is-on' : ''} onClick={() => togglePokerHold(index)} disabled={animating || Boolean(ping)}>
+            <span>{cardLabel(code)}</span><strong>{pokerRound.held[index] ? 'HELD' : 'Hold'}</strong>
+          </button>)}
+        </div> : null}
+
         <div className="run-controls">
           <div className="stake-control" aria-label="Practice stake">
-            <button type="button" onClick={() => setStake(-1)} aria-label="Lower practice stake" disabled={blockedByOtherTab || animating || stakes[0] === run.stakeCents}>−</button>
+            <button type="button" onClick={() => setStake(-1)} aria-label="Lower practice stake" disabled={blockedByOtherTab || animating || Boolean(pokerRound) || stakes[0] === run.stakeCents}>−</button>
             <span><small>Practice stake</small>{formatMoney(run.stakeCents)}</span>
-            <button type="button" onClick={() => setStake(1)} aria-label="Raise practice stake" disabled={blockedByOtherTab || animating || stakes[2] === run.stakeCents || stakes[Math.min(stakes.length-1,stakes.indexOf(run.stakeCents as never)+1)] > run.balanceCents}>+</button>
+            <button type="button" onClick={() => setStake(1)} aria-label="Raise practice stake" disabled={blockedByOtherTab || animating || Boolean(pokerRound) || stakes[2] === run.stakeCents || stakes[Math.min(stakes.length-1,stakes.indexOf(run.stakeCents as never)+1)] > run.balanceCents}>+</button>
           </div>
-          <button type="button" className="game-action" onClick={act} disabled={blockedByOtherTab || animating || Boolean(ping) || run.balanceCents < run.stakeCents}>{animating ? '...' : actionLabel(profile.gamblingType)}</button>
+          <button type="button" className="game-action" onClick={act} disabled={blockedByOtherTab || animating || Boolean(ping) || (!pokerRound && run.balanceCents < run.stakeCents)}>
+            {animating ? '...' : actionLabel(profile.gamblingType, Boolean(pokerRound))}
+          </button>
         </div>
         <p className="run-fineprint">Simulation. Leave whenever you want.</p>
       </section>
