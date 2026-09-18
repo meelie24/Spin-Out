@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {
   MAX_RUN_MS,
   computeMoneyKept,
+  classifyRealWorldOutcome,
+  isFinancialContextStale,
   computeReality,
   isObligationExpired,
   recentExitAverageSeconds,
@@ -23,9 +25,11 @@ const profile: RealityProfile = {
   obligationAmountCents: 43_000,
   obligationDueDate: '2026-09-22',
   recentLenderName: 'Brian',
+  recentLenderHelpedRecently: true,
   recentLenderAmountCents: 20_000,
   personalMoneyGoal: "Mom's birthday",
   startingUrge: 8,
+  financialContextUpdatedAt: '2026-09-18T00:00:00.000Z',
   createdAt: '2026-09-18T00:00:00.000Z',
 };
 
@@ -72,7 +76,10 @@ test('returning progress uses voluntary exits only and recent five average', () 
     id: crypto.randomUUID(), startedAt: 0, endedAt: 1, exitReason: reason,
     timeToExitSeconds: seconds, intendedWagerCents: 10_000, actualWagerCents: 0,
     moneyKeptCents: 10_000, startingUrge: 8, endingUrge: 4, gamblingType: 'slots',
-    triggerType: 'bored', pings: [], actions: 3,
+    triggerType: 'bored', realWorldOutcome: 'did-not-gamble', context: {
+      availableUntilIncomeCents: null, nextIncomeDate: null, obligationType: 'none', obligationAmountCents: null,
+      obligationDueDate: null, recentLenderName: null, recentLenderHelpedRecently: false, recentLenderAmountCents: null, personalMoneyGoal: null,
+    }, pings: [], timeline: [], actions: 3,
   });
   const runs = [mk(500,'voluntary'),mk(400,'voluntary'),mk(null,'timeout'),mk(300,'voluntary'),mk(200,'voluntary'),mk(100,'voluntary'),mk(50,'voluntary')];
   assert.equal(recentExitAverageSeconds(runs), 210);
@@ -88,4 +95,20 @@ test('stake options stay bounded and scale with the intended wager', () => {
   assert.deepEqual(stakeOptionsFor(20_00), [100, 200, 400]);
   assert.deepEqual(stakeOptionsFor(100_00), [500, 1000, 2000]);
   assert.deepEqual(stakeOptionsFor(300_00), [1500, 3000, 6000]);
+});
+
+
+test('real-world outcome classification follows the amount, not the button label', () => {
+  assert.equal(classifyRealWorldOutcome(10_000, 0), 'did-not-gamble');
+  assert.equal(classifyRealWorldOutcome(10_000, 4_000), 'gambled-less');
+  assert.equal(classifyRealWorldOutcome(10_000, 10_000), 'gambled-planned');
+  assert.equal(classifyRealWorldOutcome(10_000, 12_000), 'gambled-more');
+});
+
+test('financial context becomes stale after a day or when payday has arrived', () => {
+  const fresh = { ...profile, financialContextUpdatedAt: '2026-09-18T08:00:00.000Z', nextIncomeDate: '2026-09-25' };
+  assert.equal(isFinancialContextStale(fresh, new Date('2026-09-18T12:00:00.000Z')), false);
+  assert.equal(isFinancialContextStale(fresh, new Date('2026-09-19T09:00:00.000Z')), true);
+  const payday = { ...fresh, nextIncomeDate: '2026-09-18' };
+  assert.equal(isFinancialContextStale(payday, new Date('2026-09-18T12:00:00.000Z')), true);
 });
