@@ -468,13 +468,13 @@ try {
   });
   await seedActive(limitContext, limitProfile, limitRun);
   const limitPage = await limitContext.newPage();
-  await limitPage.goto(\`\${base}/play\`, { waitUntil: 'domcontentloaded' });
+  await limitPage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await limitPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await waitActionReady(limitPage);
   await limitPage.locator('.game-action').click();
   const limitPing = limitPage.locator('.reality-ping');
   await limitPing.waitFor({ timeout: 9000 });
-  assert(await limitPing.getByText(/You decided on 5\\. This is 7\\./i).isVisible(), 'chosen-limit Ping did not reference the exact user limit');
+  assert(await limitPing.getByText(/You decided on 5\. This is 7\./i).isVisible(), 'chosen-limit Ping did not reference the exact user limit');
   assert(await limitPing.getByRole('button', { name: "I'm done" }).isVisible(), 'strong limit intervention did not offer an immediate exit');
   await limitContext.close();
 
@@ -502,12 +502,12 @@ try {
   });
   await seedActive(stakeContext, stakeProfile, stakeRun);
   const stakePage = await stakeContext.newPage();
-  await stakePage.goto(\`\${base}/play\`, { waitUntil: 'domcontentloaded' });
+  await stakePage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await stakePage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await stakePage.getByRole('button', { name: 'Raise practice stake' }).click();
   const stakePing = stakePage.locator('.reality-ping');
   await stakePing.waitFor({ timeout: 5000 });
-  assert(await stakePing.getByText(/You lost, then raised it\\./i).isVisible(), 'stake-escalation Ping did not fire immediately');
+  assert(await stakePing.getByText(/You lost, then raised it\./i).isVisible(), 'stake-escalation Ping did not fire immediately');
   const afterStake = await stakePage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
   assert(afterStake?.actionCount === 3, 'stake-escalation intervention required another play before firing');
   await stakeContext.close();
