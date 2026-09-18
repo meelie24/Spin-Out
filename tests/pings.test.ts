@@ -14,9 +14,11 @@ const baseProfile: RealityProfile = {
   obligationAmountCents: 43_000,
   obligationDueDate: '2026-09-22',
   recentLenderName: 'Brian',
+  recentLenderHelpedRecently: true,
   recentLenderAmountCents: 20_000,
   personalMoneyGoal: "Mom's birthday",
   startingUrge: 8,
+  financialContextUpdatedAt: '2026-09-18T00:00:00.000Z',
   createdAt: '2026-09-18T00:00:00.000Z',
 };
 
@@ -54,6 +56,8 @@ test('borrowing ping only uses a supplied first name', () => {
   assert.ok(withName?.message.includes('Brian'));
   const withoutName = buildPingCandidates({ ...baseProfile, recentLenderName: null }, snap({ balanceCents: 10_000 }));
   assert.equal(withoutName.some(c => c.type === 'borrowing'), false);
+  const saidNo = buildPingCandidates({ ...baseProfile, recentLenderHelpedRecently: false }, snap({ balanceCents: 10_000 }));
+  assert.equal(saidNo.some(c => c.type === 'borrowing'), false);
 });
 
 test('pings are spaced and not shown after every action', () => {
@@ -77,4 +81,16 @@ test('trigger-specific candidates change the conversation without inventing fact
   assert.equal(winMoney.some(c => c.type === 'win-money'), true);
   const habit = buildPingCandidates({ ...baseProfile, triggerType: 'habit' }, snap({ actionCount: 7, balanceCents: 27_000 }));
   assert.equal(habit.some(c => c.type === 'habit'), true);
+});
+
+
+test('generic loss ping never says Down $0', () => {
+  const candidates = buildPingCandidates(baseProfile, snap({ balanceCents: 30_000, previousBalanceCents: 30_000, lastNetCents: 0, actionCount: 6 }));
+  assert.equal(candidates.some(c => c.type === 'generic'), false);
+});
+
+test('recovery ping appears when an obligation shortfall is repaired', () => {
+  const p = { ...baseProfile, intendedWagerCents: 60_000, availableUntilIncomeCents: 50_000, obligationAmountCents: 43_000 };
+  const candidates = buildPingCandidates(p, snap({ initialBalanceCents: 60_000, previousBalanceCents: 50_000, balanceCents: 60_000, lastNetCents: 10_000, actionCount: 6 }));
+  assert.equal(candidates.some(c => c.type === 'recovery'), true);
 });
