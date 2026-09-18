@@ -150,27 +150,55 @@ export function RealityContextPanel({
         </label>
       </div>
 
-      <div className="context-edit-section">
-        <div className="context-edit-title"><strong>When does it usually get harder?</strong><span>Optional</span></div>
-        <div className="context-chip-grid">
-          {difficultOptions.map(option => <button key={option.value} type="button" className={(draft.difficultTimes ?? []).includes(option.value) ? 'is-on' : ''} onClick={() => toggleDifficult(option.value)}>{option.label}</button>)}
+      <details className="context-edit-details">
+        <summary>When does it usually get harder?<span>Optional</span></summary>
+        <div className="context-edit-details-body">
+          <div className="context-chip-grid">
+            {difficultOptions.map(option => <button key={option.value} type="button" className={(draft.difficultTimes ?? []).includes(option.value) ? 'is-on' : ''} onClick={() => toggleDifficult(option.value)}>{option.label}</button>)}
+          </div>
+          <input value={draft.difficultTimeCustom ?? ''} onChange={e => setDraft({ ...draft, difficultTimeCustom:e.target.value })} placeholder="Something else"/>
         </div>
-        <input value={draft.difficultTimeCustom ?? ''} onChange={e => setDraft({ ...draft, difficultTimeCustom:e.target.value })} placeholder="Something else"/>
-      </div>
+      </details>
 
-      <div className="context-edit-section">
-        <div className="context-edit-title"><strong>If payday gets hard</strong><span>Pick up to 2</span></div>
-        <div className="context-chip-grid">
-          {planOptions.map(option => <button key={option.value} type="button" className={selectedPlans.includes(option.value) ? 'is-on' : ''} onClick={() => togglePlan(option.value)}>{option.label}</button>)}
+      <details className="context-edit-details">
+        <summary>If payday gets hard<span>Pick up to 2</span></summary>
+        <div className="context-edit-details-body">
+          <div className="context-chip-grid">
+            {planOptions.map(option => <button key={option.value} type="button" className={selectedPlans.includes(option.value) ? 'is-on' : ''} onClick={() => togglePlan(option.value)}>{option.label}</button>)}
+          </div>
+          <input value={draft.paydayPlanCustom ?? ''} onChange={e => setDraft({ ...draft, paydayPlanCustom:e.target.value })} placeholder="My own plan"/>
         </div>
-        <input value={draft.paydayPlanCustom ?? ''} onChange={e => setDraft({ ...draft, paydayPlanCustom:e.target.value })} placeholder="My own plan"/>
-      </div>
+      </details>
 
-      <div className="context-edit-section compact">
-        <label>Why are you trying to stop?
-          <input value={draft.quitReason ?? ''} onChange={e => setDraft({ ...draft, quitReason:e.target.value })} placeholder="Your words"/>
-        </label>
-      </div>
+      <details className="context-edit-details">
+        <summary>More personal context<span>Optional</span></summary>
+        <div className="context-edit-details-body">
+          <label>If you came up short, who would you call?
+            <input
+              value={draft.recentLenderName ?? ''}
+              onChange={e => setDraft({ ...draft, recentLenderName:e.target.value.replace(/[^a-zA-Z '-]/g,'').slice(0,32) })}
+              placeholder="First name"
+            />
+          </label>
+          {draft.recentLenderName?.trim() ? <>
+            <div className="inline-choices">
+              <button type="button" className={draft.recentLenderHelpedRecently ? 'is-on' : ''} onClick={() => setDraft({ ...draft, recentLenderHelpedRecently:true })}>Helped recently</button>
+              <button type="button" className={!draft.recentLenderHelpedRecently ? 'is-on' : ''} onClick={() => setDraft({ ...draft, recentLenderHelpedRecently:false, recentLenderAmountCents:null })}>No</button>
+            </div>
+            {draft.recentLenderHelpedRecently ? <label>About how much?
+              <span className="context-money-input">$<input
+                inputMode="decimal"
+                value={moneyValue(draft.recentLenderAmountCents)}
+                onChange={e => setDraft({ ...draft, recentLenderAmountCents:cents(e.target.value) })}
+                placeholder="Optional"
+              /></span>
+            </label> : null}
+          </> : null}
+          <label>Why are you trying to stop?
+            <input value={draft.quitReason ?? ''} onChange={e => setDraft({ ...draft, quitReason:e.target.value })} placeholder="Your words"/>
+          </label>
+        </div>
+      </details>
 
       <button className="primary-button reality-context-save" type="button" onClick={save}>{saved ? 'Saved' : 'Save'}</button>
     </section>
