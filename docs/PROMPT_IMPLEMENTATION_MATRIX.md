@@ -1,86 +1,96 @@
-# Spin Out 69-section master-prompt compliance matrix
+# Spin Out production compliance matrix
 
-This is the release-candidate audit against `docs/MASTER_PRODUCT_PROMPT.md`, with later explicit owner directions treated as superseding earlier presentation requirements where they conflict.
+Authoritative sources:
+- `docs/MASTER_PRODUCT_PROMPT.md` — current 70-section production prompt supplied 2026-09-18.
+- `docs/OWNER_OVERRIDES.md` — later owner decisions that supersede conflicting prompt requirements.
+- `docs/GAME_CALIBRATION.md` — researched game-rule targets.
 
-**Audited branch:** `release/final-production-pass`  
-**Current candidate before this documentation commit:** `bffa179a7ebd690d0eb24742264406e5b6e49dc9`  
-**Rule:** “PASS” means the behavior exists in the release candidate and is covered by code and/or browser QA. “CONFIG REQUIRED” means the product code exists but a real external merchant/deployment credential is intentionally not fabricated.
+Status meanings:
+- **PASS**: implemented and verified in current release-candidate code/CI or rendered screenshots.
+- **PARTIAL / IN PROGRESS**: implementation exists but a required verification stage remains.
+- **PENDING EXTERNAL**: requires a real third-party account/configuration/credential and is deliberately not fabricated.
+- **SUPERSEDED**: later owner instruction replaces the original section.
 
-| # | Master-prompt section | Status | Release-candidate evidence / note |
+| # | Requirement | Status | Evidence / remaining work |
 |---:|---|---|---|
-| 1 | WHAT SPIN OUT IS | **PASS** | Browser-first pre-gambling Reality Run; real context feeds a finite simulated session and voluntary exit timing. |
-| 2 | THE CORE EXPERIENCE | **PASS** | Setup → run → Pings → exit/timeout → urge check → real-world outcome → Money Kept is implemented. |
-| 3 | DESIGN PHILOSOPHY | **PASS** | Premium, mature, cinematic brown/bronze product language; no therapy/PSA/SaaS treatment. |
-| 4 | THE LANDING PAGE | **PASS — SUPERSEDED** | Owner’s 2026-09-18 direction intentionally replaces the old minimal Start-only landing with the premium game hub: liquid-glass sidebar, six visible game tiles, QUIT/symbol atmosphere, dismissible interventions. |
-| 5 | FIRST-RUN REALITY SETUP | **PASS** | One-at-a-time setup collects the specified core context plus optional personalizers. |
-| 6 | SETUP QUESTION 1 | **PASS** | Intended wager presets + custom amount. |
-| 7 | SETUP QUESTION 2 | **PASS** | Gambling type selection exists; homepage game cards can preselect it and skip the redundant question. |
-| 8 | SETUP QUESTION 3 | **PASS** | Trigger choices and optional custom reason. |
-| 9 | SETUP QUESTION 4 | **PASS** | Available-until-income currency input + Not sure. |
-| 10 | SETUP QUESTION 5 | **PASS** | Income timing quick choices + date. |
-| 11 | SETUP QUESTION 6 | **PASS** | Primary obligation choices including no urgent obligation. |
-| 12 | SETUP QUESTION 7 | **PASS** | Amount + due timing are handled in one progressive obligation surface. |
-| 13 | OPTIONAL PERSONALIZER 1 | **PASS** | Optional first-name lender context and recent-help amount. |
-| 14 | OPTIONAL PERSONALIZER 2 | **PASS** | Optional personal money goal with quick choices/custom path. |
-| 15 | FINAL SETUP INTERACTION | **PASS** | Tactile 1–10 urge control transitions directly toward the run. |
-| 16 | MAKE SETUP FEEL FAST | **PASS** | One decision at a time, auto-forwarding choices, no question-count progress bar. |
-| 17 | MOTION SYSTEM | **PASS** | Short interaction transitions and larger scene transitions are implemented with reduced-motion fallback. |
-| 18 | QUESTION ANIMATION | **PASS** | Selection commitment state compresses/locks the chosen card and recedes other options before advancing. |
-| 19 | TRANSITION INTO THE REALITY RUN | **PASS** | Practice-deposit transition carries the intended amount into the game balance and retains real-life context. |
-| 20 | REALITY RUN | **PASS** | Finite 900-second max, no visible countdown, no duration reward. |
-| 21 | LEAVING THE RUN | **PASS** | Natural per-game exit is always available; voluntary exit ends immediately without confirmation. |
-| 22 | PRIMARY BEHAVIORAL METRIC | **PASS** | Time to voluntary exit is stored and compared only against the same user. |
-| 23 | ADDITIONAL ANALYTICS | **PASS** | Run timeline/events retain actions, stakes, balance/net changes, Ping timing/response, urge/outcome and exit data; internal run state also tracks losses/recoveries/largest loss. |
-| 24 | GAME ENVIRONMENTS | **PASS** | Original slots, sports, casino, poker and lottery/scratch environments exist without cloning named operators. |
-| 25 | IMPORTANT GAMEPLAY RULE | **PASS** | Finite practice economy; no prizes, redeemable currency, loot boxes, jackpots, daily rewards or endless retention loop. |
-| 26 | TRIGGER PERSONALIZATION | **PASS** | Trigger-specific behavior/Ping families cover chase, win-money, boredom, rush, switch-off and habit. |
-| 27 | REALITY ENGINE | **PASS** | Confirmed profile facts and computed financial consequences progressively enter the run. |
-| 28 | REALITY PINGS | **PASS** | Distinct glass intervention surface, scale emphasis, game de-emphasis and immediate dismissal. |
-| 29 | PING DISMISSAL | **PASS** | Whole Ping is one-click/tap dismissible, including during entry animation. |
-| 30 | PING SOUND | **PASS** | Short distinct Web Audio cue plus mute; no casino jackpot/siren treatment. |
-| 31 | REALITY PING VOICE | **PASS** | Short direct familiar language with contractions and non-corporate wording. |
-| 32 | MESSAGE STRUCTURE | **PASS** | Fact/consequence/question structure is used where facts support it. |
-| 33 | CAR EXAMPLES | **PASS** | Car-payment factual and recovery Ping paths are implemented. |
-| 34 | RENT EXAMPLES | **PASS** | Rent/mortgage shortfall and recovery Ping paths are implemented. |
-| 35 | CHILD / FAMILY EXAMPLES | **PASS** | Family/child-related goal and obligation context can enter Pings without inventing facts. |
-| 36 | BORROWING EXAMPLES | **PASS** | Optional lender name/amount can drive factual lender Pings. |
-| 37 | PAYDAY EXAMPLES | **PASS** | Income-date distance is calculated when fresh and used in payday context. |
-| 38 | GROCERIES | **PASS** | Groceries can be an obligation/goal and is handled by the Reality Engine. |
-| 39 | WORK | **PASS** | Work-hour style comparisons remain hypothetical rather than fabricated factual claims. |
-| 40 | CHASING | **PASS** | Win-it-back path includes chasing/recovery/break-even logic. |
-| 41 | RECOVERY MOMENTS | **PASS** | Break-even/recovery moments can trigger a stop-and-question Ping. |
-| 42 | ESCALATION | **PASS** | Stake changes and escalation after Pings are tracked and can affect intervention logic. |
-| 43 | REALITY PING FREQUENCY | **PASS** | Spacing, action-gap gating, severity and recent-category avoidance are implemented. |
-| 44 | FINANCIAL ACCURACY | **PASS** | Money/shortfall math is centralized in tested engine functions; stale financial context is guarded. |
-| 45 | HYPOTHETICAL COMPARISONS | **PASS** | Non-confirmed comparisons are phrased conditionally (for example, “could’ve”). |
-| 46 | REALITY BACKGROUND | **PASS** | Obligation, goal, payday/shortfall context progressively appears behind the game. |
-| 47 | BACKGROUND MOTION | **PASS** | Background prominence changes progressively without becoming the primary control surface. |
-| 48 | PROGRESSIVE PERSONALIZATION | **PASS** | Returning/post-run data can add secondary goals and improve future Ping relevance. |
-| 49 | RETURNING USERS | **PASS** | Profile reuse minimizes setup; stale/expired financial context is refreshed when needed. |
-| 50 | ENDING A REALITY RUN | **PASS** | Voluntary, timeout and practice-balance endings resolve cleanly into post-run flow. |
-| 51 | REAL-WORLD OUTCOME | **PASS** | No / Less than planned / Yes path records actual wager without shame language. |
-| 52 | MONEY KEPT | **PASS** | Intended minus actual wager calculation, including factual overspend handling. |
-| 53 | CONNECT MONEY KEPT TO REAL LIFE | **PASS** | Result can connect kept money to the user’s entered obligation/goal when mathematically relevant. |
-| 54 | TIME-TO-EXIT PROGRESS | **PASS** | Recent exit average plus first-five vs recent-five Plus comparison use voluntary exits only. |
-| 55 | RETURNING HOMEPAGE | **PASS — UPDATED** | New hub keeps returning-user Money Kept and recent-exit signal in the sidebar/hero while preserving game-first entry. |
-| 56 | NO DAILY STREAK SYSTEM | **PASS** | No streaks, leaderboards, daily rewards or social competition. |
-| 57 | PERSONALIZATION ENGINE | **PASS** | Profile, trigger, obligations, dates, lender/goal context and history feed deterministic personalization. |
-| 58 | PING LEARNING | **PASS** | Local learning records shown/exits-after and post-Ping behavior; Plus exposes descriptive patterns without claiming causality. |
-| 59 | MONETIZATION | **PASS — CONFIG REQUIRED** | Spin Out+ is $4.99/month or $29.99/year; core runs remain free. Current Plus delivers history, Money Kept/exit trends, trigger/Ping patterns, weekly readouts and cross-device history. Lemon Squeezy broad checkout + direct PayPal fallback are implemented; live merchant credentials/variants/webhooks are deployment configuration. |
-| 60 | PAYWALL PLACEMENT | **PASS** | Paywall appears after help has been delivered or on Plus/history access; never inside an active run/Ping. |
-| 61 | PRIVACY | **PASS** | Private context is not public/shared; local-first storage remains, with authenticated Supabase sync only for signed-in account use. |
-| 62 | MOBILE EXPERIENCE | **PASS** | QA covers 320/375/390/430 widths; thumb-sized controls, responsive cards/Pings and playable run surface. |
-| 63 | DESKTOP EXPERIENCE | **PASS** | Centered dominant run plus premium desktop game hub/sidebar; Pings overlay the simulation. |
-| 64 | ACCESSIBILITY | **PASS** | Keyboard/focus handling, labels, mute, reduced motion, forced-colors QA and responsive text are covered. |
-| 65 | REQUIRED PRODUCT STATES | **PASS** | Required free/premium/auth/setup/run/Ping/outcome/timeout/responsive states have explicit handling and CI coverage. |
-| 66 | FAILURE / RELAPSE UX | **PASS** | Overspending/gambling is shown factually; progress is retained; no failure label or punishment. |
-| 67 | FINAL REALITY PING CHECK | **PASS** | Ping candidates are fact-bound or explicitly hypothetical, short, de-duplicated and only shown at gated moments. |
-| 68 | FINAL EXPERIENCE TEST | **PASS** | Automated mobile first-run QA executes the specified arc through setup, live run, exit, urge/outcome and Money Kept. |
-| 69 | FINAL STANDARD | **PASS — RELEASE CANDIDATE** | Current release candidate passes core tests, typecheck, lint, production build, responsive/a11y browser QA, homepage prompt dismissal and game preselection. Production deployment verification is a separate release gate and is not claimed here. |
+| 1 | PRIMARY CHAT GOAL | **IN PROGRESS** | Premium game hub, calibrated games, one-run Plus, RevenueCat layer and QA are implemented; Paddle sandbox and GitHub-native deployed verification remain. |
+| 2 | STRICT VISUAL REFERENCES | **PASS** | Reference-driven homepage/sidebar composition is implemented and iterated through CI screenshots. |
+| 3 | REFERENCE A — LIQUID GLASS SIDEBAR | **PASS** | Floating translucent sidebar, blur, internal highlights, active capsule/edge light and brown adaptation are rendered on desktop. |
+| 4 | REFERENCE B — CHINESE CASINO VISUAL RICHNESS | **PASS** | Brown/oxblood/bronze adaptation retains dimensional ornamental game art rather than flattening the reference language. |
+| 5 | CHINESE SYMBOL ACCURACY | **PASS** | Upright 福, square-holed Chinese cash coin, and sycee-inspired assets are deliberate original assets and checked in rendered homepage output. |
+| 6 | ORIGINALITY DOES NOT MEAN LOWER QUALITY | **PASS** | Reference composition/material richness is adapted without copying proprietary artwork. |
+| 7 | EVERY CASINO SYMBOL GETS THIS TREATMENT | **PASS — CURRENT INVENTORY** | Current primary inventory includes 7, BAR, cherry, lemon, plum, bell, gem, roulette, cards, sportsbook ticket, scratch ticket, coin, 福, and sycee; assets are custom SVGs. |
+| 8 | SYMBOL VISUAL QUALITY | **PASS** | Primary symbols use layered fills, material highlights, outlines and shadows and remain legible at enlarged card scale. |
+| 9 | SYMBOL STATES | **PARTIAL** | Result choreography exists per game; restrained symbol-level anticipation/win treatment exists mainly through reel/card/ticket result animation rather than bespoke states for every individual asset. |
+| 10 | SPIN OUT COLOR SYSTEM | **PASS** | Espresso/dark chocolate/oxblood/cream/bronze/gold remain the core system; red is concentrated in interventions and selected gaming accents. |
+| 11 | HOMEPAGE = MAIN GAME HUB | **PASS** | All six available Reality Run choices are visible and clickable directly on home. |
+| 12 | HOMEPAGE BACKGROUND | **PASS** | QUIT appears at multiple scales/depths with controlled cropping rather than a plain gradient. |
+| 13 | CASINO SYMBOLS IN THE BACKGROUND | **PASS** | Atmospheric symbol grid plus art-directed 7/coin/福/BAR depth layers sit behind the content. |
+| 14 | RED HOMEPAGE PROMPTS | **PASS** | Distributed red-glass interventions are individually dismissible, animated, responsive and absent from active gameplay. |
+| 15 | REMOVE SPORTS BETTING | **SUPERSEDED** | Owner explicitly retained Sportsbook on 2026-09-18 subject to realistic calibration. Sportsbook is now a fictional two-sided moneyline simulation with displayed odds and potential return. |
+| 16 | EVERY GAME MUST LOOK LIKE A FINISHED CASINO GAME | **PASS — RC** | Slots, Sportsbook, Roulette, Video Poker and Scratch each have game-specific scene construction, controls, result choreography and audio. Screenshot loop materially enlarged/differentiated non-slot surfaces. |
+| 17 | GAME LOGIC MUST CONTROL THE VISUALS | **PASS** | Game-specific engines compute the result first and pass the exact reel grid, wheel number/color, sports settlement, poker hand or scratch ticket to Phaser. |
+| 18 | INDIVIDUAL GAME AUDIT | **PASS — LOCAL/CI** | QA opens each game separately, performs its actual interaction loop, checks console errors, screenshots mobile output and now tests rapid-input protection. |
+| 19 | SOUND DESIGN | **PASS — SYNTHETIC ORIGINAL** | Reusable original Web Audio cues are game-specific for slots, roulette, sportsbook, poker, scratch and Reality Pings. |
+| 20 | AUDIO ENGINE REQUIREMENTS | **PASS** | Shared engine, master mute, persistent preference, overlap control through action locking, gesture-triggered start and graceful no-asset dependency. |
+| 21 | NEW USER 2-DAY TRIAL | **SUPERSEDED** | Owner replaced 48 hours with one full-Plus Reality Run capped by the existing 15-minute run maximum. |
+| 22 | TRIAL SOURCE OF TRUTH | **PASS — OVERRIDE MODEL** | Supabase user_access stores claimed run ID/game/start/end/consumed timestamps server-side; paid access comes from RevenueCat premium. |
+| 23 | TRIAL SECURITY | **PASS — OVERRIDE MODEL** | One-run trial is account/server bound; local storage, logout, browser changes and client clock do not create a new claim. |
+| 24 | REVENUECAT IS REQUIRED | **IMPLEMENTED / CONFIG PENDING** | Current purchases-js SDK integrated; premium is the single canonical paid entitlement. Dashboard/provider config still needs real RevenueCat project values. |
+| 25 | AUTHENTICATED REVENUECAT IDENTITY | **PASS IN CODE** | Supabase authenticated user ID is used as the RevenueCat App User ID. |
+| 26 | REVENUECAT IS NOT THE CARD PROCESSOR | **PASS IN CODE / CONFIG PENDING** | Checkout is implemented through RevenueCat Web with Paddle Billing expected as the configured billing engine. |
+| 27 | WHY THIS PAYMENT STACK IS BEING USED | **PASS** | Architecture keeps entitlement in RevenueCat and merchant/billing lifecycle in Paddle, with no legacy PayPal/Lemon provider code remaining. |
+| 28 | PADDLE APPROVAL CONDITION | **PENDING EXTERNAL** | No approval is fabricated; production Paddle activation requires legitimate merchant approval for the actual product. |
+| 29 | PADDLE SANDBOX FIRST | **PENDING EXTERNAL** | Code path is ready. Paddle sandbox account/product/price + RevenueCat Paddle config/import/offering/packages still require provider-dashboard setup. |
+| 30 | PAYMENT SUCCESS TEST | **PENDING EXTERNAL** | Cannot claim until a real Paddle sandbox checkout activates RevenueCat premium for the authenticated test account. |
+| 31 | CANCELLED PAYMENT TEST | **PENDING EXTERNAL** | UI handles RevenueCat UserCancelledError, but a real Paddle sandbox cancellation still must be observed. |
+| 32 | FAILED PAYMENT TEST | **PENDING EXTERNAL** | Recoverable error UI exists; real Paddle sandbox failure flow still must be exercised. |
+| 33 | REVENUECAT / PADDLE LIFECYCLE TESTING | **PENDING EXTERNAL** | Purchase/cancel/failure/persistence require configured sandbox provider accounts. |
+| 34 | PAYMENT TRACKING | **PENDING EXTERNAL** | RevenueCat/Paddle dashboards are the intended operational source; real customer/subscription/revenue records begin only after sandbox/provider setup. |
+| 35 | NEVER PUT SECRET PAYMENT CREDENTIALS IN THE CLIENT | **PASS** | Only NEXT_PUBLIC_REVENUECAT_WEB_API_KEY is client-visible; RevenueCat REST and Supabase service-role keys remain server env vars. |
+| 36 | SERVER-SIDE ACCESS PROTECTION | **PASS** | Protected Plus and sync routes resolve server access; run sync requires paid premium or the exact claimed trial run ID. |
+| 37 | HOMEPAGE TRIAL UI | **PASS — OVERRIDE MODEL** | Account/sidebar states show first run includes Plus, active trial minutes, paid Plus, or Core without deceptive urgency. |
+| 38 | SUBSCRIPTION UX | **PASS IN CODE / PROVIDER CONFIG PENDING** | Branded modal states price/frequency/features/trial state and RevenueCat-Paddle checkout action. |
+| 39 | GITHUB IS THE DEPLOYMENT SOURCE OF TRUTH | **PASS IN REPO / DEPLOY PENDING** | Release branch is canonical. No incomplete file-transfer deployment will be accepted. |
+| 40 | DO NOT MERGE TO MAIN YET | **PASS** | main remains unmerged; release/final-production-pass is still the verification branch. |
+| 41 | HOSTING PLATFORM | **PENDING CONNECTION** | GitHub-native host path is required. Netlify plugin is not connected; current Vercel connector cannot access the account scope needed for native Git project inspection. |
+| 42 | DO NOT USE GITHUB PAGES FOR THE APP | **PASS** | No GitHub Pages deployment path is being used. |
+| 43 | CUSTOM DOMAIN PATH | **READY / PURCHASE PENDING** | Code remains domain-configurable; final domain purchase/connection is intentionally not claimed. |
+| 44 | CENTRALIZE SITE URL CONFIGURATION | **PASS** | NEXT_PUBLIC_SITE_URL and origin-derived return/callback paths are used instead of binding code to a preview hostname. |
+| 45 | DEPLOYED SITE TESTING | **PENDING** | Local/CI browser matrix passes; full GitHub-native deployed URL testing, console and network inspection remain. |
+| 46 | RESPONSIVE DESIGN | **PASS — CI** | 320/375/390/430/768/1024/1440 matrix with overflow/a11y checks and separate mobile/desktop composition. |
+| 47 | MOTION SYSTEM | **PASS** | Navigation/game/intervention/dismissal motion is differentiated and reduced-motion is supported. |
+| 48 | TYPOGRAPHY | **PASS** | Display, game labels, numeric/tabular values, interventions and hierarchy are intentionally separated. |
+| 49 | LOADING STATES | **PASS** | Game loading, entitlement checking, checkout loading and premium access resolution avoid false paid/free flashes. |
+| 50 | ERROR STATES | **PASS IN CODE / PAYMENT EXTERNAL PENDING** | Auth/game/network/payment fallbacks are recoverable; real Paddle sandbox errors still need provider verification. |
+| 51 | ACCESSIBILITY | **PASS — CI** | Keyboard/focus, semantic controls, forced colors, responsive text, reduced motion and audio-independent messaging are tested. |
+| 52 | PERFORMANCE | **PASS — CURRENT ASSET SET** | SVG game art, lazy Phaser import, lightweight generated audio and responsive rendering avoid heavy image bundles. |
+| 53 | REMOVE “GENERATED APP” VISUAL TELLS | **PASS — SCREENSHOT REVIEW** | Homepage moved away from SaaS grid language; game cards use authored imagery/materials and varied desktop proportions. |
+| 54 | VISUAL REFERENCE LOOP | **PASS — MULTIPLE ITERATIONS** | CI screenshots were inspected, compared, corrected, rerendered and inspected again for home and every game. |
+| 55 | FUNCTIONAL TEST JOURNEY | **PARTIAL** | Core journey is automated. Authenticated one-run Plus + real Paddle sandbox purchase portion waits on provider configuration. |
+| 56 | FAILURE TEST JOURNEY | **PARTIAL** | LocalStorage bypass, stale context, multi-tab lock, timeout, exhausted balance, reduced motion, presence failure and rapid input are covered; provider payment failures await sandbox. |
+| 57 | PRODUCTION SECRETS | **PASS** | No production payment secrets are fabricated or committed. |
+| 58 | FINAL IMPLEMENTATION ORDER | **IN PROGRESS** | Architecture/core visuals/game calibration/trial/RevenueCat code and CI are done; provider sandbox and Git-native deployment are the remaining stages. |
+| 59 | HOMEPAGE ACCEPTANCE CRITERIA | **PASS — OWNER OVERRIDE APPLIED** | All games visible, Sports retained by override, premium symbols/background/prompts/sidebar and responsive views are implemented. |
+| 60 | PER-GAME ACCEPTANCE CRITERIA | **PASS — CI RC** | Each current named game loads, resolves, animates, handles rapid input, mobile, sound, state and screenshots without console exceptions in latest green candidate. |
+| 61 | TRIAL ACCEPTANCE CRITERIA | **PASS — OVERRIDE MODEL / AUTH LIVE TEST PENDING** | Schema and server resolver enforce one 15-minute first-run trial. A real authenticated test account still needs deployed end-to-end verification. |
+| 62 | REVENUECAT ACCEPTANCE CRITERIA | **IMPLEMENTED / PROVIDER TEST PENDING** | SDK, stable user ID, premium abstraction and server checks are built. Real customer persistence requires RevenueCat config. |
+| 63 | PADDLE ACCEPTANCE CRITERIA | **PENDING EXTERNAL** | Sandbox merchant/product/import/offering and successful/cancelled/failed checkouts are not yet legitimately configured/tested. |
+| 64 | PAYMENT TRACKING ACCEPTANCE CRITERIA | **PENDING EXTERNAL** | Provider dashboards will expose the required operational lifecycle once Paddle/RevenueCat sandbox is connected. |
+| 65 | AUDIO ACCEPTANCE CRITERIA | **PASS — CI** | Shared game-specific Web Audio, Reality Ping cue, master mute and persistent mute are implemented; persistence is in browser QA. |
+| 66 | DEPLOYMENT ACCEPTANCE CRITERIA | **PENDING HOST CONNECTION** | GitHub branch/build is green. Native Git checkout, deployment env, real URL games/audio/mobile/console/network are outstanding. |
+| 67 | DOMAIN ACCEPTANCE CRITERIA | **READY / CONNECTION PENDING** | Domain-sensitive code is configurable; temporary Git-native deployed URL and final DNS connection remain. |
+| 68 | FINAL VISUAL QUESTIONS | **PASS — RELEASE CANDIDATE** | Latest inspected renders show liquid-glass hub, visible game art, verified cultural symbols and differentiated game surfaces; latest atmosphere/prompt correction is under CI. |
+| 69 | FINAL COMPLETION REPORT | **NOT FINAL YET** | Evidence matrix is maintained here; final report waits for provider sandbox and deployed URL testing. |
+| 70 | FINAL DEFINITION OF DONE | **NOT YET** | Automated/local green is insufficient by design. Paddle sandbox + RevenueCat lifecycle + GitHub-native deployed verification remain mandatory. |
 
-## Release gates outside the 69 product sections
+## Current release blockers
 
-- Latest functional candidate passed core tests, TypeScript, lint, production build and full browser QA before this documentation-only closeout.
-- The temporary audit-bootstrap workflow is removed as part of closeout; the normal CI workflow remains.
-- Live subscription charging is intentionally unavailable until real Lemon Squeezy and/or PayPal production credentials, product/variant IDs and signed webhook secrets are configured.
-- Production Vercel deployment, production console/network inspection, and merge to `main` remain release gates. Do not mark those complete unless they are actually executed against the deployed artifact.
+1. Configure a real Paddle **sandbox** merchant/product/prices and connect it to a RevenueCat Paddle web config.
+2. Create/import the monthly and annual products, attach them to the single `premium` entitlement, and expose them through the current offering.
+3. Run successful, cancelled and failed sandbox checkout journeys against a real authenticated Spin Out account.
+4. Connect a full-stack host directly to the GitHub repository/branch and deploy the exact verified commit through native Git integration.
+5. Exercise the deployed URL on desktop/mobile and inspect production console/network behavior.
+6. Only then promote that exact verified commit to `main`.
+
+No provider credential, merchant approval, deployed URL, or payment result is treated as successful until observed.
