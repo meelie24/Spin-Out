@@ -19,9 +19,9 @@ const games: Array<{
   tone: string;
 }> = [
   { id: 'slots', name: 'Slots', eyebrow: 'Spin', description: 'Reels, stakes and the urge to press it again.', symbols: ['/symbols/seven.svg','/symbols/cherry.svg','/symbols/gem.svg'], tone: 'slots' },
-  { id: 'sports', name: 'Sports', eyebrow: 'Bet slip', description: 'Odds, picks and the pull to chase the result.', symbols: ['/symbols/bell.svg','/symbols/gem.svg','/symbols/seven.svg'], tone: 'sports' },
-  { id: 'casino', name: 'Casino', eyebrow: 'Table', description: 'A polished table run built around live decisions.', symbols: ['/symbols/gem.svg','/symbols/seven.svg','/symbols/plum.svg'], tone: 'casino' },
-  { id: 'poker', name: 'Poker', eyebrow: 'Cards', description: 'Pressure, reads and the temptation to stay seated.', symbols: ['/symbols/plum.svg','/symbols/gem.svg','/symbols/bell.svg'], tone: 'poker' },
+  { id: 'sports', name: 'Sportsbook', eyebrow: 'Bet slip', description: 'Odds, picks and the pull to chase the result.', symbols: ['/symbols/bell.svg','/symbols/gem.svg','/symbols/seven.svg'], tone: 'sports' },
+  { id: 'casino', name: 'Roulette', eyebrow: 'Table', description: 'A polished table run built around live decisions.', symbols: ['/symbols/gem.svg','/symbols/seven.svg','/symbols/plum.svg'], tone: 'casino' },
+  { id: 'poker', name: 'Video Poker', eyebrow: 'Cards', description: 'Pressure, reads and the temptation to stay seated.', symbols: ['/symbols/plum.svg','/symbols/gem.svg','/symbols/bell.svg'], tone: 'poker' },
   { id: 'lottery', name: 'Lottery', eyebrow: 'Scratch', description: 'Fast chances, near misses and one-more energy.', symbols: ['/symbols/lemon.svg','/symbols/cherry.svg','/symbols/seven.svg'], tone: 'lottery' },
   { id: 'other', name: 'Something else', eyebrow: 'Your game', description: 'Start a Reality Run and set the game yourself.', symbols: ['/symbols/cherry.svg','/symbols/bell.svg','/symbols/lemon.svg'], tone: 'other' },
 ];
