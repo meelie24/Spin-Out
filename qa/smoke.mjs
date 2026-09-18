@@ -164,7 +164,7 @@ try {
   await hubPage.locator('a[href="/play?game=slots"]').click();
   await hubPage.getByRole('heading', { name: /How much were you about to put in/i }).waitFor();
   await hubPage.getByRole('button', { name: '$100' }).click();
-  await hubPage.getByRole('heading', { name: /What’s pulling you in/i }).waitFor();
+  await hubPage.getByRole('heading', { name: /What were you hoping would happen/i }).waitFor();
   assert(await hubPage.getByRole('button', { name: /Slots/i }).count() === 0, 'homepage game preselection did not skip the redundant game question');
   await hubContext.close();
 
@@ -236,29 +236,16 @@ try {
 
   await page.getByRole('button', { name: '$100' }).click();
   await page.getByRole('button', { name: /Slots/ }).click();
-  await page.getByRole('button', { name: /Win it back/ }).click();
-  await page.getByRole('heading', { name: /Why are you trying to stop/i }).waitFor();
-  await page.screenshot({ path: `${out}/quit-reason-390.png`, fullPage: true });
-  await page.getByRole('button', { name: 'Skip' }).click();
-  await page.locator('input[name="available"]').fill('850');
-  await page.getByRole('button', { name: 'Next week' }).click();
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('button', { name: /^Car$/ }).click();
-  await page.locator('input[name="amount"]').fill('430');
-  await page.getByRole('button', { name: 'This week' }).click();
-  await page.getByRole('button', { name: /Lock it in/ }).click();
-  await page.getByRole('heading', { name: /How bad do you want to play right now/i }).waitFor();
-  assert(await page.getByRole('heading', { name: /If you came up short/i }).count() === 0, 'optional lender question returned to first-run setup');
-  assert(await page.getByRole('heading', { name: /What would you rather keep this money for/i }).count() === 0, 'optional goal question returned to first-run setup');
-  await page.getByRole('button', { name: '8' }).click();
+  await page.getByRole('button', { name: 'Win back what I lost', exact: true }).click();
+  await page.getByRole('button', { name: 'Car payment', exact: true }).click();
+  await page.getByRole('button', { name: '5 rounds', exact: true }).click();
 
-  const loadButton = page.getByRole('button', { name: /Load \$100/ });
-  await loadButton.waitFor();
+  await page.locator('.run-intro').waitFor();
+  assert(await page.locator('.deposit-terminal').count() === 0, 'retired deposit gate appeared after the five-question setup');
   await page.screenshot({ path: `${out}/transition-390.png`, fullPage: true });
-  await page.getByRole('button', { name: '5 rounds' }).click();
-  await page.screenshot({ path: `${out}/transition-limit-390.png`, fullPage: true });
-  await loadButton.click();
+  await page.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await page.locator('.in-run-setup').waitFor({ timeout: 5000 });
   await page.waitForFunction(() => {
     const raw = localStorage.getItem('spinout.active.v2');
     const active = raw ? JSON.parse(raw) : null;
@@ -349,16 +336,11 @@ try {
   await unknown.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await unknown.getByRole('button', { name: '$20', exact: true }).click();
   await unknown.getByRole('button', { name: /Slots/ }).click();
-  await unknown.getByRole('button', { name: /Bored/ }).click();
-  await unknown.getByRole('heading', { name: /Why are you trying to stop/i }).waitFor();
-  await unknown.getByRole('button', { name: 'Skip' }).click();
-  await unknown.getByRole('button', { name: /Not sure on the amount/i }).click();
-  await unknown.getByRole('button', { name: 'Not sure', exact: true }).click();
-  await unknown.getByRole('button', { name: 'Continue' }).click();
-  await unknown.getByRole('button', { name: /Nothing urgent/ }).click();
-  await unknown.getByRole('button', { name: '3' }).waitFor();
-  await unknown.getByRole('button', { name: '3' }).click();
-  await unknown.getByRole('button', { name: /Load \$20/ }).waitFor();
+  await unknown.getByRole('button', { name: 'Kill some time', exact: true }).click();
+  await unknown.getByRole('button', { name: 'Nothing specific', exact: true }).click();
+  await unknown.getByRole('button', { name: "I'll decide when I'm done", exact: true }).click();
+  await unknown.locator('.run-intro').waitFor();
+  assert(await unknown.locator('.deposit-terminal').count() === 0, 'alternate path still exposed the retired deposit gate');
   await unknownContext.close();
 
   // Stale returning financial context must be refreshed without full onboarding.
@@ -369,8 +351,12 @@ try {
   const stale = await staleContext.newPage();
   await stale.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await stale.getByRole('button', { name: '$50', exact: true }).click();
-  await stale.getByRole('button', { name: /Win it back/ }).click();
-  await stale.getByRole('heading', { name: /Until more money comes in/i }).waitFor();
+  await stale.getByRole('button', { name: 'Win back what I lost', exact: true }).click();
+  await stale.getByRole('button', { name: '5 rounds', exact: true }).click();
+  await stale.locator('.run-intro').waitFor();
+  await stale.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
+  await stale.locator('.in-run-setup').waitFor({ timeout: 5000 });
+  await stale.getByRole('heading', { name: /When's more money coming in/i }).waitFor();
   await stale.screenshot({ path: `${out}/stale-returning-390.png`, fullPage: true });
   await staleContext.close();
 
