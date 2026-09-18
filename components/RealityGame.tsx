@@ -13,6 +13,7 @@ export const RealityGame = forwardRef<RealityGameHandle, { gameType: GamblingTyp
   function RealityGame({ gameType, reducedMotion, initialBalanceCents }, ref) {
     const host = useRef<HTMLDivElement>(null);
     const bridge = useRef<RealityGameBridge | null>(null);
+    const initialBalance = useRef(initialBalanceCents);
     const [ready, setReady] = useState(false);
 
     useImperativeHandle(ref, () => ({
@@ -22,15 +23,16 @@ export const RealityGame = forwardRef<RealityGameHandle, { gameType: GamblingTyp
 
     useEffect(() => {
       let cancelled = false;
-      setReady(false);
+      const node = host.current;
+      queueMicrotask(() => { if (!cancelled) setReady(false); });
       (async () => {
-        if (!host.current) return;
+        if (!node) return;
         const { mountRealityGame } = await import('@/lib/phaserGame');
-        const mounted = await mountRealityGame(host.current, { gameType, reducedMotion, initialBalanceCents });
+        const mounted = await mountRealityGame(node, { gameType, reducedMotion, initialBalanceCents: initialBalance.current });
         if (cancelled) mounted.destroy();
         else { bridge.current = mounted; setReady(true); }
       })();
-      return () => { cancelled = true; bridge.current?.destroy(); bridge.current = null; if (host.current) host.current.innerHTML = ''; };
+      return () => { cancelled = true; bridge.current?.destroy(); bridge.current = null; if (node) node.innerHTML = ''; };
     }, [gameType, reducedMotion]);
 
     useEffect(() => {
