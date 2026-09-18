@@ -13,6 +13,7 @@ export type GameVisual =
 export interface ResolvedGameOutcome {
   band: OutcomeBand;
   netCents: number;
+  nearMiss?: boolean;
   visual: GameVisual;
 }
 
@@ -87,9 +88,14 @@ export function resolveSlots(rng: () => number, stakeCents: number): ResolvedGam
   }
 
   const netCents = payoutCents - stakeCents;
+  const nearMiss = netCents < 0 && SLOT_LINES.some(line => {
+    const symbols = line.map((row, reel) => grid[row][reel]);
+    return symbols[0] === symbols[1] && symbols[2] !== symbols[0];
+  });
   return {
     band: bandFromNet(netCents, stakeCents, payoutCents),
     netCents,
+    nearMiss,
     visual: { kind: 'slots', grid, paylinesWon, payoutCents },
   };
 }
@@ -254,9 +260,12 @@ export function resolveScratch(rng: () => number, stakeCents: number): ResolvedG
   }
 
   const netCents = prizeCents - stakeCents;
+  const firstThree = cells.slice(0, 3);
+  const nearMiss = !win && new Set(firstThree).size === 2;
   return {
     band: bandFromNet(netCents, stakeCents, prizeCents),
     netCents,
+    nearMiss,
     visual: { kind:'scratch', cells, prizeCents, won: prizeCents > 0 },
   };
 }
