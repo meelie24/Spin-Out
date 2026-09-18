@@ -113,3 +113,11 @@ The main game interfaces are usable and polished on a 390px viewport. Reality Pi
 6. Copy polish.
 7. Rerun complete browser/user journeys.
 8. Leave payment/deployment blockers explicitly open until real external systems exist.
+
+
+## Retest findings discovered after the first fix pass
+
+| Finding | What happened | Likely user thought | Severity | Root cause | Fix |
+|---|---|---|---|---|---|
+| A 10,000-run sample can finish ahead and visually contradict the lesson | The fixed mobile panel correctly revealed the slot sample, but that sample ended +$9,178 | “Wait, doesn’t this prove I can come out ahead?” | **HIGH** | One finite sample can legitimately beat expectation because of variance, but the UI presented the sample net without the calibrated game model’s expected return | Show **sample result** and **model expectation** separately. Never rewrite the sample to force a loss. The expectation must be calculated from the actual calibrated rules. |
+| My Reality save action can fall below the visible modal area | Collapsing optional sections improved the form, but the save control can still sit below the initial mobile viewport | “Did this save automatically?” | **MEDIUM** | Long editable drawer with non-sticky final action | Make the Save action sticky inside the drawer and keep it visible while scrolling. |
