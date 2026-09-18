@@ -8,13 +8,13 @@ import { RealityRun, type RunEndData } from './RealityRun';
 import { PostRunFlow } from './PostRunFlow';
 import { clearActiveRun, loadActiveRun, loadData, updateData } from '@/lib/storage';
 import { shouldAutoEnd } from '@/lib/engine';
-import type { ActiveRun, RealityProfile } from '@/lib/types';
+import type { ActiveRun, GamblingType, RealityProfile } from '@/lib/types';
 
 interface ActiveEnvelope { profile: RealityProfile; run: ActiveRun }
 
 type Stage = 'loading' | 'setup' | 'deposit' | 'run' | 'post';
 
-export function PlayExperience() {
+export function PlayExperience({ initialGame = null }: { initialGame?: GamblingType | null }) {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>('loading');
   const [profile, setProfile] = useState<RealityProfile | null>(null);
@@ -46,7 +46,7 @@ export function PlayExperience() {
   }, []);
 
   if (stage === 'loading') return <main className="loading-page"><span className="loading-dot"/>Loading</main>;
-  if (stage === 'setup') return <RealitySetup existing={profile} onComplete={next => { setProfile(next); updateData(data => ({ ...data, profile: next })); setStage('deposit'); }} />;
+  if (stage === 'setup') return <RealitySetup existing={profile} initialGame={initialGame} onComplete={next => { setProfile(next); updateData(data => ({ ...data, profile: next })); setStage('deposit'); }} />;
   if (stage === 'deposit' && profile) return <FakeDeposit profile={profile} onComplete={() => setStage('run')} />;
   if (stage === 'run' && profile) return <RealityRun profile={profile} restoredRun={restored} onEnd={data => { setEnd(data); setRestored(null); setStage('post'); }} />;
   if (stage === 'post' && profile && end) return <PostRunFlow profile={profile} end={end} onDone={() => router.push('/')} />;

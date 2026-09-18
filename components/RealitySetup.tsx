@@ -39,23 +39,23 @@ function dateFor(choice: string) {
   return d.toISOString().slice(0, 10);
 }
 
-export function RealitySetup({ existing, onComplete }: { existing: RealityProfile | null; onComplete: (profile: RealityProfile) => void }) {
+export function RealitySetup({ existing, initialGame = null, onComplete }: { existing: RealityProfile | null; initialGame?: GamblingType | null; onComplete: (profile: RealityProfile) => void }) {
   const firstRun = !existing;
   const expired = existing?.obligationDueDate ? isObligationExpired(existing.obligationDueDate, new Date().toISOString().slice(0, 10)) : false;
   const financeStale = existing ? isFinancialContextStale(existing) : false;
   const steps = useMemo<Step[]>(() => {
-    if (firstRun) return ['wager','game','trigger','available','income','obligation','obligation-detail','lender','goal','urge'];
+    if (firstRun) return initialGame ? ['wager','trigger','available','income','obligation','obligation-detail','lender','goal','urge'] : ['wager','game','trigger','available','income','obligation','obligation-detail','lender','goal','urge'];
     const next: Step[] = ['wager','trigger'];
     if (financeStale) next.push('available','income','obligation','obligation-detail');
     else if (expired) next.push('obligation','obligation-detail');
     next.push('urge');
     return next;
-  }, [firstRun, expired, financeStale]);
+  }, [firstRun, expired, financeStale, initialGame]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const panel = useRef<HTMLDivElement>(null);
   const [wager, setWager] = useState(existing?.intendedWagerCents ?? 10_000);
-  const [game, setGame] = useState<GamblingType>(existing?.gamblingType ?? 'slots');
+  const [game, setGame] = useState<GamblingType>(initialGame ?? existing?.gamblingType ?? 'slots');
   const [trigger, setTrigger] = useState<TriggerType>(existing?.triggerType ?? 'win-it-back');
   const [triggerCustom, setTriggerCustom] = useState(existing?.triggerCustom ?? '');
   const [available, setAvailable] = useState<number | null>(existing?.availableUntilIncomeCents ?? null);
