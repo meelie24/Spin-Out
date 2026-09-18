@@ -123,6 +123,8 @@ export interface ActiveRun {
       deck: string[];
       held: boolean[];
       phase: 'hold';
+      wagerCents: number;
+      balanceBeforeCents: number;
     };
   };
 }
