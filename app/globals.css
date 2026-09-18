@@ -49,3 +49,8 @@
 .run-card{filter:saturate(calc(1 - var(--reality)*.18));transition:filter .5s ease}
 .ghost-e{left:12%;top:48%}.ghost-f{right:11%;top:52%;text-align:right}.ghost-f strong{font-size:clamp(17px,3vw,32px)}.ghost-g{left:18%;bottom:5%}
 @media(max-width:700px){.game-decision{margin-top:5px}.game-decision button{min-height:36px;padding:0 10px;font-size:9px}.ghost-e,.ghost-f{display:none}}
+
+.exit-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.exit-compare-grid>div{padding:18px;border-radius:14px;background:rgba(100,66,46,.055);display:grid;gap:5px}
+.exit-compare-grid span{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#897568}
+.exit-compare-grid strong{font-size:30px;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
