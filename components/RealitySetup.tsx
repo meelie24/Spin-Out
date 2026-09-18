@@ -23,7 +23,6 @@ const obligations: { value: ObligationType; label: string }[] = [
   { value: 'loan', label: 'Loan' }, { value: 'insurance', label: 'Insurance' }, { value: 'phone', label: 'Phone' },
   { value: 'other', label: 'Other' }, { value: 'none', label: 'Nothing urgent' },
 ];
-const goals = ['Savings', 'Mom / Dad / family', 'Birthday', 'Kids', 'Groceries', 'Trip', 'Debt', 'Car', 'Something I want', 'Other'];
 
 type Step = 'wager' | 'game' | 'trigger' | 'quit-reason' | 'available' | 'obligation' | 'obligation-detail' | 'urge';
 
@@ -65,10 +64,10 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
   const [obligationAmount, setObligationAmount] = useState<number | null>(existing?.obligationAmountCents ?? null);
   const [obligationDate, setObligationDate] = useState<string | null>(existing?.obligationDueDate ?? null);
   const [customObligationDate, setCustomObligationDate] = useState(false);
-  const [lenderName, setLenderName] = useState(existing?.recentLenderName ?? '');
-  const [lenderHelped, setLenderHelped] = useState(existing?.recentLenderHelpedRecently ?? false);
-  const [lenderAmount, setLenderAmount] = useState<number | null>(existing?.recentLenderAmountCents ?? null);
-  const [goal, setGoal] = useState(existing?.personalMoneyGoal ?? '');
+  const lenderName = existing?.recentLenderName ?? '';
+  const lenderHelped = existing?.recentLenderHelpedRecently ?? false;
+  const lenderAmount = existing?.recentLenderAmountCents ?? null;
+  const goal = existing?.personalMoneyGoal ?? '';
 
   const step = steps[index];
 
