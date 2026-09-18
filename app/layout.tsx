@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import './globals.css';
+import { AccountSync } from '@/components/AccountSync';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://spinitout.com';
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
+        <AccountSync />
         <header className="site-header">
           <Link href="/" className="brand" aria-label="Spin Out home"><span className="brand-mark" aria-hidden="true">S</span><span>Spin Out</span></Link>
           <nav aria-label="Main navigation">
