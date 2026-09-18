@@ -113,7 +113,7 @@ try {
       'dismissed homepage Reality Ping returned immediately after refresh');
   });
 
-  await check('Run 10,000 copy and focus', async context => {
+  await check('Run 10,000 focus', async context => {
     const p = profile('slots');
     await seedActive(context, p, runFor(p, { actionCount: 2, balanceCents: 8_000 }));
     const page = await context.newPage();
@@ -122,6 +122,16 @@ try {
     await page.getByRole('button', { name: 'Run 10,000' }).click();
     await page.locator('.longrun-panel').waitFor();
     await assertFocusInside(page, '.longrun-panel', 'Run 10,000');
+  });
+
+  await check('Run 10,000 neutral progression copy', async context => {
+    const p = profile('slots');
+    await seedActive(context, p, runFor(p, { actionCount: 2, balanceCents: 8_000 }));
+    const page = await context.newPage();
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.getByRole('button', { name: 'Run 10,000' }).click();
+    await page.locator('.longrun-panel').waitFor();
     await page.waitForTimeout(520);
     const text = await page.locator('.longrun-panel').innerText();
     assert(!/\bkeep going\b/i.test(text), 'Run 10,000 used directive "Keep going" copy');
