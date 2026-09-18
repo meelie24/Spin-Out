@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
 import fs from 'node:fs/promises';
 
 const base = process.env.BASE_URL || 'http://127.0.0.1:3000';
@@ -9,9 +10,85 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function isoFromNow(days) {
+  const d = new Date(Date.now() + days * 86_400_000);
+  d.setHours(12, 0, 0, 0);
+  return d.toISOString().slice(0, 10);
+}
+
+function profile(type = 'slots', patch = {}) {
+  const now = new Date().toISOString();
+  return {
+    version: 1,
+    intendedWagerCents: 10_000,
+    gamblingType: type,
+    triggerType: 'win-it-back',
+    triggerCustom: null,
+    availableUntilIncomeCents: 85_000,
+    nextIncomeDate: isoFromNow(7),
+    obligationType: 'car',
+    obligationAmountCents: 43_000,
+    obligationDueDate: isoFromNow(4),
+    recentLenderName: null,
+    recentLenderHelpedRecently: false,
+    recentLenderAmountCents: null,
+    personalMoneyGoal: 'Savings',
+    additionalMoneyGoal: null,
+    startingUrge: 8,
+    financialContextUpdatedAt: now,
+    createdAt: now,
+    ...patch,
+  };
+}
+
+function runFor(p, patch = {}) {
+  return {
+    id: crypto.randomUUID(),
+    startedAt: Date.now(),
+    initialBalanceCents: p.intendedWagerCents,
+    balanceCents: p.intendedWagerCents,
+    previousBalanceCents: p.intendedWagerCents,
+    stakeCents: Math.max(100, Math.round(p.intendedWagerCents * .1 / 100) * 100),
+    previousStakeCents: Math.max(100, Math.round(p.intendedWagerCents * .1 / 100) * 100),
+    actionCount: 0,
+    largestLossCents: 0,
+    simulatedLossesCents: 0,
+    simulatedRecoveriesCents: 0,
+    lastNetCents: 0,
+    lastPingAction: -10,
+    pings: [],
+    timeline: [],
+    ...patch,
+  };
+}
+
+async function seedActive(context, p, run) {
+  await context.addInitScript(({ profile, run }) => {
+    localStorage.setItem('spinout.active.v2', JSON.stringify({ profile, run }));
+  }, { profile: p, run });
+}
+
+async function noHorizontalOverflow(page, label) {
+  const ok = await page.locator('body').evaluate(el => el.scrollWidth <= window.innerWidth + 1);
+  assert(ok, `${label}: horizontal overflow`);
+}
+
+async function waitActionReady(page) {
+  await page.waitForFunction(() => {
+    const button = document.querySelector('.game-action');
+    return button instanceof HTMLButtonElement && !button.disabled;
+  }, null, { timeout: 7000 });
+}
+
+async function assertA11y(page, label) {
+  const results = await new AxeBuilder({ page }).analyze();
+  const serious = results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
+  assert(serious.length === 0, `${label}: axe violations ${JSON.stringify(serious.map(v => ({ id:v.id, impact:v.impact, nodes:v.nodes.length })))}`);
+}
+
 const browser = await chromium.launch({ headless: true });
 try {
-  // Keep six independent anonymous sessions active long enough to exercise the live counter.
+  // Shared anonymous presence: six isolated browser sessions should produce at least five "other" sessions.
   const counterContexts = [];
   for (let i = 0; i < 6; i++) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
@@ -20,46 +97,78 @@ try {
     counterContexts.push(context);
   }
   const firstCounterPage = counterContexts[0].pages()[0];
-  await firstCounterPage.waitForTimeout(900);
-  await firstCounterPage.reload({ waitUntil: 'networkidle' });
-  const counterText = await firstCounterPage.locator('.journey-counter').textContent();
-  assert(counterText?.includes('5 people are on this journey with you'), `unexpected live presence text: ${counterText}`);
+  let counterText = '';
+  for (let i = 0; i < 12; i++) {
+    await firstCounterPage.reload({ waitUntil: 'networkidle' });
+    counterText = await firstCounterPage.locator('.journey-counter').textContent().catch(() => '') || '';
+    if (/other people? (?:are|is) here right now/i.test(counterText)) break;
+    await firstCounterPage.waitForTimeout(500);
+  }
+  assert(/other people? (?:are|is) here right now/i.test(counterText), `shared presence missing: ${counterText}`);
+  const count = Number(counterText.match(/\d+/)?.[0] ?? 0);
+  assert(count >= 5, `shared presence undercounted six sessions: ${counterText}`);
   for (const c of counterContexts) await c.close();
 
+  // Presence failure must hide the number rather than invent one.
+  const noPresence = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const np = await noPresence.newPage();
+  await np.route('**/api/presence', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"available":false}' }));
+  await np.goto(base, { waitUntil: 'networkidle' });
+  await np.waitForTimeout(250);
+  assert(await np.locator('.journey-counter').count() === 0, 'presence failure displayed a count');
+  await noPresence.close();
+
+  // Required responsive matrix.
   const sizes = [
-    ['desktop', 1440, 900],
-    ['mobile-390', 390, 844],
     ['mobile-320', 320, 568],
+    ['mobile-375', 375, 667],
+    ['mobile-390', 390, 844],
+    ['mobile-430', 430, 932],
+    ['tablet-768', 768, 1024],
+    ['laptop-1024', 1024, 768],
+    ['desktop-1440', 1440, 900],
   ];
   for (const [name, width, height] of sizes) {
     const context = await browser.newContext({ viewport: { width, height } });
     const page = await context.newPage();
     await page.goto(base, { waitUntil: 'networkidle' });
+    await page.getByRole('link', { name: /^Start$/i }).waitFor();
+    await noHorizontalOverflow(page, name);
     await page.screenshot({ path: `${out}/home-${name}.png`, fullPage: true });
-    assert(await page.getByRole('link', { name: /^Start$/i }).isVisible(), `${name}: Start missing`);
-    assert(await page.locator('body').evaluate(el => el.scrollWidth <= window.innerWidth + 1), `${name}: horizontal overflow`);
+    if (name === 'desktop-1440' || name === 'mobile-390') await assertA11y(page, name);
     await context.close();
   }
 
+  // Real auth UI: keyboard focus, Escape, focus return. No simulated sign-in state.
+  const authContext = await browser.newContext({ viewport: { width: 1024, height: 768 } });
+  const authPage = await authContext.newPage();
+  await authPage.goto(base, { waitUntil: 'networkidle' });
+  const signIn = authPage.getByRole('button', { name: 'Sign in' });
+  await signIn.waitFor();
+  await signIn.click();
+  const authDialog = authPage.getByRole('dialog', { name: 'Sign in' });
+  await authDialog.waitFor();
+  assert(await authPage.evaluate(() => document.querySelector('[role="dialog"]')?.contains(document.activeElement)), 'auth dialog did not receive focus');
+  await authPage.keyboard.press('Escape');
+  assert(await authDialog.count() === 0, 'Escape did not close auth dialog');
+  assert(await signIn.evaluate(el => document.activeElement === el), 'auth focus did not return to trigger');
+  await authContext.close();
+
+  // Full first-run flow on mobile.
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
   const browserErrors = [];
   page.on('pageerror', error => browserErrors.push(`pageerror: ${error.message}`));
-  page.on('console', message => {
-    if (message.type() === 'error') browserErrors.push(`console: ${message.text()}`);
-  });
+  page.on('console', message => { if (message.type() === 'error') browserErrors.push(`console: ${message.text()}`); });
   await page.goto(`${base}/play`, { waitUntil: 'networkidle' });
 
-  // First-run setup. One decision per screen.
   await page.getByRole('button', { name: '$100' }).click();
   await page.getByRole('button', { name: /Slots/ }).click();
   await page.getByRole('button', { name: /Win it back/ }).click();
-  await page.getByRole('textbox', { name: undefined }).first().fill('850').catch(() => {});
-  const available = page.locator('input[name="available"]');
-  await available.fill('850');
+  await page.locator('input[name="available"]').fill('850');
   await page.getByRole('button', { name: 'Use' }).click();
   await page.getByRole('button', { name: 'Next week' }).click();
-  await page.getByRole('button', { name: /Car/ }).click();
+  await page.getByRole('button', { name: /^Car$/ }).click();
   await page.locator('input[name="amount"]').fill('430');
   await page.getByRole('button', { name: 'This week' }).click();
   await page.getByRole('button', { name: /Lock it in/ }).click();
@@ -67,68 +176,22 @@ try {
   await page.getByRole('button', { name: 'Savings' }).click();
   await page.getByRole('button', { name: '8' }).click();
 
-  await page.getByRole('button', { name: /Deposit \$100/ }).waitFor();
-  await page.screenshot({ path: `${out}/fake-deposit-390.png`, fullPage: true });
-  await page.getByRole('button', { name: /Deposit \$100/ }).click();
+  const loadButton = page.getByRole('button', { name: /Load \$100/ });
+  await loadButton.waitFor();
+  await page.screenshot({ path: `${out}/transition-390.png`, fullPage: true });
+  await loadButton.click();
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
-  await page.screenshot({ path: `${out}/run-390.png`, fullPage: true });
+  await noHorizontalOverflow(page, 'Reality Run 390');
   const canvasBox = await page.locator('.phaser-stage canvas').boundingBox();
-  assert(canvasBox && canvasBox.width > 300, 'Phaser canvas did not render at usable size');
+  assert(canvasBox && canvasBox.width > 300, 'Phaser canvas did not render at usable mobile size');
+
   const cash = page.getByRole('button', { name: 'Cash Out' });
-  assert(await cash.isVisible(), 'Cash Out missing');
+  await cash.waitFor();
   const cashBox = await cash.boundingBox();
-  assert(cashBox && cashBox.y >= 0 && cashBox.y + cashBox.height <= 844, 'Cash Out is outside mobile viewport');
-  let sawPing = false;
-  for (let i = 0; i < 4; i++) {
-    const action = page.locator('.game-action');
-    await action.waitFor({ state: 'visible' });
-    await page.waitForFunction(() => {
-      const button = document.querySelector('.game-action');
-      return button instanceof HTMLButtonElement && !button.disabled;
-    });
-    await action.click();
-    try {
-      await page.waitForFunction(() => {
-        const ping = document.querySelector('.reality-ping');
-        const button = document.querySelector('.game-action');
-        return Boolean(ping) || (button instanceof HTMLButtonElement && !button.disabled);
-      }, null, { timeout: 5000 });
-    } catch (error) {
-      const state = await page.evaluate(() => {
-        const button = document.querySelector('.game-action');
-        return {
-          buttonText: button?.textContent,
-          buttonDisabled: button instanceof HTMLButtonElement ? button.disabled : null,
-          ping: Boolean(document.querySelector('.reality-ping')),
-          stageReady: document.querySelector('.phaser-stage')?.getAttribute('data-ready'),
-        };
-      });
-      throw new Error(`Reality action stalled: ${JSON.stringify(state)} browserErrors=${JSON.stringify(browserErrors)} original=${error.message}`);
-    }
-    const ping = page.locator('.reality-ping');
-    if (await ping.isVisible().catch(() => false)) {
-      sawPing = true;
-      const glass = await ping.evaluate(el => {
-        const style = getComputedStyle(el);
-        const inline = el instanceof HTMLElement ? (el.style.backdropFilter || el.style.webkitBackdropFilter || '') : '';
-        return {
-          computed: style.backdropFilter || style.webkitBackdropFilter || '',
-          inline,
-          background: style.backgroundImage || style.backgroundColor,
-        };
-      });
-      await page.screenshot({ path: `${out}/reality-ping-390.png`, fullPage: true });
-      assert(glass.computed.includes('blur') || glass.inline.includes('blur'), `Reality Ping glass blur missing: ${JSON.stringify(glass)}`);
-      await ping.click();
-      await page.waitForFunction(() => {
-        const button = document.querySelector('.game-action');
-        return button instanceof HTMLButtonElement && !button.disabled;
-      });
-    }
-  }
-  assert(browserErrors.length === 0, `browser errors: ${JSON.stringify(browserErrors)}`);
-  assert(sawPing, 'Reality Ping did not appear within four actions');
-  assert(await cash.isVisible(), 'Cash Out is not available after a Reality Ping');
+  assert(cashBox && cashBox.y >= 0 && cashBox.y + cashBox.height <= 844, 'Cash Out outside mobile viewport');
+  await page.getByRole('button', { name: 'Mute sound' }).click();
+  await page.getByRole('button', { name: 'Unmute sound' }).waitFor();
+  await page.screenshot({ path: `${out}/run-390.png`, fullPage: true });
   await cash.click();
   await page.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor();
   await page.getByRole('button', { name: '5' }).click();
@@ -136,93 +199,196 @@ try {
   await page.getByRole('button', { name: 'No' }).click();
   await page.locator('.money-kept').waitFor();
   await page.screenshot({ path: `${out}/money-kept-390.png`, fullPage: true });
+
+  // Post-run Plus placement is allowed, but signed-out users cannot buy/unlock Plus.
   await page.getByRole('button', { name: 'Spin Out+' }).click();
-  await page.getByRole('heading', { name: /Keep the deeper history/i }).waitFor();
-  assert(await page.getByText('$4.99').isVisible(), 'monthly Plus price missing');
-  assert(await page.getByText('$29.99').isVisible(), 'yearly Plus price missing');
-  assert(await page.getByText(/No fake payment button is shown/i).isVisible(), 'unconfigured billing state is not honest');
-  assert(await page.getByRole('button', { name: /Preview Plus/i }).count() === 0, 'fake Plus preview control returned');
-  await page.screenshot({ path: `${out}/plus-390.png`, fullPage: true });
+  await page.getByRole('heading', { name: /Full history and trends/i }).waitFor();
+  assert(await page.getByText(/Sign in before subscribing/i).isVisible(), 'Plus did not require real auth');
   await page.getByRole('button', { name: 'Close' }).click();
 
-  // Premium features sold in Plus must exist and render from the real saved run.
+  // Editing localStorage must not unlock /plus.
   await page.evaluate(() => {
     const raw = localStorage.getItem('spinout.v2');
-    if (!raw) throw new Error('missing stored Spin Out data');
-    const data = JSON.parse(raw);
-    data.account = { ...data.account, billing: 'premium', paypalSubscriptionId: null, paypalPlan: null };
+    const data = raw ? JSON.parse(raw) : { version: 2, runs: [], pingLearning: {}, events: [] };
+    data.account = { signedIn: true, email: 'fake@example.com', billing: 'premium', paypalSubscriptionId: 'FAKE', paypalPlan: 'yearly' };
     localStorage.setItem('spinout.v2', JSON.stringify(data));
   });
   await page.goto(`${base}/plus`, { waitUntil: 'networkidle' });
-  await page.getByRole('heading', { name: 'Your patterns.' }).waitFor();
-  assert(await page.getByText('Weekly readout').isVisible(), 'Plus weekly summary missing');
-  assert(await page.getByText('Every saved run').isVisible(), 'Plus run history missing');
-  assert(await page.getByText('Money kept', { exact: true }).first().isVisible(), 'Plus Money Kept trend missing');
-  assert(await page.locator('body').evaluate(el => el.scrollWidth <= window.innerWidth + 1), 'Plus dashboard overflows mobile');
-  await page.screenshot({ path: `${out}/plus-dashboard-390.png`, fullPage: true });
+  await page.getByRole('heading', { name: /Your full history/i }).waitFor();
+  assert(await page.getByText(/Sign in to use Plus/i).isVisible(), 'localStorage unlocked Plus');
+  assert(await page.getByRole('heading', { name: /Your history\./i }).count() === 0, 'premium dashboard rendered without server entitlement');
   await context.close();
 
-  // Every Reality Run environment must mount and accept its core action without browser errors.
-  for (const gameType of ['sports','casino','poker','lottery']) {
+  // Deterministic Reality Ping from a restored losing state; keyboard dismissal must work immediately.
+  const pingContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const pingProfile = profile('slots', { intendedWagerCents: 10_000, availableUntilIncomeCents: 6_000, obligationAmountCents: 8_000 });
+  const pingRun = runFor(pingProfile, { balanceCents: 5_000, previousBalanceCents: 5_500, stakeCents: 500, previousStakeCents: 500, actionCount: 2, largestLossCents: 5_000, simulatedLossesCents: 5_000 });
+  await seedActive(pingContext, pingProfile, pingRun);
+  const pingPage = await pingContext.newPage();
+  await pingPage.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await pingPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await waitActionReady(pingPage);
+  await pingPage.locator('.game-action').click();
+  const ping = pingPage.locator('.reality-ping');
+  await ping.waitFor({ timeout: 7000 });
+  await pingPage.screenshot({ path: `${out}/reality-ping-390.png`, fullPage: true });
+  await ping.focus();
+  await pingPage.keyboard.press('Enter');
+  await ping.waitFor({ state: 'detached' });
+  await pingContext.close();
+
+  // First-run alternate path: unknown cash/income, no urgent obligation, lender+goal skipped.
+  const unknownContext = await browser.newContext({ viewport: { width: 375, height: 667 } });
+  const unknown = await unknownContext.newPage();
+  await unknown.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await unknown.getByRole('button', { name: '$20' }).click();
+  await unknown.getByRole('button', { name: /Slots/ }).click();
+  await unknown.getByRole('button', { name: /Bored/ }).click();
+  await unknown.getByRole('button', { name: 'Not sure' }).click();
+  await unknown.getByRole('button', { name: 'Not sure' }).click();
+  await unknown.getByRole('button', { name: /Nothing urgent/ }).click();
+  await unknown.getByRole('heading', { name: /If you came up short/i }).waitFor();
+  await unknown.getByRole('button', { name: 'Skip' }).click();
+  await unknown.getByRole('button', { name: 'Skip' }).click();
+  await unknown.getByRole('button', { name: '3' }).click();
+  await unknown.getByRole('button', { name: /Load \$20/ }).waitFor();
+  await unknownContext.close();
+
+  // Stale returning financial context must be refreshed without full onboarding.
+  const staleContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await staleContext.addInitScript(({ p }) => {
+    localStorage.setItem('spinout.v2', JSON.stringify({ version:2, profile:p, runs:[], pingLearning:{}, events:[], account:{} }));
+  }, { p: profile('slots', { nextIncomeDate: isoFromNow(-1), obligationDueDate: isoFromNow(-1), financialContextUpdatedAt: new Date(Date.now() - 3 * 86_400_000).toISOString() }) });
+  const stale = await staleContext.newPage();
+  await stale.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await stale.getByRole('button', { name: '$50' }).click();
+  await stale.getByRole('button', { name: /Win it back/ }).click();
+  await stale.getByRole('heading', { name: /How much have you actually got/i }).waitFor();
+  await stale.screenshot({ path: `${out}/stale-returning-390.png`, fullPage: true });
+  await staleContext.close();
+
+  // Custom wager extremes.
+  for (const [label, amount] of [['small','1'],['large','10000']]) {
+    const customContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const custom = await customContext.newPage();
+    await custom.goto(`${base}/play`, { waitUntil: 'networkidle' });
+    await custom.getByRole('textbox', { name: 'Other wager amount' }).fill(amount);
+    await custom.getByRole('button', { name: 'Use' }).click();
+    await custom.getByRole('heading', { name: /What were you about to play/i }).waitFor();
+    await custom.screenshot({ path: `${out}/custom-${label}-390.png`, fullPage: true });
+    await customContext.close();
+  }
+
+  // Restored active run survives refresh.
+  const restoreContext = await browser.newContext({ viewport: { width: 430, height: 932 } });
+  const restoreProfile = profile('slots');
+  const restoreRun = runFor(restoreProfile);
+  await seedActive(restoreContext, restoreProfile, restoreRun);
+  const restore = await restoreContext.newPage();
+  await restore.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await restore.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await restore.reload({ waitUntil: 'networkidle' });
+  await restore.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await restoreContext.close();
+
+  // A second tab cannot independently control the same active run.
+  const multiContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const multiProfile = profile('slots');
+  const multiRun = runFor(multiProfile);
+  await seedActive(multiContext, multiProfile, multiRun);
+  const tab1 = await multiContext.newPage();
+  await tab1.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await tab1.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  const tab2 = await multiContext.newPage();
+  await tab2.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  const lock2 = tab2.getByRole('dialog', { name: /open in another tab/i });
+  await lock2.waitFor({ timeout: 5000 });
+  await lock2.getByRole('button', { name: 'Use this tab' }).click();
+  await tab1.getByRole('dialog', { name: /open in another tab/i }).waitFor({ timeout: 5000 });
+  await multiContext.close();
+
+  // Restored balance exhaustion ends cleanly.
+  const exhaustedContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const exhaustedProfile = profile('slots');
+  const exhaustedRun = runFor(exhaustedProfile, { balanceCents: 50, previousBalanceCents: 100, stakeCents: 500, previousStakeCents: 500 });
+  await seedActive(exhaustedContext, exhaustedProfile, exhaustedRun);
+  const exhausted = await exhaustedContext.newPage();
+  await exhausted.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await exhausted.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor({ timeout: 5000 });
+  await exhaustedContext.close();
+
+  // 15-minute timeout ends without being counted as a voluntary exit.
+  const timeoutContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const timeoutProfile = profile('slots');
+  const timeoutRun = runFor(timeoutProfile, { startedAt: Date.now() - 901_000 });
+  await seedActive(timeoutContext, timeoutProfile, timeoutRun);
+  const timeout = await timeoutContext.newPage();
+  await timeout.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await timeout.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor({ timeout: 5000 });
+  await timeoutContext.close();
+
+  // Every environment mounts, exposes its own decision where appropriate, and completes an action.
+  for (const gameType of ['slots','sports','casino','poker','lottery','other']) {
     const envContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    await envContext.addInitScript(({ type }) => {
-      const profile = {
-        version: 1,
-        intendedWagerCents: 10000,
-        gamblingType: type,
-        triggerType: 'win-it-back',
-        triggerCustom: null,
-        availableUntilIncomeCents: 85000,
-        nextIncomeDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0,10),
-        obligationType: 'car',
-        obligationAmountCents: 43000,
-        obligationDueDate: new Date(Date.now() + 4 * 86400000).toISOString().slice(0,10),
-        recentLenderName: null,
-        recentLenderAmountCents: null,
-        personalMoneyGoal: 'Savings',
-        startingUrge: 8,
-        createdAt: new Date().toISOString(),
-      };
-      const run = {
-        id: 'qa-' + type,
-        startedAt: Date.now(),
-        initialBalanceCents: 10000,
-        balanceCents: 10000,
-        previousBalanceCents: 10000,
-        stakeCents: 1000,
-        previousStakeCents: 1000,
-        actionCount: 0,
-        largestLossCents: 0,
-        simulatedLossesCents: 0,
-        simulatedRecoveriesCents: 0,
-        lastNetCents: 0,
-        lastPingAction: -10,
-        pings: [],
-      };
-      localStorage.setItem('spinout.active.v2', JSON.stringify({ profile, run }));
-    }, { type: gameType });
+    const p = profile(gameType);
+    const r = runFor(p);
+    await seedActive(envContext, p, r);
     const envPage = await envContext.newPage();
     const errors = [];
     envPage.on('pageerror', error => errors.push(error.message));
     await envPage.goto(`${base}/play`, { waitUntil: 'networkidle' });
     await envPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
-    const action = envPage.locator('.game-action');
-    await action.click();
+    if (gameType === 'sports') await envPage.getByRole('button', { name: 'Cedar City' }).click();
+    if (gameType === 'casino') await envPage.getByRole('button', { name: 'Black' }).click();
+    if (gameType === 'poker') await envPage.getByRole('button', { name: 'Draw' }).click();
+    await waitActionReady(envPage);
+    await envPage.locator('.game-action').click();
     await envPage.waitForFunction(() => {
+      const ping = document.querySelector('.reality-ping');
       const button = document.querySelector('.game-action');
-      return button instanceof HTMLButtonElement && !button.disabled;
-    }, null, { timeout: 5000 });
+      return Boolean(ping) || (button instanceof HTMLButtonElement && !button.disabled);
+    }, null, { timeout: 7000 });
     assert(errors.length === 0, `${gameType} environment errors: ${JSON.stringify(errors)}`);
     await envPage.screenshot({ path: `${out}/environment-${gameType}-390.png`, fullPage: true });
     await envContext.close();
   }
 
-  // Reduced motion remains playable.
+  // Reduced motion stays playable.
   const reduced = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  const reducedProfile = profile('slots');
+  await seedActive(reduced, reducedProfile, runFor(reducedProfile));
   const rp = await reduced.newPage();
-  await rp.goto(base, { waitUntil: 'networkidle' });
-  assert(await rp.getByRole('link', { name: /^Start$/i }).isVisible(), 'reduced motion home failed');
+  await rp.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await rp.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await waitActionReady(rp);
+  await rp.locator('.game-action').click();
+  await rp.waitForFunction(() => {
+    const ping = document.querySelector('.reality-ping');
+    const button = document.querySelector('.game-action');
+    return Boolean(ping) || (button instanceof HTMLButtonElement && !button.disabled);
+  }, null, { timeout: 4000 });
   await reduced.close();
+
+  // Forced colors remains understandable.
+  const contrast = await browser.newContext({ viewport: { width: 390, height: 844 }, forcedColors: 'active' });
+  const cp = await contrast.newPage();
+  await cp.goto(base, { waitUntil: 'networkidle' });
+  await cp.getByRole('link', { name: /^Start$/i }).waitFor();
+  await noHorizontalOverflow(cp, 'forced colors');
+  await contrast.close();
+
+  // Slow network still reaches the primary action.
+  const slow = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const sp = await slow.newPage();
+  await sp.route('**/*', async route => {
+    await new Promise(resolve => setTimeout(resolve, 60));
+    await route.continue();
+  });
+  await sp.goto(base, { waitUntil: 'networkidle', timeout: 30_000 });
+  await sp.getByRole('link', { name: /^Start$/i }).waitFor();
+  await slow.close();
+
+  assert(browserErrors.length === 0, `first-run browser errors: ${JSON.stringify(browserErrors)}`);
 } finally {
   await browser.close();
 }
