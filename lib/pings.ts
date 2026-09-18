@@ -41,6 +41,11 @@ export function buildPingCandidates(profile: RealityProfile, snapshot: RunSnapsh
       message: `${dollars(Math.min(loss, profile.intendedWagerCents))} could've gone toward ${profile.personalMoneyGoal}. Another one?` });
   }
 
+  if (profile.additionalMoneyGoal && profile.additionalMoneyGoal !== profile.personalMoneyGoal && loss >= Math.max(4_000, profile.intendedWagerCents * 0.4)) {
+    candidates.push({ id: id('goal-secondary', snapshot), type: 'goal-secondary', level: 3, factual: false,
+      message: `${dollars(Math.min(loss, profile.intendedWagerCents))} could've stayed available for ${profile.additionalMoneyGoal}. Keep going?` });
+  }
+
   const payday = financeFresh ? daysUntil(profile.nextIncomeDate, new Date(now)) : null;
   if (payday != null && payday > 0 && loss >= Math.max(3_000, profile.intendedWagerCents * 0.3)) {
     candidates.push({ id: id('payday', snapshot), type: 'payday', level: 3, factual: true,
