@@ -18,12 +18,12 @@ const games: Array<{
   symbols: string[];
   tone: string;
 }> = [
-  { id: 'slots', name: 'Slots', eyebrow: 'Spin', description: 'Reels, stakes and the urge to press it again.', symbols: ['/symbols/seven.svg','/symbols/cherry.svg','/symbols/gem.svg'], tone: 'slots' },
-  { id: 'sports', name: 'Sportsbook', eyebrow: 'Bet slip', description: 'Odds, picks and the pull to chase the result.', symbols: ['/symbols/bell.svg','/symbols/gem.svg','/symbols/seven.svg'], tone: 'sports' },
-  { id: 'casino', name: 'Roulette', eyebrow: 'Table', description: 'A polished table run built around live decisions.', symbols: ['/symbols/gem.svg','/symbols/seven.svg','/symbols/plum.svg'], tone: 'casino' },
-  { id: 'poker', name: 'Video Poker', eyebrow: 'Cards', description: 'Pressure, reads and the temptation to stay seated.', symbols: ['/symbols/plum.svg','/symbols/gem.svg','/symbols/bell.svg'], tone: 'poker' },
-  { id: 'lottery', name: 'Lottery', eyebrow: 'Scratch', description: 'Fast chances, near misses and one-more energy.', symbols: ['/symbols/lemon.svg','/symbols/cherry.svg','/symbols/seven.svg'], tone: 'lottery' },
-  { id: 'other', name: 'Something else', eyebrow: 'Your game', description: 'Start a Reality Run and set the game yourself.', symbols: ['/symbols/cherry.svg','/symbols/bell.svg','/symbols/lemon.svg'], tone: 'other' },
+  { id: 'slots', name: 'Slots', eyebrow: '5 reels · 5 lines', description: 'Weighted reel stops, visible paylines and a real paytable.', symbols: ['/symbols/seven.svg','/symbols/bar.svg','/symbols/cherry.svg'], tone: 'slots' },
+  { id: 'sports', name: 'Sportsbook', eyebrow: 'Moneyline', description: 'Fictional events with real odds, bet-slip math and potential return.', symbols: ['/symbols/sports-ticket.svg','/symbols/cash-coin.svg','/symbols/gem.svg'], tone: 'sports' },
+  { id: 'casino', name: 'Roulette', eyebrow: 'Single zero', description: 'A 37-pocket European wheel with red and black even-money bets.', symbols: ['/symbols/roulette.svg','/symbols/cash-coin.svg','/symbols/gem.svg'], tone: 'casino' },
+  { id: 'poker', name: 'Video Poker', eyebrow: 'Jacks or Better', description: 'Deal five, choose individual holds, draw and resolve the hand.', symbols: ['/symbols/cards.svg','/symbols/bar.svg','/symbols/gem.svg'], tone: 'poker' },
+  { id: 'lottery', name: 'Scratch', eyebrow: 'Match 3', description: 'A predetermined nine-panel ticket revealed in sequence.', symbols: ['/symbols/scratch-ticket.svg','/symbols/seven.svg','/symbols/cash-coin.svg'], tone: 'lottery' },
+  { id: 'other', name: 'Something else', eyebrow: 'Reality Run', description: 'Use the slot-style simulation when your real game is not listed.', symbols: ['/symbols/fu.svg','/symbols/sycee.svg','/symbols/cash-coin.svg'], tone: 'other' },
 ];
 
 const prompts = [
@@ -35,13 +35,13 @@ const prompts = [
 
 const motif = [
   { kind: 'word', value: 'QUIT' }, { kind: 'icon', value: '/symbols/seven.svg' },
-  { kind: 'icon', value: '/symbols/cherry.svg' }, { kind: 'word', value: 'BAR' },
-  { kind: 'icon', value: '/symbols/gem.svg' }, { kind: 'word', value: 'QUIT' },
-  { kind: 'icon', value: '/symbols/bell.svg' }, { kind: 'word', value: '★' },
-  { kind: 'word', value: 'QUIT' }, { kind: 'icon', value: '/symbols/lemon.svg' },
-  { kind: 'word', value: '7' }, { kind: 'icon', value: '/symbols/plum.svg' },
+  { kind: 'icon', value: '/symbols/cherry.svg' }, { kind: 'icon', value: '/symbols/bar.svg' },
+  { kind: 'icon', value: '/symbols/fu.svg' }, { kind: 'word', value: 'QUIT' },
+  { kind: 'icon', value: '/symbols/cash-coin.svg' }, { kind: 'word', value: '★' },
+  { kind: 'word', value: 'QUIT' }, { kind: 'icon', value: '/symbols/sycee.svg' },
+  { kind: 'icon', value: '/symbols/roulette.svg' }, { kind: 'icon', value: '/symbols/cards.svg' },
   { kind: 'word', value: 'QUIT' }, { kind: 'word', value: '◆' },
-  { kind: 'icon', value: '/symbols/cherry.svg' }, { kind: 'word', value: 'SPIN' },
+  { kind: 'icon', value: '/symbols/scratch-ticket.svg' }, { kind: 'word', value: 'SPIN' },
 ];
 
 function formatTime(seconds: number | null) {
