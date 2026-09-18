@@ -9,8 +9,8 @@ import {
   sampleOutcome,
   shouldAutoEnd,
   stakeOptionsFor,
-} from '../lib/engine.js';
-import type { RealityProfile, RunRecord } from '../lib/types.js';
+} from '../lib/engine';
+import type { RealityProfile, RunRecord } from '../lib/types';
 
 const profile: RealityProfile = {
   version: 1,

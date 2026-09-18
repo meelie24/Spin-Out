@@ -1,4 +1,4 @@
-import type { RealityMath, RealityProfile, RunRecord } from './types.js';
+import type { RealityMath, RealityProfile, RunRecord } from './types';
 
 export const MAX_RUN_MS = 900_000;
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PresenceRegistry } from '../lib/presence.js';
+import { PresenceRegistry } from '../lib/presence';
 
 test('presence counts unique live anonymous sessions', () => {
   const p = new PresenceRegistry(60_000);
@@ -26,7 +26,7 @@ test('presence rejects empty or unreasonably long ids', () => {
 });
 
 test('companion count excludes the current visitor', async () => {
-  const { companionCount } = await import('../lib/presence.js');
+  const { companionCount } = await import('../lib/presence');
   assert.equal(companionCount(1), 0);
   assert.equal(companionCount(6), 5);
   assert.equal(companionCount(0), 0);

@@ -56,8 +56,7 @@ try {
   await page.getByRole('button', { name: 'Next week' }).click();
   await page.getByRole('button', { name: /Car/ }).click();
   await page.locator('input[name="amount"]').fill('430');
-  const due = new Date(Date.now() + 4 * 86400000).toISOString().slice(0, 10);
-  await page.locator('input[name="due"]').fill(due);
+  await page.getByRole('button', { name: 'This week' }).click();
   await page.getByRole('button', { name: /Lock it in/ }).click();
   await page.getByRole('button', { name: 'Skip' }).click();
   await page.getByRole('button', { name: 'Savings' }).click();
@@ -74,8 +73,21 @@ try {
   assert(await cash.isVisible(), 'Cash Out missing');
   const cashBox = await cash.boundingBox();
   assert(cashBox && cashBox.y >= 0 && cashBox.y + cashBox.height <= 844, 'Cash Out is outside mobile viewport');
-  await page.getByRole('button', { name: /^Spin$/ }).click();
-  await page.waitForTimeout(1200);
+  let sawPing = false;
+  for (let i = 0; i < 4; i++) {
+    await page.getByRole('button', { name: /^Spin$/ }).click();
+    await page.waitForTimeout(1100);
+    const ping = page.locator('.reality-ping');
+    if (await ping.isVisible().catch(() => false)) {
+      sawPing = true;
+      const blur = await ping.evaluate(el => getComputedStyle(el).backdropFilter || getComputedStyle(el).webkitBackdropFilter || '');
+      assert(blur.includes('blur'), `Reality Ping glass blur missing: ${blur}`);
+      await page.screenshot({ path: `${out}/reality-ping-390.png`, fullPage: true });
+      await ping.click();
+    }
+  }
+  assert(sawPing, 'Reality Ping did not appear within four actions');
+  assert(await cash.isVisible(), 'Cash Out is not available after a Reality Ping');
   await cash.click();
   await page.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor();
   await page.getByRole('button', { name: '5' }).click();

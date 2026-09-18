@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildPingCandidates, selectPing } from '../lib/pings.js';
-import type { PingLearning, RealityProfile, RunSnapshot } from '../lib/types.js';
+import { buildPingCandidates, selectPing } from '../lib/pings';
+import type { PingLearning, RealityProfile, RunSnapshot } from '../lib/types';
 
 const baseProfile: RealityProfile = {
   version: 1,

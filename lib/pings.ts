@@ -1,5 +1,5 @@
-import { computeReality, daysUntil, formatMoney } from './engine.js';
-import type { PingCandidate, PingLearning, RealityProfile, RunSnapshot } from './types.js';
+import { computeReality, daysUntil, formatMoney } from './engine';
+import type { PingCandidate, PingLearning, RealityProfile, RunSnapshot } from './types';
 
 const obligationNames: Record<string, string> = {
   rent: 'rent', car: 'car payment', groceries: 'groceries', 'credit-card': 'credit card',
