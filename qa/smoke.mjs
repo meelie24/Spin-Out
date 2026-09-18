@@ -232,7 +232,7 @@ try {
   });
   await page.goto(`${base}/plus`, { waitUntil: 'networkidle' });
   await page.getByRole('heading', { name: /Your full history/i }).waitFor();
-  assert(await page.getByText(/Sign in to use Plus/i).isVisible(), 'localStorage unlocked Plus');
+  assert(await page.getByText(/Sign in to claim your one-run Plus trial or use paid Plus across devices/i).isVisible(), 'localStorage unlocked Plus');
   assert(await page.getByRole('heading', { name: /Your history\./i }).count() === 0, 'premium dashboard rendered without server entitlement');
   await context.close();
 
