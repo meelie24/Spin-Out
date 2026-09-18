@@ -190,7 +190,7 @@ export function buildPingCandidates(profile: RealityProfile, snapshot: RunSnapsh
         `${snapshot.consecutiveLosses} losses. Are you trying to get it back now?`,
         'Were you actually done, or did the losses change your mind?',
       ], snapshot.actionCount),
-      explanation: 'A losing streak does not make the next result more likely to win.',
+      explanation: "Those losses didn't make the next result more likely to win.",
     });
   }
 
@@ -214,7 +214,7 @@ export function buildPingCandidates(profile: RealityProfile, snapshot: RunSnapsh
       factual: true,
       message: "That looked close. It wasn't.",
       detail: 'The result was still a loss.',
-      explanation: 'A near miss can feel different from an ordinary loss even though it did not move the odds of the next result.',
+      explanation: "It looked closer. The next result wasn't any more likely to win.",
     });
   }
 
@@ -226,7 +226,7 @@ export function buildPingCandidates(profile: RealityProfile, snapshot: RunSnapsh
       factual: true,
       message: 'Would this win make you stay longer?',
       detail: 'How much would you give back trying to hit it again?',
-      explanation: 'A win after losses can make the chase feel worth continuing even when the earlier losses are still real.',
+      explanation: "That win didn't erase the losses before it. Did it make staying feel easier to justify?",
     });
   } else if ((snapshot.consecutiveWins ?? 0) >= 2) {
     candidates.push({
@@ -440,7 +440,7 @@ export function buildPingCandidates(profile: RealityProfile, snapshot: RunSnapsh
       type: 'rush',
       level: 2,
       factual: true,
-      message: 'Is the pace the point now?',
+      message: 'Are you playing for the rush now?',
     });
   }
 
