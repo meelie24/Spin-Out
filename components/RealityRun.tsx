@@ -213,7 +213,7 @@ export function RealityRun({
     media?.addEventListener?.('change', sync);
     queueMicrotask(() => setMuted(spinAudio.isMuted()));
     spinAudio.startAmbient();
-    spinAudio.setAmbientMode(ambientMode);
+    spinAudio.setAmbientMode(runRef.current.directorState?.ambientMode ?? 'normal');
     track('session_start', { game: profile.gamblingType, trigger: profile.triggerType, intended: profile.intendedWagerCents });
     return () => {
       media?.removeEventListener?.('change', sync);
