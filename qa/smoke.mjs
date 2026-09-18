@@ -227,7 +227,7 @@ try {
   const cash = page.getByRole('button', { name: "I'm done" });
   await cash.waitFor();
   const cashBox = await cash.boundingBox();
-  assert(cashBox && cashBox.y >= 0 && cashBox.y + cashBox.height <= 844, 'Cash Out outside mobile viewport');
+  assert(cashBox && cashBox.y >= 0 && cashBox.y + cashBox.height <= 844, 'Exit control outside mobile viewport');
   await page.getByRole('button', { name: 'Mute sound' }).click();
   await page.getByRole('button', { name: 'Unmute sound' }).waitFor();
   await page.reload({ waitUntil: 'domcontentloaded' });
