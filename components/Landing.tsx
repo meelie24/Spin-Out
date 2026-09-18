@@ -11,6 +11,8 @@ import { JourneyCounter } from './JourneyCounter';
 import { AccessStatus } from './AccessStatus';
 import { RealityContextPanel } from './RealityContextPanel';
 import { buildRealityInsights } from '@/lib/realityEngine/insights';
+import { buildPaydayShield, type PaydayShieldCard as PaydayShieldData } from '@/lib/realityEngine/payday';
+import { PaydayShieldCard } from './PaydayShieldCard';
 import type { RealityProfile } from '@/lib/types';
 
 const games: Array<{
@@ -88,6 +90,7 @@ export function Landing() {
   const [runs, setRuns] = useState<ReturnType<typeof loadData>['runs']>([]);
   const [profile, setProfile] = useState<RealityProfile | null>(null);
   const [contextOpen, setContextOpen] = useState(false);
+  const [paydayShield, setPaydayShield] = useState<PaydayShieldData | null>(null);
   const [hiddenPrompts, setHiddenPrompts] = useState<string[]>([]);
   const [dismissingPrompts, setDismissingPrompts] = useState<string[]>([]);
 
@@ -98,6 +101,7 @@ export function Landing() {
       const data = loadData();
       setRuns(data.runs);
       setProfile(data.profile);
+      setPaydayShield(data.profile ? buildPaydayShield(data.profile, new Date()) : null);
       setReady(true);
     });
     return () => { cancelled = true; };
@@ -239,6 +243,14 @@ export function Landing() {
           <PromptCard prompt={prompts[0]} {...promptProps('money')} className="prompt-hero" />
         </section>
 
+        {paydayShield ? <div className="home-payday-wrap">
+          <PaydayShieldCard
+            card={paydayShield}
+            onReview={() => setContextOpen(true)}
+            onDismiss={() => setPaydayShield(null)}
+          />
+        </div> : null}
+
         <section className="games-stage" id="games">
           <div className="games-heading">
             <div>
@@ -301,7 +313,10 @@ export function Landing() {
       {contextOpen ? <RealityContextPanel
         profile={profile}
         onClose={() => setContextOpen(false)}
-        onSaved={next => setProfile(next)}
+        onSaved={next => {
+          setProfile(next);
+          setPaydayShield(buildPaydayShield(next, new Date()));
+        }}
       /> : null}
     </main>
   );
