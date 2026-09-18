@@ -1,4 +1,4 @@
-import type { RealityMath, RealityProfile, RunRecord } from './types';
+import type { RealityMath, RealityProfile, RealWorldOutcome, RunRecord } from './types';
 
 export const MAX_RUN_MS = 900_000;
 
@@ -63,4 +63,24 @@ export function daysUntil(dateIso: string | null, now = new Date()) {
   const target = new Date(`${dateIso}T12:00:00`);
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
   return Math.max(0, Math.ceil((target.getTime() - today.getTime()) / 86_400_000));
+}
+
+
+export function classifyRealWorldOutcome(intendedWagerCents: number, actualWagerCents: number): RealWorldOutcome {
+  if (actualWagerCents <= 0) return 'did-not-gamble';
+  if (actualWagerCents < intendedWagerCents) return 'gambled-less';
+  if (actualWagerCents === intendedWagerCents) return 'gambled-planned';
+  return 'gambled-more';
+}
+
+export function isFinancialContextStale(profile: RealityProfile, now = new Date()) {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+  const updated = new Date(profile.financialContextUpdatedAt || profile.createdAt);
+  if (!Number.isFinite(updated.getTime())) return true;
+  if (now.getTime() - updated.getTime() >= 24 * 60 * 60 * 1000) return true;
+  if (profile.nextIncomeDate) {
+    const income = new Date(profile.nextIncomeDate + 'T12:00:00');
+    if (income.getTime() <= today.getTime()) return true;
+  }
+  return false;
 }
