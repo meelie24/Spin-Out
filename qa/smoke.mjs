@@ -140,6 +140,22 @@ try {
     await context.close();
   }
 
+  // Homepage hub behavior: intervention cards dismiss and game tiles preselect the run type.
+  const hubContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const hubPage = await hubContext.newPage();
+  await hubPage.goto(base, { waitUntil: 'networkidle' });
+  const moneyPrompt = hubPage.getByRole('button', { name: /That money already has a job/i });
+  await moneyPrompt.waitFor();
+  await moneyPrompt.click();
+  await hubPage.waitForTimeout(300);
+  assert(await moneyPrompt.count() === 0, 'homepage intervention did not dismiss');
+  await hubPage.locator('a[href="/play?game=slots"]').click();
+  await hubPage.getByRole('heading', { name: /How much were you about to put in/i }).waitFor();
+  await hubPage.getByRole('button', { name: '$100' }).click();
+  await hubPage.getByRole('heading', { name: /What’s pulling you in/i }).waitFor();
+  assert(await hubPage.getByRole('button', { name: /Slots/i }).count() === 0, 'homepage game preselection did not skip the redundant game question');
+  await hubContext.close();
+
   // Real auth UI: keyboard focus, Escape, focus return. No simulated sign-in state.
   const authContext = await browser.newContext({ viewport: { width: 1024, height: 768 } });
   const authPage = await authContext.newPage();
