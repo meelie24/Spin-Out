@@ -68,6 +68,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   );
   const [pendingBalanceEnd, setPendingBalanceEnd] = useState(false);
   const [blockedByOtherTab, setBlockedByOtherTab] = useState(false);
+  const [accessMode, setAccessMode] = useState<'checking'|'trial'|'paid'|'core'>('checking');
   const [gameDecision, setGameDecision] = useState<string>(() => profile.gamblingType === 'sports' ? 'North Harbor' : profile.gamblingType === 'casino' ? 'Red' : profile.gamblingType === 'poker' ? 'Hold' : '');
   const ended = useRef(false);
   const lease = useRef<ReturnType<typeof createRunLease> | null>(null);
@@ -77,6 +78,24 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   const intensity = Math.min(1, reality.simulatedLossCents / Math.max(profile.intendedWagerCents, 1));
 
   useEffect(() => { runRef.current = run; saveActiveRun({ profile, run }); }, [profile, run]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch('/api/access/claim', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ runId: runRef.current.id, game: profile.gamblingType }),
+    })
+      .then(async response => {
+        const payload = await response.json().catch(() => ({})) as { access?: 'trial'|'paid'|'core' };
+        if (!cancelled) {
+          setAccessMode(payload.access === 'trial' || payload.access === 'paid' ? payload.access : 'core');
+          window.dispatchEvent(new Event('spinout:access-changed'));
+        }
+      })
+      .catch(() => { if (!cancelled) setAccessMode('core'); });
+    return () => { cancelled = true; };
+  }, [profile.gamblingType]);
   useEffect(() => {
     lease.current = createRunLease(runRef.current.id);
     const claim = lease.current.claim();
@@ -294,6 +313,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
           <div><span>Balance</span><strong>{formatMoney(run.balanceCents)}</strong></div>
           <div><span>Stake</span><strong>{formatMoney(run.stakeCents)}</strong></div>
           <div><span>Plays</span><strong>{run.actionCount}</strong></div>
+          <div className="run-access"><span>Access</span><strong>{accessMode === 'paid' ? 'Plus' : accessMode === 'trial' ? 'Plus trial' : accessMode === 'checking' ? '…' : 'Core'}</strong></div>
           <button type="button" className="sound-button" aria-label={muted ? 'Unmute sound' : 'Mute sound'} onClick={() => { const next = !muted; setMuted(next); spinAudio.setMuted(next); if (!next) spinAudio.startAmbient(); }}>{muted ? 'Sound off' : 'Sound on'}</button>
         </div>
 
