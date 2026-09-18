@@ -6,6 +6,7 @@ import { classifyRealWorldOutcome, computeMoneyKept, formatMoney, recentExitAver
 import { currentMonthMoneyKept, loadData, totalMoneyKept, track, updateData } from '@/lib/storage';
 import type { RealityProfile, RunRecord } from '@/lib/types';
 import type { RunEndData } from './RealityRun';
+import { syncProfileIfSignedIn, syncRunIfSignedIn } from '@/lib/sync';
 
 function formatTime(seconds: number | null) {
   if (seconds == null) return 'Run ended';
@@ -59,11 +60,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
     const next = updateData(data => ({ ...data, profile, runs: [...data.runs, record].slice(-80) }));
     setSavedRuns(next.runs);
     track('run_outcome_recorded', { outcome: realWorldOutcome, actual, kept: math.keptCents, urgeBefore: profile.startingUrge, urgeAfter: endingUrge });
-    void fetch('/api/sync/run', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ profile, record }),
-    }).catch(() => {});
+    void syncRunIfSignedIn(profile, record);
     setStage('summary');
   };
 
@@ -120,11 +117,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
               {['Emergency fund','Family','Debt','Savings'].map(label => <button key={label} type="button" onClick={() => {
                 setExtraGoal(label);
                 const next = updateData(data => ({ ...data, profile: data.profile ? { ...data.profile, additionalMoneyGoal: label } : data.profile }));
-                void fetch('/api/sync/profile', {
-                  method: 'POST',
-                  headers: { 'content-type': 'application/json' },
-                  body: JSON.stringify({ profile: next.profile }),
-                }).catch(() => {});
+                void syncProfileIfSignedIn(next.profile);
               }}>{label}</button>)}
             </div>
           </div> : null}
