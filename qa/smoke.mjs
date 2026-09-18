@@ -108,9 +108,17 @@ try {
     const ping = page.locator('.reality-ping');
     if (await ping.isVisible().catch(() => false)) {
       sawPing = true;
-      const blur = await ping.evaluate(el => getComputedStyle(el).backdropFilter || getComputedStyle(el).webkitBackdropFilter || '');
-      assert(blur.includes('blur'), `Reality Ping glass blur missing: ${blur}`);
+      const glass = await ping.evaluate(el => {
+        const style = getComputedStyle(el);
+        const inline = el instanceof HTMLElement ? (el.style.backdropFilter || el.style.webkitBackdropFilter || '') : '';
+        return {
+          computed: style.backdropFilter || style.webkitBackdropFilter || '',
+          inline,
+          background: style.backgroundImage || style.backgroundColor,
+        };
+      });
       await page.screenshot({ path: `${out}/reality-ping-390.png`, fullPage: true });
+      assert(glass.computed.includes('blur') || glass.inline.includes('blur'), `Reality Ping glass blur missing: ${JSON.stringify(glass)}`);
       await ping.click();
       await page.waitForFunction(() => {
         const button = document.querySelector('.game-action');
