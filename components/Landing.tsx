@@ -168,7 +168,7 @@ export function Landing() {
             {exitTrend ? <div className="sidebar-exit-trend">
               <span>Your last 3</span>
               <div>{exitTrend.map((seconds, index) => <b key={index}>{formatTime(seconds)}</b>)}</div>
-              <em>You're leaving sooner.</em>
+              <em>{"You're leaving sooner."}</em>
             </div> : null}
           </> : <>
             <strong>Run it here first.</strong>
