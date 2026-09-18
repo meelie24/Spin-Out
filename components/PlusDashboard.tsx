@@ -22,7 +22,7 @@ function labelTrigger(trigger: RunRecord['triggerType']) {
   return trigger.replaceAll('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-export function PlusDashboard({ authenticated, premium, serverRuns, manageUrl }: { authenticated: boolean; premium: boolean; serverRuns: RunRecord[]; manageUrl: string | null }) {
+export function PlusDashboard({ authenticated, premium, accessSource, trialEligible, trialEndsAt, serverRuns, manageUrl }: { authenticated: boolean; premium: boolean; accessSource: 'paid'|'trial'|'core'|'signed-out'; trialEligible: boolean; trialEndsAt: string | null; serverRuns: RunRecord[]; manageUrl: string | null }) {
   const [data, setData] = useState<ReturnType<typeof loadData> | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [clockMs, setClockMs] = useState(0);
@@ -82,7 +82,7 @@ export function PlusDashboard({ authenticated, premium, serverRuns, manageUrl }:
       <section className="plus-gate">
         <p className="kicker">Spin Out+</p>
         <h1>Your full history.</h1>
-        <p>{authenticated ? 'Core Reality Runs stay free. Plus keeps your full history and trend views.' : 'Sign in to use Plus across devices and keep paid access tied to your account.'}</p>
+        <p>{authenticated ? trialEligible ? 'Your first Reality Run includes the full Plus feature set. Start any game to claim it.' : 'Core Reality Runs stay free. Subscribe to restore cross-device history, trends and deeper personalization.' : 'Sign in to claim your one-run Plus trial or use paid Plus across devices.'}</p>
         {authenticated ? <button className="primary-button" type="button" onClick={() => setUpgradeOpen(true)}>See Plus</button> : <Link className="primary-button" href="/">Sign in</Link>}
         <Link className="bare-link" href="/">Back home</Link>
       </section>
@@ -93,7 +93,7 @@ export function PlusDashboard({ authenticated, premium, serverRuns, manageUrl }:
   const maxKept = Math.max(1, ...runs.slice(-12).map(r => Math.max(0,r.moneyKeptCents)));
   return <main className="plus-page">
     <header className="plus-head">
-      <div><p className="kicker">Spin Out+</p><h1>Your history.</h1></div>
+      <div><p className="kicker">Spin Out+{accessSource === 'trial' ? ' · trial run' : ''}</p><h1>Your history.</h1>{accessSource === 'trial' && trialEndsAt ? <p className="metric-note">Plus is active for this first Reality Run until the run finishes or its 15-minute window ends.</p> : null}</div>
       <Link className="soft-button" href="/play">Start a Reality Run</Link>
     </header>
 
