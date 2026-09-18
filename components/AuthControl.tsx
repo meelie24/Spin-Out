@@ -22,6 +22,11 @@ export function AuthControl() {
     return () => data.subscription.unsubscribe();
   }, [configured]);
 
+  const closeDialog = () => {
+    trigger.current?.focus();
+    setOpen(false);
+  };
+
   useEffect(() => {
     if (!open) return;
     const node = dialog.current;
@@ -45,11 +50,6 @@ export function AuthControl() {
   }, [open]);
 
   if (!configured) return null;
-
-  const closeDialog = () => {
-    trigger.current?.focus();
-    setOpen(false);
-  };
 
   const signIn = async () => {
     const supabase = createBrowserSupabase();
