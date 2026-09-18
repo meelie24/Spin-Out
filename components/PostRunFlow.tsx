@@ -7,6 +7,7 @@ import { currentMonthMoneyKept, loadData, totalMoneyKept, track, updateData } fr
 import type { RealityProfile, RunRecord } from '@/lib/types';
 import type { RunEndData } from './RealityRun';
 import { syncProfileIfSignedIn, syncRunIfSignedIn } from '@/lib/sync';
+import { buildRealityReceipt } from '@/lib/realityEngine/receipt';
 
 function formatTime(seconds: number | null) {
   if (seconds == null) return '—';
@@ -28,6 +29,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
   const saved = useRef(false);
 
   const durationSeconds = Math.max(0, Math.round((end.endedAt - end.run.startedAt) / 1000));
+  const receipt = useMemo(() => buildRealityReceipt(profile, end.run, end.endedAt), [profile, end.run, end.endedAt]);
   const lastPing = end.run.pings[end.run.pings.length - 1];
   const exitedAfterPing = end.reason === 'voluntary' && Boolean(lastPing && end.endedAt - lastPing.shownAt <= 60_000);
   const previousComparable = [...initialRuns].reverse().find(run =>
@@ -138,14 +140,16 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
     <main className="post-shell">
       <section className="post-card">
         {stage === 'exit-receipt' ? <>
-          <p className="kicker">{end.reason === 'voluntary' ? 'You left.' : 'Reality Run ended'}</p>
-          <div className="exit-receipt">
-            <div><strong>{formatTime(durationSeconds)}</strong><span>session</span></div>
-            <div><strong>{end.run.actionCount}</strong><span>{end.run.actionCount === 1 ? 'round' : 'rounds'}</span></div>
-            <div><strong>{end.run.pings.length}</strong><span>Reality {end.run.pings.length === 1 ? 'Ping' : 'Pings'}</span></div>
+          <p className="kicker">Reality Receipt</p>
+          <div className="exit-receipt receipt-four">
+            <div><strong>{formatTime(receipt.durationSeconds)}</strong><span>session</span></div>
+            <div><strong>{receipt.rounds}</strong><span>{receipt.rounds === 1 ? 'round' : 'rounds'}</span></div>
+            <div><strong>{formatMoney(receipt.startedCents)}</strong><span>started</span></div>
+            <div><strong>{formatMoney(receipt.endedCents)}</strong><span>ended</span></div>
           </div>
 
-          {exitedAfterPing ? <p className="exit-observation">You left after the last Reality Ping.</p> : null}
+          {receipt.behavior ? <p className="exit-observation">{receipt.behavior}</p> : null}
+          {receipt.translation ? <p className="exit-translation">{receipt.translation}</p> : null}
 
           {end.reason === 'voluntary' && previousComparable?.timeToExitSeconds != null ? (
             <div className="exit-compare">
@@ -157,13 +161,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
             </div>
           ) : null}
 
-          {limitExceededByRounds > 0 ? (
-            <p className="exit-observation">You went {limitExceededByRounds} round{limitExceededByRounds === 1 ? '' : 's'} past the limit you chose.</p>
-          ) : null}
-          {limitExceededSeconds > 0 ? (
-            <p className="exit-observation">You stayed {formatTime(limitExceededSeconds)} past the time you chose.</p>
-          ) : null}
-
+          {end.reason === 'voluntary' ? <p className="receipt-left">You left.</p> : null}
           <button className="primary-button" type="button" onClick={() => setStage('urge')}>Continue</button>
         </> : null}
 
