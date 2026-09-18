@@ -15,10 +15,10 @@ function formatTime(seconds: number | null) {
 export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile; end: RunEndData; onDone: () => void }) {
   const [stage, setStage] = useState<'urge'|'urge-shift'|'outcome'|'amount'|'summary'>('urge');
   const [endingUrge, setEndingUrge] = useState<number | null>(null);
-  const [outcome, setOutcome] = useState<'no'|'yes'|'less'|null>(null);
   const [actualWagerCents, setActualWagerCents] = useState(0);
   const [savedRuns, setSavedRuns] = useState<RunRecord[]>(() => loadData().runs);
   const [plusOpen, setPlusOpen] = useState(false);
+  const [extraGoal, setExtraGoal] = useState<string | null>(profile.additionalMoneyGoal ?? null);
   const saved = useRef(false);
 
   const finalize = (actual: number) => {
@@ -87,9 +87,9 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
         {stage === 'outcome' ? <>
           <p className="kicker">One more thing</p><h1>Did you end up gambling?</h1>
           <div className="outcome-choices">
-            <button type="button" onClick={() => { setOutcome('no'); finalize(0); }}>No</button>
-            <button type="button" onClick={() => { setOutcome('less'); setStage('amount'); }}>Less than I planned</button>
-            <button type="button" onClick={() => { setOutcome('yes'); setStage('amount'); }}>Yes</button>
+            <button type="button" onClick={() => finalize(0)}>No</button>
+            <button type="button" onClick={() => setStage('amount')}>Less than I planned</button>
+            <button type="button" onClick={() => setStage('amount')}>Yes</button>
           </div>
         </> : null}
 
@@ -113,6 +113,21 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
 
           {money.keptCents > 0 && profile.obligationAmountCents && profile.obligationType !== 'none' ? <div className="protected-card"><span>{profile.obligationType.replace('-', ' ').toUpperCase()}</span><strong>{formatMoney(Math.min(money.keptCents, profile.obligationAmountCents))} / {formatMoney(profile.obligationAmountCents)}</strong><em>PROTECTED</em></div> : null}
           {recentExit != null ? <div className="exit-metric"><span>Recent exit average</span><strong>{formatTime(recentExit)}</strong></div> : null}
+          {savedRuns.length >= 3 && !extraGoal ? <div className="progressive-card">
+            <span>One more thing for next time</span>
+            <strong>Anything else you want this money available for?</strong>
+            <div className="progressive-choices">
+              {['Emergency fund','Family','Debt','Savings'].map(label => <button key={label} type="button" onClick={() => {
+                setExtraGoal(label);
+                const next = updateData(data => ({ ...data, profile: data.profile ? { ...data.profile, additionalMoneyGoal: label } : data.profile }));
+                void fetch('/api/sync/profile', {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  body: JSON.stringify({ profile: next.profile }),
+                }).catch(() => {});
+              }}>{label}</button>)}
+            </div>
+          </div> : null}
           <div className="summary-actions"><button className="primary-button" type="button" onClick={onDone}>Done</button><button className="bare-link" type="button" onClick={() => setPlusOpen(true)}>Spin Out+</button></div>{plusOpen ? <PlusPanel onClose={() => setPlusOpen(false)} /> : null}
         </> : null}
       </section>
