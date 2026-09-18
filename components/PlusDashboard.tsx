@@ -22,26 +22,30 @@ function labelTrigger(trigger: RunRecord['triggerType']) {
   return trigger.replaceAll('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-export function PlusDashboard({ authenticated, premium, serverRuns }: { authenticated: boolean; premium: boolean; serverRuns: RunRecord[] }) {
+export function PlusDashboard({ authenticated, premium, serverRuns, nowMs }: { authenticated: boolean; premium: boolean; serverRuns: RunRecord[]; nowMs: number }) {
   const [data, setData] = useState<ReturnType<typeof loadData> | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => {
-    const current = loadData();
-    const merged = new Map<string, RunRecord>();
-    for (const run of serverRuns) merged.set(run.id, run);
-    for (const run of current.runs) merged.set(run.id, run);
-    setData({ ...current, runs: [...merged.values()].sort((a,b) => a.endedAt - b.endedAt) });
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      const current = loadData();
+      const merged = new Map<string, RunRecord>();
+      for (const run of serverRuns) merged.set(run.id, run);
+      for (const run of current.runs) merged.set(run.id, run);
+      setData({ ...current, runs: [...merged.values()].sort((a,b) => a.endedAt - b.endedAt) });
+    });
+    return () => { cancelled = true; };
   }, [serverRuns]);
 
-  const runs = data?.runs ?? [];
+  const runs = useMemo(() => data?.runs ?? [], [data?.runs]);
 
   const metrics = useMemo(() => {
     const voluntary = runs.filter(r => r.timeToExitSeconds != null).map(r => r.timeToExitSeconds as number);
     const first5 = voluntary.slice(0, 5);
     const recent5 = voluntary.slice(-5);
-    const now = Date.now();
-    const week = runs.filter(r => now - r.endedAt <= 7 * 24 * 60 * 60 * 1000);
+    const week = runs.filter(r => nowMs - r.endedAt <= 7 * 24 * 60 * 60 * 1000);
     const urgeDelta = week.length ? average(week.map(r => r.endingUrge - r.startingUrge)) : null;
     const triggerCounts = new Map<string, number>();
     for (const run of runs) triggerCounts.set(run.triggerType, (triggerCounts.get(run.triggerType) ?? 0) + 1);
@@ -67,7 +71,7 @@ export function PlusDashboard({ authenticated, premium, serverRuns }: { authenti
       triggers,
       pingStats:[...pingStats.entries()].sort((a,b)=>b[1].shown-a[1].shown).slice(0,4),
     };
-  }, [runs]);
+  }, [runs, nowMs]);
 
   if (!data) return <main className="plus-page"><span className="loading-dot"/>Loading</main>;
 
