@@ -156,7 +156,7 @@ try {
   const hubContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const hubPage = await hubContext.newPage();
   await hubPage.goto(base, { waitUntil: 'domcontentloaded' });
-  const moneyPrompt = hubPage.getByRole('button', { name: /That money already has a job/i });
+  const moneyPrompt = hubPage.getByRole('button', { name: /What usually happens after “one more”/i });
   await moneyPrompt.waitFor();
   await moneyPrompt.click();
   await hubPage.waitForTimeout(300);
