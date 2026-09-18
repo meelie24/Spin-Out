@@ -241,7 +241,7 @@ try {
   const unknownContext = await browser.newContext({ viewport: { width: 375, height: 667 } });
   const unknown = await unknownContext.newPage();
   await unknown.goto(`${base}/play`, { waitUntil: 'networkidle' });
-  await unknown.getByRole('button', { name: '$20' }).click();
+  await unknown.getByRole('button', { name: '$20', exact: true }).click();
   await unknown.getByRole('button', { name: /Slots/ }).click();
   await unknown.getByRole('button', { name: /Bored/ }).click();
   await unknown.getByRole('button', { name: 'Not sure' }).click();
@@ -261,7 +261,7 @@ try {
   }, { p: profile('slots', { nextIncomeDate: isoFromNow(-1), obligationDueDate: isoFromNow(-1), financialContextUpdatedAt: new Date(Date.now() - 3 * 86_400_000).toISOString() }) });
   const stale = await staleContext.newPage();
   await stale.goto(`${base}/play`, { waitUntil: 'networkidle' });
-  await stale.getByRole('button', { name: '$50' }).click();
+  await stale.getByRole('button', { name: '$50', exact: true }).click();
   await stale.getByRole('button', { name: /Win it back/ }).click();
   await stale.getByRole('heading', { name: /How much have you actually got/i }).waitFor();
   await stale.screenshot({ path: `${out}/stale-returning-390.png`, fullPage: true });
