@@ -8,6 +8,7 @@ import { loadData, totalMoneyKept } from '@/lib/storage';
 import type { GamblingType } from '@/lib/types';
 import { AuthControl } from './AuthControl';
 import { JourneyCounter } from './JourneyCounter';
+import { AccessStatus } from './AccessStatus';
 
 const games: Array<{
   id: GamblingType;
@@ -157,6 +158,7 @@ export function Landing() {
 
         <div className="sidebar-bottom">
           <JourneyCounter />
+          <AccessStatus />
           <AuthControl />
         </div>
       </aside>
