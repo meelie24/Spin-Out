@@ -214,7 +214,7 @@ export function RealityRun({
     queueMicrotask(() => setMuted(spinAudio.isMuted()));
     spinAudio.startAmbient();
     spinAudio.setAmbientMode(runRef.current.directorState?.ambientMode ?? 'normal');
-    track('session_start', { game: profile.gamblingType, trigger: profile.triggerType, intended: profile.intendedWagerCents });
+    track('session_start', { game: profile.gamblingType, trigger: profile.triggerType });
     return () => {
       media?.removeEventListener?.('change', sync);
       spinAudio.stopAmbient();
@@ -250,8 +250,6 @@ export function RealityRun({
     track(reason === 'voluntary' ? 'session_voluntary_exit' : reason === 'timeout' ? 'session_timeout' : 'credits_exhausted', {
       actions: current.actionCount,
       timeToExitSeconds,
-      balance: current.balanceCents,
-      largestLoss: current.largestLossCents,
       pings: current.pings.length,
     });
     onEnd({ run: current, reason, endedAt, timeToExitSeconds });
@@ -377,9 +375,8 @@ export function RealityRun({
     const recentPing = lastDismissedPing.current;
     track('run_action', {
       action: next.actionCount,
-      net: outcome.netCents,
-      balance: next.balanceCents,
-      stake: next.stakeCents,
+      outcome: outcome.band,
+      nearMiss: outcome.nearMiss === true,
       game: profile.gamblingType,
       afterPing: recentPing?.type ?? null,
       msAfterPing: recentPing ? Math.max(0, Date.now() - recentPing.dismissedAt) : null,
@@ -503,7 +500,7 @@ export function RealityRun({
         runRef.current = next;
         game.current?.setBalance(balanceCents);
         game.current?.setPokerHand(state.hand, state.held);
-        track('poker_deal', { stake: state.wagerCents, balance: balanceCents });
+        track('poker_deal', { action: run.actionCount + 1 });
         window.setTimeout(() => {
           actionLock.current = false;
           setAnimating(false);
@@ -563,9 +560,7 @@ export function RealityRun({
     spinAudio.click();
     const recentPing = lastDismissedPing.current;
     track('stake_changed', {
-      from: current.stakeCents,
-      to: nextStake,
-      balance: current.balanceCents,
+      direction: nextStake > current.stakeCents ? 'up' : 'down',
       afterPing: recentPing?.type ?? null,
     });
 
@@ -671,7 +666,7 @@ export function RealityRun({
       seed,
     });
     setLongRun(result);
-    track('long_run_opened', { game: profile.gamblingType, stake: runRef.current.stakeCents });
+    track('long_run_opened', { game: profile.gamblingType });
   };
 
   const gameLabel = profile.gamblingType === 'slots' ? 'Slots'
