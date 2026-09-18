@@ -3,16 +3,17 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RealitySetup } from './RealitySetup';
-import { FakeDeposit } from './FakeDeposit';
+import { RunIntro } from './RunIntro';
 import { RealityRun, type RunEndData } from './RealityRun';
 import { PostRunFlow } from './PostRunFlow';
 import { clearActiveRun, loadActiveRun, loadData, updateData } from '@/lib/storage';
+import { syncProfileIfSignedIn } from '@/lib/sync';
 import { shouldAutoEnd } from '@/lib/engine';
 import type { ActiveRun, GamblingType, RealityProfile, SessionLimit } from '@/lib/types';
 
 interface ActiveEnvelope { profile: RealityProfile; run: ActiveRun }
 
-type Stage = 'loading' | 'setup' | 'deposit' | 'run' | 'post';
+type Stage = 'loading' | 'setup' | 'intro' | 'run' | 'post';
 
 export function PlayExperience({ initialGame = null }: { initialGame?: GamblingType | null }) {
   const router = useRouter();
@@ -28,11 +29,17 @@ export function PlayExperience({ initialGame = null }: { initialGame?: GamblingT
       if (cancelled) return;
       const data = loadData();
       const active = loadActiveRun<ActiveEnvelope>();
+
       if (active?.profile && active?.run) {
         setProfile(active.profile);
         if (shouldAutoEnd(active.run.startedAt, Date.now())) {
           clearActiveRun();
-          setEnd({ run: active.run, reason: 'timeout', endedAt: active.run.startedAt + 900_000, timeToExitSeconds: null });
+          setEnd({
+            run: active.run,
+            reason: 'timeout',
+            endedAt: active.run.startedAt + 900_000,
+            timeToExitSeconds: null,
+          });
           setStage('post');
         } else {
           setRestored(active.run);
@@ -40,16 +47,66 @@ export function PlayExperience({ initialGame = null }: { initialGame?: GamblingT
         }
         return;
       }
+
       setProfile(data.profile);
       setStage('setup');
     });
+
     return () => { cancelled = true; };
   }, []);
 
-  if (stage === 'loading') return <main className="loading-page"><span className="loading-dot"/>Loading</main>;
-  if (stage === 'setup') return <RealitySetup existing={profile} initialGame={initialGame} onComplete={next => { setProfile(next); updateData(data => ({ ...data, profile: next })); setStage('deposit'); }} />;
-  if (stage === 'deposit' && profile) return <FakeDeposit profile={profile} onComplete={limit => { setSessionLimit(limit); setStage('run'); }} />;
-  if (stage === 'run' && profile) return <RealityRun profile={profile} restoredRun={restored} sessionLimit={sessionLimit} onEnd={data => { setEnd(data); setRestored(null); setStage('post'); }} />;
-  if (stage === 'post' && profile && end) return <PostRunFlow profile={profile} end={end} onDone={() => router.push('/')} />;
-  return <main className="plain-page"><h1>Couldn’t start the run.</h1><button className="primary-button" type="button" onClick={() => { clearActiveRun(); setStage('setup'); }}>Start over</button></main>;
+  const saveProfile = (next: RealityProfile) => {
+    setProfile(next);
+    updateData(data => ({ ...data, profile: next }));
+    void syncProfileIfSignedIn(next);
+  };
+
+  if (stage === 'loading') {
+    return <main className="loading-page"><span className="loading-dot" />Loading</main>;
+  }
+
+  if (stage === 'setup') {
+    return (
+      <RealitySetup
+        existing={profile}
+        initialGame={initialGame}
+        onComplete={(next, limit) => {
+          saveProfile(next);
+          setSessionLimit(limit);
+          setRestored(null);
+          setStage('intro');
+        }}
+      />
+    );
+  }
+
+  if (stage === 'intro' && profile) {
+    return <RunIntro profile={profile} onStart={() => setStage('run')} />;
+  }
+
+  if (stage === 'run' && profile) {
+    return (
+      <RealityRun
+        profile={profile}
+        restoredRun={restored}
+        sessionLimit={sessionLimit}
+        onEnd={data => {
+          setEnd(data);
+          setRestored(null);
+          setStage('post');
+        }}
+      />
+    );
+  }
+
+  if (stage === 'post' && profile && end) {
+    return <PostRunFlow profile={profile} end={end} onDone={() => router.push('/')} />;
+  }
+
+  return (
+    <main className="plain-page">
+      <h1>Couldn’t start the run.</h1>
+      <button className="primary-button" type="button" onClick={() => { clearActiveRun(); setStage('setup'); }}>Start over</button>
+    </main>
+  );
 }

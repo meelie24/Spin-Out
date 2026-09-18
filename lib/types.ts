@@ -5,6 +5,7 @@ export type OutcomeBand = 'loss' | 'partial-loss' | 'push' | 'win' | 'big-win';
 export type ExitReason = 'voluntary' | 'timeout' | 'balance';
 export type DifficultTime = 'payday' | 'friday-night' | 'late-night' | 'after-drinking' | 'after-argument' | 'bored' | 'stressed' | 'alone' | 'custom';
 export type PaydayPlanAction = 'open-spinout' | 'move-bill-money' | 'move-savings' | 'message-someone' | 'use-gambling-block' | 'custom';
+export type OnboardingQuestionKey = 'income-date' | 'available-money' | 'obligation-amount' | 'obligation-date' | 'quit-reason' | 'money-goal' | 'difficult-times' | 'lender-name' | 'lender-helped' | 'lender-amount' | 'payday-plan';
 
 export interface SessionLimit {
   rounds: number | null;
@@ -32,6 +33,7 @@ export interface RealityProfile {
   difficultTimeCustom?: string | null;
   paydayPlanActions?: PaydayPlanAction[];
   paydayPlanCustom?: string | null;
+  onboardingCompleted?: OnboardingQuestionKey[];
   startingUrge: number;
   financialContextUpdatedAt: string;
   createdAt: string;
