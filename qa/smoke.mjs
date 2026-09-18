@@ -402,12 +402,23 @@ try {
 
     const beforeReload = await envPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
     assert(beforeReload, `${gameType} active run missing before refresh`);
-    await envPage.reload({ waitUntil: 'networkidle' });
-    await envPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
-    const afterReload = await envPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
-    assert(afterReload?.balanceCents === beforeReload.balanceCents, `${gameType} balance changed on refresh`);
-    assert(afterReload?.actionCount === beforeReload.actionCount, `${gameType} action count changed on refresh`);
+    const persistedState = await envContext.storageState();
+    for (const origin of persistedState.origins || []) {
+      origin.localStorage = (origin.localStorage || []).filter(item => item.name !== 'spinout.run.lease.v1');
+    }
     await envContext.close();
+
+    const restoreGameContext = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      storageState: persistedState,
+    });
+    const restoreGamePage = await restoreGameContext.newPage();
+    await restoreGamePage.goto(`${base}/play`, { waitUntil: 'networkidle' });
+    await restoreGamePage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+    const afterReload = await restoreGamePage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
+    assert(afterReload?.balanceCents === beforeReload.balanceCents, `${gameType} balance changed on restore: ${beforeReload.balanceCents} → ${afterReload?.balanceCents}`);
+    assert(afterReload?.actionCount === beforeReload.actionCount, `${gameType} action count changed on restore: ${beforeReload.actionCount} → ${afterReload?.actionCount}`);
+    await restoreGameContext.close();
   }
 
   // Reduced motion stays playable.
