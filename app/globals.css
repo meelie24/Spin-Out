@@ -54,3 +54,7 @@
 .exit-compare-grid>div{padding:18px;border-radius:14px;background:rgba(100,66,46,.055);display:grid;gap:5px}
 .exit-compare-grid span{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#897568}
 .exit-compare-grid strong{font-size:30px;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+
+.tab-lock{position:absolute;z-index:60;inset:76px 18px auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid rgba(240,211,158,.28);border-radius:13px;background:rgba(26,16,13,.88);backdrop-filter:blur(16px);color:#ead8ba;box-shadow:0 16px 45px rgba(0,0,0,.28)}
+.tab-lock strong{font-size:12px;font-weight:620}
+.tab-lock button{min-height:38px;padding:0 12px;border-radius:9px;border:1px solid rgba(234,202,141,.28);background:#5b3a29;color:#f7e5c5;font-size:11px}
