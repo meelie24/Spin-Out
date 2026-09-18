@@ -41,6 +41,7 @@ export function Landing() {
               <h1 id="home-title">{formatMoney(kept)} kept.</h1>
               {recent != null ? <p className="subtle-metric">Recent exit average <strong>{formatTime(recent)}</strong></p> : null}
               <Link href="/play" className="primary-cta">I feel like gambling</Link>
+              {account?.billing === 'premium' ? <Link href="/plus" className="bare-link plus-home-link">Open Spin Out+</Link> : null}
             </>
           ) : (
             <>
