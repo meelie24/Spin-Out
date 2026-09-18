@@ -63,7 +63,9 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   const [animating, setAnimating] = useState(false);
   const [ping, setPing] = useState<PingCandidate | null>(null);
   const [muted, setMuted] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+  );
   const [pendingBalanceEnd, setPendingBalanceEnd] = useState(false);
   const [blockedByOtherTab, setBlockedByOtherTab] = useState(false);
   const [gameDecision, setGameDecision] = useState<string>(() => profile.gamblingType === 'sports' ? 'North Harbor' : profile.gamblingType === 'casino' ? 'Red' : profile.gamblingType === 'poker' ? 'Hold' : '');
