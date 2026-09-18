@@ -603,3 +603,34 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
 .checkout-primary{width:100%}
 .checkout-availability{margin:0;text-align:center;color:#8b786b;font-size:10px;line-height:1.45}
 @media(max-width:560px){.checkout-methods{grid-template-columns:1fr 1fr}}
+
+
+/* Game-specific calibrated controls */
+.run-hud{grid-template-columns:1fr 1fr .7fr .85fr auto}
+.run-access strong{font-size:13px!important;color:#d8b982!important}
+.sports-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:720px}
+.sports-picks button{display:flex;justify-content:space-between;align-items:center;gap:9px;border-radius:12px}
+.sports-picks button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sports-picks button strong{font-variant-numeric:tabular-nums;color:#d9bd88;font-size:11px}
+.sports-picks button.is-on strong{color:#f5deb4}
+.poker-holds{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));max-width:650px}
+.poker-holds button{display:grid;gap:2px;text-align:center;border-radius:10px}
+.poker-holds button span{font-family:Georgia,serif;font-size:14px}
+.poker-holds button strong{font-size:7px;letter-spacing:.11em;color:#8d7967}
+.poker-holds button.is-on strong{color:#e8c98f}
+@media(max-width:700px){
+  .run-hud{grid-template-columns:1fr 1fr .65fr .8fr auto}
+  .run-access strong{font-size:10px!important}
+  .sports-picks{grid-template-columns:1fr 1fr;gap:6px}
+  .poker-holds{grid-template-columns:repeat(5,1fr);gap:4px}
+  .poker-holds button{padding:0 5px;min-width:0}
+  .poker-holds button span{font-size:11px}
+}
+@media(max-width:430px){
+  .run-hud{grid-template-columns:1fr 1fr .55fr .68fr auto}
+  .run-access span{font-size:6px}
+  .run-access strong{font-size:8px!important}
+  .sports-picks button{font-size:8px;padding:0 8px}
+  .sports-picks button strong{font-size:9px}
+  .poker-holds button span{font-size:9px}
+}
