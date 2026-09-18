@@ -32,6 +32,8 @@ const games: Array<{
   { id: 'other', name: 'Something else', eyebrow: 'Reality Run', description: 'Use the slot-style simulation when your real game is not listed.', purpose: 'Practice stopping before one more becomes another.', symbols: ['/symbols/fu.svg','/symbols/sycee.svg','/symbols/cash-coin.svg'], tone: 'other' },
 ];
 
+const HOME_PROMPT_SESSION_KEY = 'spinout.home-prompts.v1';
+
 const prompts = [
   { id: 'money', label: 'What usually happens after “one more”?', detail: 'Reality Ping · tap to clear' },
   { id: 'chase', label: 'How much are you actually trying to get back?', detail: 'Reality Ping · tap to clear' },
@@ -102,6 +104,14 @@ export function Landing() {
       setRuns(data.runs);
       setProfile(data.profile);
       setPaydayShield(data.profile ? buildPaydayShield(data.profile, new Date()) : null);
+      try {
+        const stored = JSON.parse(window.sessionStorage.getItem(HOME_PROMPT_SESSION_KEY) ?? '[]') as unknown;
+        if (Array.isArray(stored)) {
+          setHiddenPrompts(stored.filter((value): value is string => typeof value === 'string'));
+        }
+      } catch {
+        // A blocked/corrupt session store should never block the homepage.
+      }
       setReady(true);
     });
     return () => { cancelled = true; };
@@ -125,13 +135,21 @@ export function Landing() {
     if (dismissingPrompts.includes(id)) return;
     setDismissingPrompts(current => [...current, id]);
     window.setTimeout(() => {
-      setHiddenPrompts(current => [...current, id]);
+      setHiddenPrompts(current => {
+        const next = current.includes(id) ? current : [...current, id];
+        try {
+          window.sessionStorage.setItem(HOME_PROMPT_SESSION_KEY, JSON.stringify(next));
+        } catch {
+          // Session-only prompt memory is progressive enhancement.
+        }
+        return next;
+      });
       setDismissingPrompts(current => current.filter(item => item !== id));
     }, 230);
   };
 
   const promptProps = (id: string) => ({
-    hidden: hiddenPrompts.includes(id),
+    hidden: !ready || hiddenPrompts.includes(id),
     dismissing: dismissingPrompts.includes(id),
     onDismiss: () => dismissPrompt(id),
   });
