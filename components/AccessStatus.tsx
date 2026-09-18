@@ -11,7 +11,7 @@ type AccessPayload = {
 
 export function AccessStatus() {
   const [access, setAccess] = useState<AccessPayload | null>(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -22,6 +22,7 @@ export function AccessStatus() {
       if (!cancelled) setAccess(payload);
     };
     void refresh();
+    queueMicrotask(() => { if (!cancelled) setNow(Date.now()); });
     const timer = window.setInterval(() => setNow(Date.now()), 30_000);
     window.addEventListener('spinout:access-changed', refresh);
     return () => {
