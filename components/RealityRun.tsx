@@ -645,7 +645,7 @@ export function RealityRun({
           <div className="bulbs bulbs-right" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
           <RealityGame ref={game} gameType={profile.gamblingType} reducedMotion={reducedMotion} initialBalanceCents={run.balanceCents}/>
           {ping ? <RealityPing ping={ping} reducedMotion={reducedMotion} onDismiss={dismissPing} onExit={leaveFromPing}/> : null}
-          <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button>
+          {!ping?.requiresChoice ? <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button> : null}
         </div>
 
         {profile.gamblingType === 'sports' ? <>
