@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RealityGame, type RealityGameHandle } from './RealityGame';
 import { RealityPing } from './RealityPing';
+import { XRayMoment } from './XRayMoment';
 import { buildPingCandidates, selectPing } from '@/lib/pings';
 import { computeReality, formatMoney, shouldAutoEnd, stakeOptionsFor, daysUntil, isFinancialContextStale } from '@/lib/engine';
 import { dealPoker, drawPoker, resolveSimpleGame, SPORTS_MARKETS, type ResolvedGameOutcome } from '@/lib/gameEngines';
@@ -151,6 +152,10 @@ export function RealityRun({
     runRef.current = run;
     saveActiveRun({ profile, run });
   }, [profile, run]);
+
+  useEffect(() => {
+    spinAudio.setAmbientMode(ambientMode);
+  }, [ambientMode]);
 
   useEffect(() => {
     if (pokerRound) game.current?.setPokerHand(pokerRound.hand, pokerRound.held);
@@ -694,7 +699,11 @@ export function RealityRun({
           <div className="bulbs bulbs-left" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
           <div className="bulbs bulbs-right" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
           <RealityGame ref={game} gameType={profile.gamblingType} reducedMotion={reducedMotion} initialBalanceCents={run.balanceCents}/>
-          {ping ? <RealityPing ping={ping} reducedMotion={reducedMotion} onDismiss={dismissPing} onExit={leaveFromPing}/> : null}
+          {ping && interventionSurface === 'xray'
+            ? <XRayMoment insight={ping} onContinue={dismissPing} onExit={leaveFromPing} />
+            : ping
+              ? <RealityPing ping={ping} reducedMotion={reducedMotion} onDismiss={dismissPing} onExit={leaveFromPing}/>
+              : null}
           {!ping?.requiresChoice ? <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button> : null}
         </div>
 
