@@ -45,8 +45,14 @@ function cardLabel(code: string) {
 
 function freshRun(profile: RealityProfile, limit: SessionLimit): ActiveRun {
   const stakes = stakeOptionsFor(profile.intendedWagerCents);
-  const runs = loadData().runs;
+  const data = loadData();
+  const runs = data.runs;
   const previous = runs.length ? runs[runs.length - 1] : null;
+  const previousEndEvent = [...data.events].reverse().find(event =>
+    event.name === 'session_voluntary_exit'
+    || event.name === 'session_timeout'
+    || event.name === 'credits_exhausted'
+  ) ?? null;
   const startedAt = Date.now();
   return {
     id: crypto.randomUUID(),
@@ -75,7 +81,7 @@ function freshRun(profile: RealityProfile, limit: SessionLimit): ActiveRun {
     chosenLimitRounds: limit.rounds,
     chosenLimitMinutes: limit.minutes,
     limitExceededAt: null,
-    returnedAfterMs: previous ? Math.max(0, startedAt - previous.endedAt) : null,
+    returnedAfterMs: previousEndEvent ? Math.max(0, startedAt - previousEndEvent.at) : previous ? Math.max(0, startedAt - previous.endedAt) : null,
     totalStakedCents: 0,
   };
 }
