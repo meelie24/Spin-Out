@@ -47,7 +47,7 @@ export function PlayExperience() {
 
   if (stage === 'loading') return <main className="loading-page"><span className="loading-dot"/>Loading</main>;
   if (stage === 'setup') return <RealitySetup existing={profile} onComplete={next => { setProfile(next); updateData(data => ({ ...data, profile: next })); setStage('deposit'); }} />;
-  if (stage === 'deposit' && profile) return <FakeDeposit amountCents={profile.intendedWagerCents} onComplete={() => setStage('run')} />;
+  if (stage === 'deposit' && profile) return <FakeDeposit profile={profile} onComplete={() => setStage('run')} />;
   if (stage === 'run' && profile) return <RealityRun profile={profile} restoredRun={restored} onEnd={data => { setEnd(data); setRestored(null); setStage('post'); }} />;
   if (stage === 'post' && profile && end) return <PostRunFlow profile={profile} end={end} onDone={() => router.push('/')} />;
   return <main className="plain-page"><h1>Couldn’t start the run.</h1><button className="primary-button" type="button" onClick={() => { clearActiveRun(); setStage('setup'); }}>Start over</button></main>;
