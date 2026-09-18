@@ -211,8 +211,15 @@ try {
   const loadButton = page.getByRole('button', { name: /Load \$100/ });
   await loadButton.waitFor();
   await page.screenshot({ path: `${out}/transition-390.png`, fullPage: true });
+  await page.getByRole('button', { name: '5 rounds' }).click();
+  await page.screenshot({ path: `${out}/transition-limit-390.png`, fullPage: true });
   await loadButton.click();
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await page.waitForFunction(() => {
+    const raw = localStorage.getItem('spinout.active.v2');
+    const active = raw ? JSON.parse(raw) : null;
+    return active?.run?.chosenLimitRounds === 5;
+  }, null, { timeout: 5000 });
   await noHorizontalOverflow(page, 'Reality Run 390');
   const canvasBox = await page.locator('.phaser-stage canvas').boundingBox();
   assert(canvasBox && canvasBox.width > 300, 'Phaser canvas did not render at usable mobile size');
