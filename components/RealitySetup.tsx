@@ -172,6 +172,7 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
               <div className="money-field">
                 <span>$</span>
                 <input
+                  name="available"
                   inputMode="decimal"
                   value={available == null ? '' : String(available / 100)}
                   onChange={e => setAvailable(centsFrom(e.target.value))}
