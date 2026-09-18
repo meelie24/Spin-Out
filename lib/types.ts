@@ -64,6 +64,7 @@ export interface RunEvent {
   stakeCents?: number;
   netCents?: number;
   pingType?: string;
+  decision?: string;
 }
 
 export interface RunContextSnapshot {
