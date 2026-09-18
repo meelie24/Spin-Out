@@ -4,11 +4,20 @@ import { useRef } from 'react';
 import { gsap } from 'gsap';
 import { formatMoney } from '@/lib/engine';
 import { spinAudio } from '@/lib/audio';
+import type { RealityProfile } from '@/lib/types';
 
-export function FakeDeposit({ amountCents, onComplete }: { amountCents: number; onComplete: () => void }) {
+function obligationLabel(profile: RealityProfile) {
+  if (profile.obligationType === 'none') return null;
+  if (profile.obligationType === 'car') return 'Car';
+  if (profile.obligationType === 'rent') return 'Rent';
+  return profile.obligationType.replace('-', ' ');
+}
+
+export function FakeDeposit({ profile, onComplete }: { profile: RealityProfile; onComplete: () => void }) {
   const amountRef = useRef<HTMLDivElement>(null);
   const trayRef = useRef<HTMLDivElement>(null);
   const committing = useRef(false);
+  const obligation = obligationLabel(profile);
 
   const commit = () => {
     if (committing.current) return;
@@ -23,20 +32,20 @@ export function FakeDeposit({ amountCents, onComplete }: { amountCents: number; 
     const dx = b.left + b.width / 2 - (a.left + a.width / 2);
     const dy = b.top + b.height / 2 - (a.top + a.height / 2);
     gsap.timeline({ onComplete })
-      .to(amount, { scale: .96, duration: .12, ease: 'power2.out' })
-      .to(amount, { x: dx, y: dy, scale: .42, opacity: .25, duration: .42, ease: 'power3.in' })
-      .to(tray, { boxShadow: '0 0 0 1px rgba(232,198,137,.85), 0 0 48px rgba(232,198,137,.22)', duration: .18 }, '<.20');
+      .to(amount, { scale: .96, duration: .11, ease: 'power2.out' })
+      .to(amount, { x: dx, y: dy, scale: .38, opacity: .12, duration: .36, ease: 'power3.in' })
+      .to(tray, { boxShadow: '0 0 0 1px rgba(232,198,137,.85), 0 0 54px rgba(232,198,137,.22)', duration: .18 }, '<.16');
   };
 
   return (
     <main className="deposit-shell">
       <section className="deposit-terminal">
-        <p className="kicker">Practice deposit</p>
-        <h1>Load the amount you were about to risk.</h1>
-        <div className="deposit-amount" ref={amountRef}>{formatMoney(amountCents)}</div>
-        <div className="deposit-tray" ref={trayRef}><span>Reality Run balance</span><strong>{formatMoney(amountCents)}</strong></div>
-        <button type="button" className="deposit-button" onClick={commit}>Deposit {formatMoney(amountCents)}</button>
-        <p className="deposit-note">No card. No bank. No real money moves.</p>
+        <p className="kicker">Reality Run</p>
+        <div className="deposit-amount" ref={amountRef}>{formatMoney(profile.intendedWagerCents)}</div>
+        {obligation && profile.obligationAmountCents ? <div className="deposit-context"><span>{obligation}</span><strong>{formatMoney(profile.obligationAmountCents)}</strong></div> : null}
+        <div className="deposit-tray" ref={trayRef}><span>Balance</span><strong>{formatMoney(profile.intendedWagerCents)}</strong></div>
+        <button type="button" className="deposit-button" onClick={commit}>Load {formatMoney(profile.intendedWagerCents)}</button>
+        <p className="deposit-note">Simulation. No payment details.</p>
       </section>
     </main>
   );
