@@ -100,8 +100,6 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
 
     track('run_outcome_recorded', {
       outcome: realWorldOutcome,
-      actual,
-      kept: math.keptCents,
       urgeBefore: profile.startingUrge,
       urgeAfter: endingUrge,
       durationSeconds,
