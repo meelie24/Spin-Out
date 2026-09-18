@@ -79,7 +79,7 @@ export function PlusDashboard({ authenticated, premium, serverRuns, nowMs }: { a
     return <main className="plus-page">
       <section className="plus-gate">
         <p className="kicker">Spin Out+</p>
-        <h1>Longer-term patterns live here.</h1>
+        <h1>Your full history.</h1>
         <p>{authenticated ? 'Core Reality Runs stay free. Plus keeps your full history and trend views.' : 'Sign in to use Plus across devices and keep paid access tied to your account.'}</p>
         {authenticated ? <button className="primary-button" type="button" onClick={() => setUpgradeOpen(true)}>See Plus</button> : <Link className="primary-button" href="/">Sign in</Link>}
         <Link className="bare-link" href="/">Back home</Link>
@@ -91,13 +91,13 @@ export function PlusDashboard({ authenticated, premium, serverRuns, nowMs }: { a
   const maxKept = Math.max(1, ...runs.slice(-12).map(r => Math.max(0,r.moneyKeptCents)));
   return <main className="plus-page">
     <header className="plus-head">
-      <div><p className="kicker">Spin Out+</p><h1>Your patterns.</h1></div>
+      <div><p className="kicker">Spin Out+</p><h1>Your history.</h1></div>
       <Link className="soft-button" href="/play">Start a Reality Run</Link>
     </header>
 
     <section className="plus-score-grid" aria-label="Plus summary">
       <article><span>Money kept</span><strong>{formatMoney(metrics.allKept)}</strong><small>{formatMoney(metrics.monthKept)} this month</small></article>
-      <article><span>Recent exit average</span><strong>{fmtTime(metrics.recentAvg)}</strong><small>{metrics.firstAvg != null ? `First five: ${fmtTime(metrics.firstAvg)}` : 'More runs will build this trend'}</small></article>
+      <article><span>Recent exit average</span><strong>{fmtTime(metrics.recentAvg)}</strong><small>{metrics.firstAvg != null ? `First five: ${fmtTime(metrics.firstAvg)}` : 'Complete more runs to compare'}</small></article>
       <article><span>Reality Runs</span><strong>{runs.length}</strong><small>{runs.filter(r=>r.exitReason==='voluntary').length} voluntary exits</small></article>
     </section>
 
