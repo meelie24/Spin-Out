@@ -181,6 +181,43 @@ test('trigger-specific candidates change the conversation without inventing fact
   assert.equal(habit.some(c => c.type === 'habit'), true);
 });
 
+test('raising the amount after a loss is recognized', () => {
+  const candidates = buildPingCandidates(baseProfile, snap({
+    previousStakeCents: 3_000,
+    stakeCents: 6_000,
+    lastNetCents: -3_000,
+    balanceCents: 20_000,
+  }), NOW);
+  const candidate = candidates.find(c => c.type === 'stake-up');
+  assert.equal(candidate?.message, 'You lost, then raised it.');
+});
+
+test('time-based prompts wait until the session has actually lasted long enough', () => {
+  const early = buildPingCandidates(baseProfile, snap({
+    actionCount: 7,
+    startedAt: NOW - 4 * 60_000,
+  }), NOW);
+  assert.equal(early.some(c => c.type === 'time-check' || c.type === 'long-session'), false);
+
+  const late = buildPingCandidates(baseProfile, snap({
+    actionCount: 7,
+    startedAt: NOW - 11 * 60_000,
+  }), NOW);
+  assert.equal(late.some(c => c.type === 'long-session'), true);
+});
+
+test('a win after losses gets interpreted after the win', () => {
+  const candidates = buildPingCandidates(baseProfile, snap({
+    lastNetCents: 4_000,
+    lossesBeforeLastWin: 3,
+    consecutiveLosses: 0,
+    consecutiveWins: 1,
+    balanceCents: 22_000,
+  }), NOW);
+  const candidate = candidates.find(c => c.type === 'win-after-losses');
+  assert.equal(candidate?.message, 'Would this win make you stay longer?');
+});
+
 test('recovery ping appears when an obligation shortfall is repaired', () => {
   const p = { ...baseProfile, intendedWagerCents: 60_000, availableUntilIncomeCents: 50_000, obligationAmountCents: 43_000 };
   const candidates = buildPingCandidates(p, snap({
