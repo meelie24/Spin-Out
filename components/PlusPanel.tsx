@@ -33,56 +33,47 @@ export function PlusPanel({ onClose }: { onClose: () => void }) {
     let cancelled = false;
 
     const load = async () => {
-      const optionsPromise = fetch('/api/billing/options', { cache: 'no-store' })
-        .then(response => response.json())
-        .catch(() => ({ lemonSqueezy: false, payPal: false })) as Promise<BillingOptions>;
-
       if (!backendConfigured) {
-        const options = await optionsPromise;
-        if (!cancelled) {
-          setBillingOptions(options);
-          setChecked(true);
-        }
+        if (!cancelled) setChecked(true);
         return;
       }
 
       const supabase = createBrowserSupabase();
       if (!supabase) {
-        const options = await optionsPromise;
-        if (!cancelled) {
-          setBillingOptions(options);
-          setChecked(true);
-        }
+        if (!cancelled) setChecked(true);
         return;
       }
 
-      const [{ data }, options] = await Promise.all([
-        supabase.auth.getUser(),
-        optionsPromise,
+      const { data } = await supabase.auth.getUser();
+      const hasUser = Boolean(data.user);
+
+      if (!cancelled) setSignedIn(hasUser);
+
+      if (!hasUser) {
+        if (!cancelled) setChecked(true);
+        return;
+      }
+
+      const [options, entitlementResponse] = await Promise.all([
+        fetch('/api/billing/options', { cache: 'no-store' })
+          .then(response => response.json())
+          .catch(() => ({ lemonSqueezy: false, payPal: false })) as Promise<BillingOptions>,
+        fetch('/api/entitlement', { cache: 'no-store' }).catch(() => null),
       ]);
 
-      const hasUser = Boolean(data.user);
+      const payload = entitlementResponse
+        ? await entitlementResponse.json().catch(() => ({})) as {
+            active?: boolean;
+            manageUrl?: string | null;
+          }
+        : {};
+
       if (!cancelled) {
-        setSignedIn(hasUser);
         setBillingOptions(options);
+        setActive(payload.active === true);
+        setManageUrl(typeof payload.manageUrl === 'string' ? payload.manageUrl : null);
+        setChecked(true);
       }
-
-      if (hasUser) {
-        const response = await fetch('/api/entitlement', { cache: 'no-store' }).catch(() => null);
-        const payload = response
-          ? await response.json().catch(() => ({})) as {
-              active?: boolean;
-              manageUrl?: string | null;
-            }
-          : {};
-
-        if (!cancelled) {
-          setActive(payload.active === true);
-          setManageUrl(typeof payload.manageUrl === 'string' ? payload.manageUrl : null);
-        }
-      }
-
-      if (!cancelled) setChecked(true);
     };
 
     void load();
