@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { companionCount } from '@/lib/presence';
 
 const SESSION_KEY = 'spinout.presence.id';
 
@@ -35,9 +34,11 @@ export function JourneyCounter() {
           cache: 'no-store',
         });
         if (!response.ok) return;
-        const payload = await response.json() as { count?: unknown };
-        if (!cancelled && typeof payload.count === 'number' && Number.isFinite(payload.count)) {
-          setCount(companionCount(payload.count));
+        const payload = await response.json() as { available?: unknown; otherCount?: unknown };
+        if (!cancelled && payload.available === true && typeof payload.otherCount === 'number' && Number.isFinite(payload.otherCount)) {
+          setCount(Math.max(0, Math.round(payload.otherCount)));
+        } else if (!cancelled) {
+          setCount(null);
         }
       } catch {
         // Presence is supplemental. The product remains fully usable if it is unavailable.
@@ -53,7 +54,7 @@ export function JourneyCounter() {
   return (
     <p className="journey-counter" aria-live="polite">
       <span className="journey-pulse" aria-hidden="true" />
-      {count === 1 ? '1 person is on this journey with you' : `${count} people are on this journey with you`}
+      {count === 1 ? '1 other person is here right now' : `${count} other people are here right now`}
     </p>
   );
 }
