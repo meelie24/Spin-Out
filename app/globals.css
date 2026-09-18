@@ -1299,3 +1299,58 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .reality-context-head h2{font-size:24px}
   .context-edit-pair{grid-template-columns:1fr}
 }
+
+
+/* Evidence-based pattern observations */
+.sidebar-insight{
+  margin-top:12px;
+  padding:13px 14px;
+  border-radius:14px;
+  border:1px solid rgba(232,196,136,.1);
+  background:rgba(20,12,10,.28);
+}
+.sidebar-insight>span{
+  display:block;
+  color:#7f6d60;
+  font-size:7px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+.sidebar-insight>strong{
+  display:block;
+  margin-top:5px;
+  color:#d4b994;
+  font-size:11px;
+  font-weight:680;
+}
+.sidebar-insight>p{
+  margin:4px 0 0;
+  color:#8f7b6d;
+  font-size:9px;
+  line-height:1.45;
+}
+.insight-card-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.insight-card-grid article{
+  padding:14px;
+  border-radius:13px;
+  background:rgba(98,65,47,.045);
+  border:1px solid rgba(79,52,40,.08);
+  display:grid;
+  gap:5px;
+}
+.insight-card-grid strong{
+  color:#4f392f;
+  font-size:13px;
+}
+.insight-card-grid span{
+  color:#7e6b5e;
+  font-size:11px;
+  line-height:1.5;
+}
+@media(max-width:620px){
+  .insight-card-grid{grid-template-columns:1fr}
+}
