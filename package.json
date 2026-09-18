@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:core": "tsc -p tsconfig.core.json && node --test .core-test/tests/*.test.js",
     "qa": "node qa/smoke.mjs",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "gsap": "^3.13.0",
