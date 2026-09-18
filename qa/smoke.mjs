@@ -279,7 +279,9 @@ try {
   await page.screenshot({ path: `${out}/run-390.png`, fullPage: true });
   await page.getByRole('button', { name: "I'm done" }).click();
   await page.getByText(/You left\./i).waitFor();
-  assert(await page.getByText(/Reality Pings?/i).count() > 0, 'exit receipt did not show Reality Ping count');
+  assert(await page.locator('.exit-receipt > div').count() === 4, 'Reality Receipt did not show the four core session facts');
+  assert(await page.getByText('started', { exact: true }).isVisible(), 'Reality Receipt missing starting balance');
+  assert(await page.getByText('ended', { exact: true }).isVisible(), 'Reality Receipt missing ending balance');
   await page.screenshot({ path: `${out}/exit-receipt-390.png`, fullPage: true });
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor();
