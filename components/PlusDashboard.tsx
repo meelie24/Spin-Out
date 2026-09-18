@@ -6,6 +6,7 @@ import { formatMoney, recentExitAverageSeconds } from '@/lib/engine';
 import { currentMonthMoneyKept, loadData, totalMoneyKept } from '@/lib/storage';
 import type { RunRecord } from '@/lib/types';
 import { PlusPanel } from './PlusPanel';
+import { buildRealityInsights } from '@/lib/realityEngine/insights';
 
 function fmtTime(seconds: number | null) {
   if (seconds == null) return '—';
@@ -42,6 +43,8 @@ export function PlusDashboard({ authenticated, premium, accessSource, trialEligi
   }, [serverRuns]);
 
   const runs = useMemo(() => data?.runs ?? [], [data?.runs]);
+
+  const realityInsights = useMemo(() => buildRealityInsights(runs), [runs]);
 
   const metrics = useMemo(() => {
     const voluntary = runs.filter(r => r.timeToExitSeconds != null).map(r => r.timeToExitSeconds as number);
@@ -135,6 +138,15 @@ export function PlusDashboard({ authenticated, premium, accessSource, trialEligi
         {!runs.length ? <p className="empty-note">Your completed runs will appear here.</p> : null}
       </div>
     </section>
+
+    {(realityInsights.fingerprint.length || realityInsights.recovery.length) ? <section className="plus-section">
+      <div className="section-title"><div><p className="kicker">Private patterns</p><h2>What keeps showing up</h2></div></div>
+      <div className="insight-card-grid">
+        {[...realityInsights.fingerprint,...realityInsights.recovery].slice(0,4).map(item => <article key={item.key}>
+          <strong>{item.title}</strong><span>{item.detail}</span>
+        </article>)}
+      </div>
+    </section> : null}
 
     <section className="plus-two-col">
       <article className="plus-section">
