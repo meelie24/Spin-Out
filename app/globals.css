@@ -752,3 +752,24 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .bet-slip-summary{grid-template-columns:1fr 1fr}
   .bet-slip-summary>span:last-child{grid-column:1/-1;border-left:0;border-top:1px solid rgba(219,184,122,.11)}
 }
+
+
+/* Art-directed homepage atmosphere: distinct depth layers, not wallpaper */
+.ambient-symbol{
+  position:absolute;
+  pointer-events:none;
+  user-select:none;
+  filter:sepia(.28) saturate(.74) brightness(.78);
+  opacity:.07;
+}
+.ambient-symbol img{width:100%;height:auto;display:block}
+.ambient-seven{width:min(18vw,235px);left:17%;top:37%;transform:rotate(-16deg);filter:blur(1px) sepia(.35) saturate(.8) brightness(.78)}
+.ambient-coin{width:min(20vw,270px);right:3%;top:48%;transform:rotate(13deg);opacity:.055;filter:blur(2px) sepia(.35) saturate(.7)}
+.ambient-fu{width:min(15vw,205px);right:16%;top:15%;transform:rotate(8deg);opacity:.045;filter:blur(3px) sepia(.4) saturate(.74)}
+.ambient-bar{width:min(17vw,230px);left:39%;bottom:4%;transform:rotate(-8deg);opacity:.05;filter:blur(2px) sepia(.32) saturate(.65)}
+@media(max-width:820px){
+  .ambient-seven{width:120px;left:-30px;top:34%;opacity:.055}
+  .ambient-coin{width:145px;right:-55px;top:58%;opacity:.045}
+  .ambient-fu{display:none}
+  .ambient-bar{width:130px;left:54%;bottom:8%;opacity:.04}
+}
