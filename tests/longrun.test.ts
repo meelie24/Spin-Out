@@ -10,6 +10,14 @@ test('10,000 slot runs reconcile exactly',()=>{
   assert.ok(result.samples.length>0);
 });
 
+test('long-run results separate sample variance from negative model expectation',()=>{
+  const result=simulateLongRun({gameType:'slots',stakeCents:1000,seed:42});
+  assert.ok(result.modelReturnRate < 1);
+  assert.ok(result.expectedNetCents < 0);
+  assert.equal(result.expectedNetCents, Math.round(result.totalStakedCents * (result.modelReturnRate - 1)));
+  assert.match(result.expectationBasis,/Calibrated game model/);
+});
+
 test('roulette long run uses the selected color and exact 37-pocket engine',()=>{
   const result=simulateLongRun({gameType:'casino',stakeCents:100,decision:'Black',seed:7});
   assert.equal(result.runs,10_000);
