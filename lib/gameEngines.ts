@@ -270,6 +270,39 @@ export function resolveScratch(rng: () => number, stakeCents: number): ResolvedG
   };
 }
 
+export function expectedReturnRate(type: GamblingType, decision = ''): number | null {
+  if (type === 'slots' || type === 'other') {
+    const counts = new Map<SlotSymbol, number>();
+    for (const symbol of SLOT_STRIP) counts.set(symbol, (counts.get(symbol) ?? 0) + 1);
+    let expected = 0;
+    for (const [symbol, count] of counts) {
+      const p = count / SLOT_STRIP.length;
+      expected +=
+        Math.pow(p, 3) * (1 - p) * SLOT_PAYTABLE[symbol][3]
+        + Math.pow(p, 4) * (1 - p) * SLOT_PAYTABLE[symbol][4]
+        + Math.pow(p, 5) * SLOT_PAYTABLE[symbol][5];
+    }
+    return expected;
+  }
+
+  if (type === 'casino') return 36 / 37;
+
+  if (type === 'sports') {
+    const selection = sportsSelection(decision) ?? sportsSelection(SPORTS_MARKETS[0].home)!;
+    const selectedImplied = 1 / selection.odds;
+    const otherImplied = 1 / selection.otherOdds;
+    const trueProbability = selectedImplied / (selectedImplied + otherImplied);
+    return trueProbability * selection.odds;
+  }
+
+  if (type === 'lottery') {
+    const averageWinningMultiplier = .40 * 1 + .38 * 2 + .17 * 5 + .05 * 10;
+    return averageWinningMultiplier / 3.75;
+  }
+
+  return null;
+}
+
 export function resolveSimpleGame(type: GamblingType, rng: () => number, stakeCents: number, decision = '') {
   if (type === 'slots' || type === 'other') return resolveSlots(rng, stakeCents);
   if (type === 'sports') return resolveSports(rng, stakeCents, decision);
