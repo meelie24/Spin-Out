@@ -344,7 +344,7 @@ try {
   await timeout.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor({ timeout: 5000 });
   await timeoutContext.close();
 
-  // Every environment mounts, exposes its own decision where appropriate, and completes an action.
+  // Every environment mounts and completes its actual game-specific interaction loop.
   for (const gameType of ['slots','sports','casino','poker','lottery','other']) {
     const envContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const p = profile(gameType);
@@ -355,16 +355,30 @@ try {
     envPage.on('pageerror', error => errors.push(error.message));
     await envPage.goto(`${base}/play`, { waitUntil: 'networkidle' });
     await envPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
-    if (gameType === 'sports') await envPage.getByRole('button', { name: 'Cedar City' }).click();
-    if (gameType === 'casino') await envPage.getByRole('button', { name: 'Black' }).click();
-    if (gameType === 'poker') await envPage.getByRole('button', { name: 'Draw' }).click();
+
+    if (gameType === 'sports') {
+      await envPage.getByRole('button', { name: /Cedar City/ }).click();
+    }
+    if (gameType === 'casino') {
+      await envPage.getByRole('button', { name: 'Black' }).click();
+    }
+
     await waitActionReady(envPage);
     await envPage.locator('.game-action').click();
+
+    if (gameType === 'poker') {
+      await envPage.locator('.poker-holds button').first().waitFor({ timeout: 5000 });
+      await envPage.locator('.poker-holds button').first().click();
+      await envPage.getByRole('button', { name: 'Draw' }).waitFor({ timeout: 5000 });
+      await envPage.getByRole('button', { name: 'Draw' }).click();
+    }
+
     await envPage.waitForFunction(() => {
       const ping = document.querySelector('.reality-ping');
       const button = document.querySelector('.game-action');
       return Boolean(ping) || (button instanceof HTMLButtonElement && !button.disabled);
-    }, null, { timeout: 7000 });
+    }, null, { timeout: gameType === 'casino' ? 9000 : 7000 });
+
     assert(errors.length === 0, `${gameType} environment errors: ${JSON.stringify(errors)}`);
     await envPage.screenshot({ path: `${out}/environment-${gameType}-390.png`, fullPage: true });
     await envContext.close();
