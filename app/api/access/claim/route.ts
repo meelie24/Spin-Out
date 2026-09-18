@@ -8,7 +8,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 export async function POST(request: Request) {
   const authClient = await createServerSupabase();
   const admin = createAdminSupabase();
-  if (!authClient || !admin) return NextResponse.json({ access: 'core', active: false, configured: false }, { status: 503 });
+  if (!authClient || !admin) return NextResponse.json({ access: 'core', active: false, configured: false }, { headers: { 'Cache-Control': 'no-store' } });
 
   const { data: auth } = await authClient.auth.getUser();
   if (!auth.user) return NextResponse.json({ access: 'core', active: false, authenticated: false }, { status: 401 });
