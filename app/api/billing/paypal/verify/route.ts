@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createAdminSupabase, createServerSupabase } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -32,9 +33,21 @@ async function accessToken(clientId: string, secret: string) {
 }
 
 export async function POST(request: Request) {
+  const auth = await createServerSupabase();
+  const admin = createAdminSupabase();
+  if (!auth || !admin) {
+    return NextResponse.json({ verified: false, message: 'Billing is not configured.' }, { status: 503 });
+  }
+
+  const { data: userData, error: userError } = await auth.auth.getUser();
+  const user = userData.user;
+  if (userError || !user) {
+    return NextResponse.json({ verified: false, message: 'Sign in before subscribing.' }, { status: 401 });
+  }
+
   const { clientId, secret, monthly, yearly } = config();
   if (!clientId || !secret || !monthly || !yearly) {
-    return NextResponse.json({ verified: false, message: 'Billing is not configured on this deployment.' }, { status: 503 });
+    return NextResponse.json({ verified: false, message: 'Billing is not configured.' }, { status: 503 });
   }
 
   let subscriptionId = '';
@@ -57,15 +70,35 @@ export async function POST(request: Request) {
       headers: { authorization: `Bearer ${token}` },
       cache: 'no-store',
     });
-    if (!response.ok) return NextResponse.json({ verified: false, message: 'PayPal could not verify this subscription.' }, { status: 400 });
-    const subscription = await response.json() as { status?: string; plan_id?: string };
+    if (!response.ok) {
+      return NextResponse.json({ verified: false, message: 'PayPal could not verify this subscription.' }, { status: 400 });
+    }
+
+    const subscription = await response.json() as { status?: string; plan_id?: string; id?: string };
     const expectedPlan = plan === 'monthly' ? monthly : yearly;
-    const verified = subscription.plan_id === expectedPlan && ['ACTIVE', 'APPROVED'].includes(subscription.status ?? '');
-    return NextResponse.json({
-      verified,
-      status: subscription.status ?? 'UNKNOWN',
-      message: verified ? undefined : 'The subscription is not active yet.',
-    }, { status: verified ? 200 : 400 });
+    const status = (subscription.status ?? 'UNKNOWN').toLowerCase();
+    const verified = subscription.plan_id === expectedPlan && ['active', 'approved'].includes(status);
+
+    if (!verified) {
+      return NextResponse.json({ verified: false, status, message: 'The subscription is not active yet.' }, { status: 400 });
+    }
+
+    const { error: saveError } = await admin.from('entitlements').upsert({
+      user_id: user.id,
+      provider: 'paypal',
+      subscription_id: subscriptionId,
+      plan,
+      status,
+      provider_payload: { id: subscription.id ?? subscriptionId, plan_id: subscription.plan_id ?? expectedPlan },
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' });
+
+    if (saveError) {
+      console.error('Entitlement save failed', saveError.message);
+      return NextResponse.json({ verified: false, message: 'Subscription was verified but access could not be saved.' }, { status: 500 });
+    }
+
+    return NextResponse.json({ verified: true, status, plan });
   } catch (error) {
     console.error('PayPal verification error', error);
     return NextResponse.json({ verified: false, message: 'Subscription verification is temporarily unavailable.' }, { status: 502 });
