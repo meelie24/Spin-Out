@@ -57,10 +57,12 @@ export function buildPingCandidates(profile: RealityProfile, snapshot: RunSnapsh
   const sessionMinutes = Math.floor(sessionElapsedMs / 60_000);
   const limitRounds = snapshot.chosenLimitRounds ?? null;
   const limitMinutes = snapshot.chosenLimitMinutes ?? null;
+  const roundLimitReached = limitRounds != null && snapshot.actionCount === limitRounds;
   const roundLimitExceeded = limitRounds != null && snapshot.actionCount > limitRounds;
   const timeLimitExceeded = limitMinutes != null && sessionElapsedMs > limitMinutes * 60_000;
   const urgent =
-    roundLimitExceeded
+    roundLimitReached
+    || roundLimitExceeded
     || timeLimitExceeded
     || rapidFour
     || (snapshot.pingDismissalStreak ?? 0) >= 4;
