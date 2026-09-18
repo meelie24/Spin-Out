@@ -22,9 +22,10 @@ function labelTrigger(trigger: RunRecord['triggerType']) {
   return trigger.replaceAll('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-export function PlusDashboard({ authenticated, premium, serverRuns, nowMs }: { authenticated: boolean; premium: boolean; serverRuns: RunRecord[]; nowMs: number }) {
+export function PlusDashboard({ authenticated, premium, serverRuns }: { authenticated: boolean; premium: boolean; serverRuns: RunRecord[] }) {
   const [data, setData] = useState<ReturnType<typeof loadData> | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [clockMs, setClockMs] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +37,7 @@ export function PlusDashboard({ authenticated, premium, serverRuns, nowMs }: { a
       for (const run of current.runs) merged.set(run.id, run);
       setData({ ...current, runs: [...merged.values()].sort((a,b) => a.endedAt - b.endedAt) });
     });
+    queueMicrotask(() => { if (!cancelled) setClockMs(Date.now()); });
     return () => { cancelled = true; };
   }, [serverRuns]);
 
@@ -45,7 +47,7 @@ export function PlusDashboard({ authenticated, premium, serverRuns, nowMs }: { a
     const voluntary = runs.filter(r => r.timeToExitSeconds != null).map(r => r.timeToExitSeconds as number);
     const first5 = voluntary.slice(0, 5);
     const recent5 = voluntary.slice(-5);
-    const week = runs.filter(r => nowMs - r.endedAt <= 7 * 24 * 60 * 60 * 1000);
+    const week = clockMs ? runs.filter(r => clockMs - r.endedAt <= 7 * 24 * 60 * 60 * 1000) : [];
     const urgeDelta = week.length ? average(week.map(r => r.endingUrge - r.startingUrge)) : null;
     const triggerCounts = new Map<string, number>();
     for (const run of runs) triggerCounts.set(run.triggerType, (triggerCounts.get(run.triggerType) ?? 0) + 1);
@@ -71,7 +73,7 @@ export function PlusDashboard({ authenticated, premium, serverRuns, nowMs }: { a
       triggers,
       pingStats:[...pingStats.entries()].sort((a,b)=>b[1].shown-a[1].shown).slice(0,4),
     };
-  }, [runs, nowMs]);
+  }, [runs, clockMs]);
 
   if (!data) return <main className="plus-page"><span className="loading-dot"/>Loading</main>;
 
