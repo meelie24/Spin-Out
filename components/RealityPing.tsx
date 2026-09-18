@@ -39,7 +39,7 @@ export function RealityPing({
             <button type="button" className="ping-leave" onClick={onExit}>{"I'm done"}</button>
           </>
         ) : (
-          <button type="button" className="ping-continue" onClick={onDismiss}>Keep going</button>
+          <button type="button" className="ping-continue" onClick={onDismiss}>Got it</button>
         )}
         {ping.explanation ? (
           <button type="button" className="ping-why" onClick={() => setWhyOpen(open => !open)}>
