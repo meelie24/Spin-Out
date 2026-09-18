@@ -490,22 +490,25 @@ export function RealityRun({
 
   const setStake = (direction: -1 | 1) => {
     if (blockedByOtherTab || animating || ping || pokerRound) return;
-    const currentIndex = stakes.indexOf(run.stakeCents as never);
+    const current = runRef.current;
+    const currentIndex = stakes.indexOf(current.stakeCents as never);
     const index = Math.max(0, Math.min(stakes.length - 1, (currentIndex < 0 ? 1 : currentIndex) + direction));
     const nextStake = stakes[index];
-    if (nextStake > run.balanceCents) return;
+    if (nextStake === current.stakeCents || nextStake > current.balanceCents) return;
+
     spinAudio.click();
     const recentPing = lastDismissedPing.current;
     track('stake_changed', {
-      from: run.stakeCents,
+      from: current.stakeCents,
       to: nextStake,
-      balance: run.balanceCents,
+      balance: current.balanceCents,
       afterPing: recentPing?.type ?? null,
     });
+
     if (recentPing) {
       updateData(data => {
         const old = data.pingLearning[recentPing.type] ?? { shown: 0, exitsAfter: 0 };
-        const key = nextStake < run.stakeCents ? 'stakeDownAfter' : 'stakeUpAfter';
+        const key = nextStake < current.stakeCents ? 'stakeDownAfter' : 'stakeUpAfter';
         return {
           ...data,
           pingLearning: {
@@ -515,7 +518,8 @@ export function RealityRun({
         };
       });
     }
-    setRun(current => ({
+
+    const next: ActiveRun = {
       ...current,
       previousStakeCents: current.stakeCents,
       stakeCents: nextStake,
@@ -525,27 +529,45 @@ export function RealityRun({
         balanceCents: current.balanceCents,
         stakeCents: nextStake,
       }],
-    }));
+    };
+
+    setRun(next);
+    runRef.current = next;
+
+    if (nextStake > current.stakeCents && current.lastNetCents < 0) {
+      showPing(next);
+    }
   };
 
-  const dismissPing = () => {
+  const closePing = (leave = false) => {
     const now = Date.now();
+    const current = runRef.current;
+    const record = current.pings[current.pings.length - 1];
+    const dwellMs = record ? Math.max(0, now - record.shownAt) : 0;
+
     if (ping) {
-      const record = runRef.current.pings[runRef.current.pings.length - 1];
-      track('reality_ping_dismissed', {
+      track(leave ? 'reality_ping_exit' : 'reality_ping_dismissed', {
         type: ping.type,
-        dwellMs: record ? Math.max(0, now - record.shownAt) : 0,
+        dwellMs,
       });
       lastDismissedPing.current = {
         type: ping.type,
         dismissedAt: now,
-        balanceAt: runRef.current.balanceCents,
-        stakeAt: runRef.current.stakeCents,
+        balanceAt: current.balanceCents,
+        stakeAt: current.stakeCents,
       };
     }
-    setPing(null);
-    setRun(current => ({
+
+    const quickDismiss = !leave && dwellMs > 0 && dwellMs < 1_200;
+    const pingDismissalStreak = ping?.type === 'dismissals'
+      ? 0
+      : quickDismiss
+        ? (current.pingDismissalStreak ?? 0) + 1
+        : 0;
+
+    const updated: ActiveRun = {
       ...current,
+      pingDismissalStreak,
       pings: current.pings.map((p, i) => i === current.pings.length - 1 ? { ...p, dismissedAt: now } : p),
       timeline: [...current.timeline, {
         kind: 'ping-dismissed',
@@ -554,12 +576,25 @@ export function RealityRun({
         stakeCents: current.stakeCents,
         pingType: ping?.type,
       }],
-    }));
+    };
+
+    setPing(null);
+    setRun(updated);
+    runRef.current = updated;
+
+    if (leave) {
+      finish('voluntary');
+      return;
+    }
+
     if (pendingBalanceEnd) {
       setPendingBalanceEnd(false);
       window.setTimeout(() => finish('balance'), 80);
     }
   };
+
+  const dismissPing = () => closePing(false);
+  const leaveFromPing = () => closePing(true);
 
   const financeFresh = !isFinancialContextStale(profile);
   const days = financeFresh ? daysUntil(profile.nextIncomeDate) : null;
@@ -603,7 +638,7 @@ export function RealityRun({
           <div className="bulbs bulbs-left" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
           <div className="bulbs bulbs-right" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
           <RealityGame ref={game} gameType={profile.gamblingType} reducedMotion={reducedMotion} initialBalanceCents={run.balanceCents}/>
-          {ping ? <RealityPing ping={ping} reducedMotion={reducedMotion} onDismiss={dismissPing}/> : null}
+          {ping ? <RealityPing ping={ping} reducedMotion={reducedMotion} onDismiss={dismissPing} onExit={leaveFromPing}/> : null}
           <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button>
         </div>
 
