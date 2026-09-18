@@ -43,7 +43,8 @@ export function Landing() {
             <>
               <h1 id="home-title">{formatMoney(kept)} kept.</h1>
               {recent != null ? <p className="subtle-metric">Recent exit average <strong>{formatTime(recent)}</strong></p> : null}
-              <Link href="/play" className="primary-cta">I feel like gambling</Link>              <PlusAccessLink />
+              <Link href="/play" className="primary-cta">I feel like gambling</Link>
+              <PlusAccessLink />
             </>
           ) : (
             <>
@@ -51,7 +52,8 @@ export function Landing() {
               <p className="landing-blurb">Run it here first.</p>
               <Link href="/play" className="primary-cta">Start</Link>
             </>
-          )}          <AuthControl />
+          )}
+          <AuthControl />
         </div>
         <div className="landing-visual" aria-hidden="true">
           <div className="light-arch"><i/><i/><i/><i/><i/><i/><i/></div>
@@ -69,7 +71,7 @@ export function Landing() {
       <JourneyCounter />
 
       <div className="landing-foot">
-        <p>Simulated balance. Nothing can be withdrawn or redeemed.</p>
+        <p>Simulation only. Balances have no cash value.</p>
         <div><Link href="/research">Research</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div>
       </div>
 
