@@ -17,6 +17,7 @@
     "lib/realityEngine/director.ts",
     "lib/realityEngine/insights.ts",
     "lib/realityEngine/receipt.ts",
+    "lib/realityEngine/payday.ts",
     "tests/*.test.ts",
     "types/node-shim.d.ts"
   ]
