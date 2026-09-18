@@ -1,19 +1,9 @@
-import type { PingCandidate } from '../types';
+import type { InterventionDirectorState, PingCandidate } from '../types';
 
 export type InterventionSurface = 'ping' | 'xray' | 'strong';
 export type AmbientMode = 'normal' | 'cooling' | 'ledger' | 'strong';
 
-export interface DirectorRecentFamily {
-  family: string;
-  at: number;
-}
-
-export interface DirectorState {
-  lastForegroundAt: number | null;
-  lastForegroundFamily: string | null;
-  recentFamilies: DirectorRecentFamily[];
-  ambientMode: AmbientMode;
-}
+export type DirectorState = InterventionDirectorState;
 
 export interface DirectorInput {
   now: number;
