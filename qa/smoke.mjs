@@ -270,7 +270,7 @@ try {
   await ping.waitFor({ timeout: 7000 });
   await pingPage.screenshot({ path: `${out}/reality-ping-390.png`, fullPage: true });
   assert(await ping.getByText(/Reality Ping/i).isVisible(), 'Reality Ping label missing');
-  await ping.getByRole('button', { name: 'Keep going' }).click();
+  await ping.getByRole('button', { name: 'Got it' }).click();
   await ping.waitFor({ state: 'detached' });
   await pingContext.close();
 
