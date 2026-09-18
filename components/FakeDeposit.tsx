@@ -32,6 +32,7 @@ export function FakeDeposit({
   const trayRef = useRef<HTMLDivElement>(null);
   const committing = useRef(false);
   const [limit, setLimit] = useState<SessionLimit>({ rounds:null, minutes:null });
+  const [limitChosen, setLimitChosen] = useState(false);
   const obligation = obligationLabel(profile);
 
   const commit = () => {
@@ -58,7 +59,7 @@ export function FakeDeposit({
   };
 
   const selected = (choice: SessionLimit) =>
-    choice.rounds === limit.rounds && choice.minutes === limit.minutes;
+    limitChosen && choice.rounds === limit.rounds && choice.minutes === limit.minutes;
 
   return (
     <main className="deposit-shell">
@@ -84,6 +85,7 @@ export function FakeDeposit({
                 onClick={() => {
                   spinAudio.click();
                   setLimit(choice.limit);
+                  setLimitChosen(true);
                 }}
               >
                 {choice.label}
