@@ -18,6 +18,7 @@
     "lib/realityEngine/insights.ts",
     "lib/realityEngine/receipt.ts",
     "lib/realityEngine/payday.ts",
+    "lib/realityEngine/longRun.ts",
     "tests/*.test.ts",
     "types/node-shim.d.ts"
   ]
