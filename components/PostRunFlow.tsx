@@ -69,6 +69,16 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
   const allKept = useMemo(() => totalMoneyKept(savedRuns), [savedRuns]);
   const recentExit = useMemo(() => recentExitAverageSeconds(savedRuns), [savedRuns]);
 
+  const finishAndLeave = async () => {
+    await fetch('/api/access/consume', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ runId: end.run.id }),
+    }).catch(() => null);
+    window.dispatchEvent(new Event('spinout:access-changed'));
+    onDone();
+  };
+
   return (
     <main className="post-shell">
       <section className="post-card">
@@ -121,7 +131,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
               }}>{label}</button>)}
             </div>
           </div> : null}
-          <div className="summary-actions"><button className="primary-button" type="button" onClick={onDone}>Done</button><button className="bare-link" type="button" onClick={() => setPlusOpen(true)}>Spin Out+</button></div>{plusOpen ? <PlusPanel onClose={() => setPlusOpen(false)} /> : null}
+          <div className="summary-actions"><button className="primary-button" type="button" onClick={() => void finishAndLeave()}>Done</button><button className="bare-link" type="button" onClick={() => setPlusOpen(true)}>Spin Out+</button></div>{plusOpen ? <PlusPanel onClose={() => setPlusOpen(false)} /> : null}
         </> : null}
       </section>
     </main>
