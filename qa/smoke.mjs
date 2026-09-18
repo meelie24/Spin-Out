@@ -220,7 +220,7 @@ try {
   // Post-run Plus placement is allowed, but signed-out users cannot buy/unlock Plus.
   await page.getByRole('button', { name: 'Spin Out+' }).click();
   await page.getByRole('heading', { name: /Full history and trends/i }).waitFor();
-  assert(await page.getByText(/Sign in before subscribing/i).isVisible(), 'Plus did not require real auth');
+  assert(await page.getByText(/Sign in to claim the one-run Plus trial or subscribe/i).isVisible(), 'Plus did not require real auth');
   await page.getByRole('button', { name: 'Close' }).click();
 
   // Editing localStorage must not unlock /plus.
