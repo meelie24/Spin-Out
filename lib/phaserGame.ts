@@ -136,38 +136,38 @@ export async function mountRealityGame(
       const root = this.add.container(0, 0);
       this.slotRoot = root;
       const frame = this.add.graphics();
-      frame.fillStyle(0x0e0b0b, .96).fillRoundedRect(104, 126, 792, 368, 15);
-      frame.lineStyle(3, 0xb99354, .85).strokeRoundedRect(104, 126, 792, 368, 15);
-      frame.lineStyle(1, 0xf4dca8, .3).strokeRoundedRect(114, 136, 772, 348, 11);
+      frame.fillStyle(0x0b0808, .98).fillRoundedRect(72, 112, 856, 404, 18);
+      frame.lineStyle(4, 0xb99354, .9).strokeRoundedRect(72, 112, 856, 404, 18);
+      frame.lineStyle(1, 0xf4dca8, .28).strokeRoundedRect(84, 124, 832, 380, 13);
       root.add(frame);
       const grid = defaultSlotGrid();
-      const reelW = 148, rowH = 108, startX = 130, startY = 148;
+      const reelW = 156, rowH = 112, startX = 110, startY = 148;
       for (let col = 0; col < 5; col++) {
-        root.add(this.add.rectangle(startX + col * reelW + reelW / 2, startY + rowH * 1.5, reelW - 2, rowH * 3, 0xf2e7d3).setStrokeStyle(1, 0x6d5f52, .5));
+        root.add(this.add.rectangle(startX + col * reelW + reelW / 2, startY + rowH * 1.5, reelW - 3, rowH * 3, 0xf2e7d3).setStrokeStyle(1, 0x6d5f52, .5));
         const maskShape = this.make.graphics({ x: 0, y: 0 });
-        maskShape.fillStyle(0xffffff).fillRect(startX + col * reelW, startY, reelW - 2, rowH * 3);
+        maskShape.fillStyle(0xffffff).fillRect(startX + col * reelW, startY, reelW - 3, rowH * 3);
         const mask = maskShape.createGeometryMask();
         this.reelMasks[col] = mask;
         const reel = this.add.container(startX + col * reelW, startY);
         reel.setMask(mask);
         root.add(reel);
         this.reelContainers[col] = reel;
-        for (let row = 0; row < 3; row++) reel.add(this.add.image(reelW / 2, row * rowH + rowH / 2, grid[row][col]).setDisplaySize(86, 86));
+        for (let row = 0; row < 3; row++) reel.add(this.add.image(reelW / 2, row * rowH + rowH / 2, grid[row][col]).setDisplaySize(98, 98));
       }
       const markers = this.add.graphics();
-      markers.fillStyle(0xd6ac63, .9).fillTriangle(111, 309, 124, 302, 124, 316).fillTriangle(889, 309, 876, 302, 876, 316);
+      markers.fillStyle(0xe0b968, .96).fillTriangle(84, 316, 103, 306, 103, 326).fillTriangle(916, 316, 897, 306, 897, 326);
       root.add(markers);
-      root.add(this.add.text(500, 118, '5 REELS · 5 PAYLINES', { fontFamily:'Inter,Arial', fontSize:'9px', color:'#a78c68', letterSpacing:1.4 }).setOrigin(.5));
+      root.add(this.add.text(500, 128, '5 REELS · 5 PAYLINES', { fontFamily:'Inter,Arial', fontSize:'12px', color:'#c0a279', letterSpacing:1.8 }).setOrigin(.5));
     }
 
     private createSports() {
       const root = this.add.container(0, 0);
       const panel = this.add.graphics();
-      panel.fillStyle(0x0d1514, .97).fillRoundedRect(112, 126, 776, 368, 18);
-      panel.lineStyle(2, 0x9f8a57, .7).strokeRoundedRect(112, 126, 776, 368, 18);
+      panel.fillStyle(0x0b1412, .985).fillRoundedRect(68, 104, 864, 426, 20);
+      panel.lineStyle(2, 0x9f8a57, .72).strokeRoundedRect(68, 104, 864, 426, 20);
       root.add(panel);
-      root.add(this.add.text(145, 148, 'GAME LINES', { fontFamily:'Inter,Arial', fontSize:'12px', fontStyle:'700', color:'#e9dec9', letterSpacing:1.5 }));
-      root.add(this.add.text(760, 148, 'MONEYLINE', { fontFamily:'Inter,Arial', fontSize:'10px', color:'#9ea99f', letterSpacing:1.2 }));
+      root.add(this.add.text(106, 132, 'MONEYLINE', { fontFamily:'Inter,Arial', fontSize:'15px', fontStyle:'700', color:'#f0e4d1', letterSpacing:1.8 }));
+      root.add(this.add.text(782, 132, 'ODDS', { fontFamily:'Inter,Arial', fontSize:'13px', fontStyle:'700', color:'#a8b7aa', letterSpacing:1.5 }));
 
       const games = [
         ['North Harbor','East Vale','1.72','2.16'],
@@ -175,93 +175,100 @@ export async function mountRealityGame(
         ['Riverside','Kingsport','1.91','1.91'],
       ];
       games.forEach((row, i) => {
-        const y = 185 + i * 94;
+        const y = 170 + i * 105;
         const box = this.add.container(0,0);
-        const bg = this.add.rectangle(500, y + 34, 706, 78, 0x18211f, .96).setStrokeStyle(1, 0x4b5e57, .55);
+        const bg = this.add.rectangle(500, y + 38, 794, 88, 0x16201d, .98).setStrokeStyle(1, 0x52675f, .55);
         box.add(bg);
-        box.add(this.add.text(168, y + 9, row[0], { fontFamily:'Inter,Arial', fontSize:'16px', fontStyle:'600', color:'#f4efe5' }));
-        box.add(this.add.text(168, y + 39, row[1], { fontFamily:'Inter,Arial', fontSize:'16px', color:'#d6d1c7' }));
-        const homeOdd = this.add.text(760, y + 8, row[2], { fontFamily:'Inter,Arial', fontSize:'15px', fontStyle:'700', color:'#e1c589' }).setOrigin(.5,0);
-        const awayOdd = this.add.text(760, y + 38, row[3], { fontFamily:'Inter,Arial', fontSize:'15px', fontStyle:'700', color:'#e1c589' }).setOrigin(.5,0);
+        box.add(this.add.text(118, y + 8, row[0], { fontFamily:'Inter,Arial', fontSize:'21px', fontStyle:'650', color:'#f5efe4' }));
+        box.add(this.add.text(118, y + 44, row[1], { fontFamily:'Inter,Arial', fontSize:'19px', color:'#d2cdc4' }));
+        const homeOdd = this.add.text(814, y + 7, row[2], { fontFamily:'Inter,Arial', fontSize:'20px', fontStyle:'750', color:'#e1c589' }).setOrigin(.5,0);
+        const awayOdd = this.add.text(814, y + 42, row[3], { fontFamily:'Inter,Arial', fontSize:'20px', fontStyle:'750', color:'#e1c589' }).setOrigin(.5,0);
         box.add([homeOdd, awayOdd]);
         root.add(box);
         this.sportsRows.push(box);
       });
-      root.add(this.add.text(500, 474, 'FICTIONAL EVENTS · DISPLAYED ODDS DRIVE THE RETURN', { fontFamily:'Inter,Arial', fontSize:'8px', color:'#7f8b82', letterSpacing:1.1 }).setOrigin(.5));
+      root.add(this.add.text(500, 500, 'SELECT A SIDE BELOW · DISPLAYED ODDS SET THE RETURN', { fontFamily:'Inter,Arial', fontSize:'10px', color:'#87978f', letterSpacing:1.25 }).setOrigin(.5));
     }
 
     private createRoulette() {
       const root = this.add.container(0,0);
       const felt = this.add.graphics();
-      felt.fillStyle(0x173028,.98).fillRoundedRect(112,126,776,368,18);
-      felt.lineStyle(2,0xb99354,.65).strokeRoundedRect(112,126,776,368,18);
+      felt.fillStyle(0x163328,.99).fillRoundedRect(68,104,864,426,20);
+      felt.lineStyle(2,0xb99354,.68).strokeRoundedRect(68,104,864,426,20);
       root.add(felt);
 
-      const wheel = this.add.container(340,310);
+      const wheel = this.add.container(330,316);
       this.wheel = wheel;
       root.add(wheel);
+      wheel.add(this.add.circle(0,0,184,0x151111).setStrokeStyle(7,0xc89b54,.9));
+      wheel.add(this.add.circle(0,0,156,0x2b201a).setStrokeStyle(3,0x6f4a2e,.8));
       const step = Math.PI * 2 / ROULETTE_WHEEL.length;
       ROULETTE_WHEEL.forEach((number, i) => {
         const angle = i * step - Math.PI / 2;
-        const color = number === 0 ? 0x17613b : RED_NUMBERS.has(number) ? 0x8d2430 : 0x171719;
-        const wedge = this.add.graphics();
-        wedge.fillStyle(color,1).slice(0,0,142,angle,angle+step,true).fillPath();
-        wedge.lineStyle(1,0xc9a769,.28).slice(0,0,142,angle,angle+step,true).strokePath();
-        wheel.add(wedge);
-        const mid = angle + step / 2;
-        const label = this.add.text(Math.cos(mid)*121, Math.sin(mid)*121, String(number), {
-          fontFamily:'Inter,Arial', fontSize:'8px', fontStyle:'700', color:'#f7e8d2'
-        }).setOrigin(.5).setRotation(mid + Math.PI / 2);
-        wheel.add(label);
+        const color = number === 0 ? 0x17613b : RED_NUMBERS.has(number) ? 0x982d37 : 0x121212;
+        const pocket = this.add.rectangle(Math.cos(angle)*142, Math.sin(angle)*142, 24, 13, color)
+          .setStrokeStyle(1,0xe3c47e,.48)
+          .setRotation(angle + Math.PI / 2);
+        wheel.add(pocket);
+        if (i % 3 === 0 || number === 0) {
+          const label = this.add.text(Math.cos(angle)*166, Math.sin(angle)*166, String(number), {
+            fontFamily:'Inter,Arial', fontSize:'10px', fontStyle:'700', color:'#f7e8d2'
+          }).setOrigin(.5);
+          wheel.add(label);
+        }
       });
-      wheel.add(this.add.circle(0,0,62,0xc49b5c).setStrokeStyle(4,0xf0d39b));
-      wheel.add(this.add.circle(0,0,37,0x35261f));
-      this.rouletteBall = this.add.circle(340,153,7,0xf7f0e2).setStrokeStyle(2,0xbca98b);
+      wheel.add(this.add.circle(0,0,76,0xc49b5c).setStrokeStyle(5,0xf0d39b));
+      wheel.add(this.add.circle(0,0,45,0x342219));
+      wheel.add(this.add.circle(0,0,18,0xb77e35));
+      this.rouletteBall = this.add.circle(330,126,9,0xf8f2e9).setStrokeStyle(2,0x9b876b);
       root.add(this.rouletteBall);
 
-      root.add(this.add.text(600,196,'EUROPEAN ROULETTE',{fontFamily:'Inter,Arial',fontSize:'24px',fontStyle:'700',color:'#f1dfbd'}));
-      root.add(this.add.text(600,235,'Single zero · Red / Black',{fontFamily:'Inter,Arial',fontSize:'13px',color:'#aab8ae'}));
-      this.rouletteNumberText = this.add.text(690,322,'—',{fontFamily:'Inter,Arial',fontSize:'70px',fontStyle:'700',color:'#f5e2c2'}).setOrigin(.5);
+      root.add(this.add.text(610,165,'EUROPEAN ROULETTE',{fontFamily:'Inter,Arial',fontSize:'28px',fontStyle:'700',color:'#f2dfbd'}));
+      root.add(this.add.text(610,205,'37 pockets · single zero',{fontFamily:'Inter,Arial',fontSize:'15px',color:'#aab8ae'}));
+      this.rouletteNumberText = this.add.text(704,322,'—',{fontFamily:'Inter,Arial',fontSize:'88px',fontStyle:'700',color:'#f5e2c2'}).setOrigin(.5);
       root.add(this.rouletteNumberText);
-      root.add(this.add.text(690,373,'RESULT',{fontFamily:'Inter,Arial',fontSize:'9px',color:'#8ca095',letterSpacing:1.6}).setOrigin(.5));
+      root.add(this.add.text(704,385,'RESULT',{fontFamily:'Inter,Arial',fontSize:'11px',color:'#96aaa0',letterSpacing:2}).setOrigin(.5));
+      root.add(this.add.text(704,432,'RED / BLACK PAYS 1:1',{fontFamily:'Inter,Arial',fontSize:'11px',color:'#bba886',letterSpacing:1.2}).setOrigin(.5));
     }
 
     private createPoker() {
       const root=this.add.container(0,0);
       const felt=this.add.graphics();
-      felt.fillStyle(0x173128,.98).fillRoundedRect(112,126,776,368,18);
-      felt.lineStyle(2,0xb99354,.65).strokeRoundedRect(112,126,776,368,18);
+      felt.fillStyle(0x173128,.99).fillRoundedRect(68,104,864,426,20);
+      felt.lineStyle(2,0xb99354,.68).strokeRoundedRect(68,104,864,426,20);
       root.add(felt);
-      root.add(this.add.text(500,151,'JACKS OR BETTER',{fontFamily:'Inter,Arial',fontSize:'16px',fontStyle:'700',color:'#ead4ad',letterSpacing:2}).setOrigin(.5));
-      root.add(this.add.text(500,177,'9 / 6 PAY TABLE',{fontFamily:'Inter,Arial',fontSize:'8px',color:'#8fa397',letterSpacing:1.5}).setOrigin(.5));
+      root.add(this.add.text(500,128,'JACKS OR BETTER',{fontFamily:'Inter,Arial',fontSize:'21px',fontStyle:'700',color:'#ead4ad',letterSpacing:2.2}).setOrigin(.5));
+      root.add(this.add.text(500,158,'9 / 6 FULL PAY · HOLD ANY CARD BEFORE DRAW',{fontFamily:'Inter,Arial',fontSize:'10px',color:'#91a69b',letterSpacing:1.45}).setOrigin(.5));
+      root.add(this.add.text(500,187,'JACKS+ 1  ·  2 PAIR 2  ·  3 KIND 3  ·  STRAIGHT 4  ·  FLUSH 6  ·  FULL HOUSE 9',{fontFamily:'Inter,Arial',fontSize:'9px',color:'#b7a783',letterSpacing:.75}).setOrigin(.5));
       for(let i=0;i<5;i++){
-        const card=this.add.container(294+i*103,315);
-        const bg=this.add.rectangle(0,0,88,128,0xf6efe3).setStrokeStyle(2,0xb3935c);
-        const t=this.add.text(0,-3,'?',{fontFamily:'Georgia',fontSize:'30px',fontStyle:'700',color:'#211817'}).setOrigin(.5);
-        const held=this.add.text(0,75,'',{fontFamily:'Inter,Arial',fontSize:'8px',fontStyle:'700',color:'#e6c98d',letterSpacing:1}).setOrigin(.5);
+        const card=this.add.container(252+i*124,335);
+        const bg=this.add.rectangle(0,0,108,158,0xf8f0e4).setStrokeStyle(3,0xb3935c);
+        const t=this.add.text(0,-4,'?',{fontFamily:'Georgia',fontSize:'36px',fontStyle:'700',color:'#211817'}).setOrigin(.5);
+        const held=this.add.text(0,92,'',{fontFamily:'Inter,Arial',fontSize:'10px',fontStyle:'750',color:'#e6c98d',letterSpacing:1.1}).setOrigin(.5);
         card.add([bg,t,held]);
         root.add(card);
         this.cards.push({card,text:t});
         this.pokerHeldLabels.push(held);
       }
-      root.add(this.add.text(500,450,'DEAL · SELECT CARDS TO HOLD · DRAW',{fontFamily:'Inter,Arial',fontSize:'9px',color:'#91a399',letterSpacing:1.1}).setOrigin(.5));
+      root.add(this.add.text(500,495,'DEAL → HOLD → DRAW',{fontFamily:'Inter,Arial',fontSize:'12px',fontStyle:'700',color:'#91a399',letterSpacing:1.6}).setOrigin(.5));
     }
 
     private createLottery() {
       const root=this.add.container(0,0);
       const paper=this.add.graphics();
-      paper.fillStyle(0xf2e6cd,.98).fillRoundedRect(145,130,710,356,16);
-      paper.lineStyle(3,0xc49a4e,.75).strokeRoundedRect(145,130,710,356,16);
+      paper.fillStyle(0xf3e7ce,.995).fillRoundedRect(84,105,832,425,20);
+      paper.lineStyle(4,0xc49a4e,.8).strokeRoundedRect(84,105,832,425,20);
       root.add(paper);
-      root.add(this.add.text(500,154,'MATCH 3',{fontFamily:'Inter,Arial',fontSize:'17px',fontStyle:'700',color:'#5e4729',letterSpacing:2}).setOrigin(.5));
-      root.add(this.add.text(500,181,'REVEAL 9 PRIZE AMOUNTS',{fontFamily:'Inter,Arial',fontSize:'9px',color:'#907754',letterSpacing:1.2}).setOrigin(.5));
+      root.add(this.add.text(500,128,'MATCH 3',{fontFamily:'Inter,Arial',fontSize:'23px',fontStyle:'750',color:'#5e4729',letterSpacing:2.4}).setOrigin(.5));
+      root.add(this.add.text(500,161,'REVEAL 9 PRIZE AMOUNTS',{fontFamily:'Inter,Arial',fontSize:'11px',color:'#8c7351',letterSpacing:1.45}).setOrigin(.5));
       for(let i=0;i<9;i++){
-        const x=325+(i%3)*175,y=245+Math.floor(i/3)*82;
-        const rect=this.add.rectangle(x,y,140,62,0x765a43).setStrokeStyle(2,0xe0c38d,.8);
-        const text=this.add.text(x,y,'SCRATCH',{fontFamily:'Inter,Arial',fontSize:'11px',fontStyle:'700',color:'#ead9b9',letterSpacing:1}).setOrigin(.5);
+        const x=310+(i%3)*190,y=245+Math.floor(i/3)*92;
+        const rect=this.add.rectangle(x,y,166,72,0x765a43).setStrokeStyle(3,0xd6b377,.86);
+        const text=this.add.text(x,y,'SCRATCH',{fontFamily:'Inter,Arial',fontSize:'14px',fontStyle:'750',color:'#ead9b9',letterSpacing:1.2}).setOrigin(.5);
         root.add([rect,text]);
         this.ticketCells.push({rect,text});
       }
+      root.add(this.add.text(500,492,'MATCH THREE IDENTICAL AMOUNTS',{fontFamily:'Inter,Arial',fontSize:'10px',fontStyle:'700',color:'#8c7351',letterSpacing:1.3}).setOrigin(.5));
     }
 
     private setContext(balanceCents: number) {
@@ -306,14 +313,14 @@ export async function mountRealityGame(
 
     private animateSlots(outcome: AnimatedOutcome) {
       const grid = outcome.visual?.kind === 'slots' ? outcome.visual.grid : defaultSlotGrid();
-      const reelW = 148, rowH = 108, startX = 130, startY = 148;
+      const reelW = 156, rowH = 112, startX = 110, startY = 148;
       const finalize = () => {
         for (let col = 0; col < 5; col++) {
           const reel = this.reelContainers[col];
           if (!reel) continue;
           reel.y = startY;
           reel.removeAll(true);
-          for (let row=0; row<3; row++) reel.add(this.add.image(reelW/2,row*rowH+rowH/2,grid[row][col]).setDisplaySize(86,86));
+          for (let row=0; row<3; row++) reel.add(this.add.image(reelW/2,row*rowH+rowH/2,grid[row][col]).setDisplaySize(98,98));
         }
       };
 
@@ -327,7 +334,7 @@ export async function mountRealityGame(
         const sequence: SlotSymbol[]=[];
         for(let i=0;i<9;i++) sequence.push(SYMBOLS[(i+col*2)%SYMBOLS.length]);
         sequence.push(grid[0][col],grid[1][col],grid[2][col]);
-        sequence.forEach((symbol,i)=>reel.add(this.add.image(reelW/2,i*rowH+rowH/2,symbol).setDisplaySize(86,86)));
+        sequence.forEach((symbol,i)=>reel.add(this.add.image(reelW/2,i*rowH+rowH/2,symbol).setDisplaySize(98,98)));
         reel.y=startY-9*rowH;
         if(!options.reducedMotion) this.tweens.add({targets:reel,y:startY,duration:760+col*90,ease:'Cubic.easeOut'});
       }
