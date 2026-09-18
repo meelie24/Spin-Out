@@ -29,7 +29,7 @@ export function XRayMoment({
 
       <div className="xray-actions">
         <button type="button" className="xray-primary" onClick={onContinue}>Got it</button>
-        <button type="button" className="xray-leave" onClick={onExit}>I'm done</button>
+        <button type="button" className="xray-leave" onClick={onExit}>{"I'm done"}</button>
         {insight.explanation ? (
           <button type="button" className="xray-link" onClick={() => setWhyOpen(open => !open)}>
             {whyOpen ? 'Close explanation' : 'Why did that feel different?'}
