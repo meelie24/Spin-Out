@@ -6,7 +6,7 @@ const PREF_KEY = 'spinout.audio.v1';
 
 class SpinAudio {
   private ctx: AudioContext | null = null;
-  private ambient: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private ambient: { source: AudioBufferSourceNode; gain: GainNode; filter: BiquadFilterNode } | null = null;
   private muted = false;
   private masterVolume = .75;
   private hydrated = false;
@@ -56,6 +56,25 @@ class SpinAudio {
     this.masterVolume = Math.max(0, Math.min(1, value));
     this.persist();
     if (this.ambient) this.ambient.gain.gain.value = .008 * this.masterVolume;
+  }
+
+  setAmbientMode(mode: 'normal' | 'cooling' | 'ledger' | 'strong') {
+    const ambient = this.ambient;
+    if (!ambient) return;
+
+    const now = this.ctx?.currentTime ?? 0;
+    const targets = mode === 'normal'
+      ? { gain: .008, frequency: 420 }
+      : mode === 'cooling'
+        ? { gain: .0058, frequency: 300 }
+        : mode === 'ledger'
+          ? { gain: .0064, frequency: 340 }
+          : { gain: .0042, frequency: 230 };
+
+    ambient.gain.gain.cancelScheduledValues(now);
+    ambient.gain.gain.setTargetAtTime(this.gain(targets.gain), now, .22);
+    ambient.filter.frequency.cancelScheduledValues(now);
+    ambient.filter.frequency.setTargetAtTime(targets.frequency, now, .22);
   }
 
   private gain(amount: number) {
@@ -195,7 +214,7 @@ class SpinAudio {
     gain.gain.value = this.gain(.008);
     source.connect(filter).connect(gain).connect(ctx.destination);
     source.start();
-    this.ambient = { source, gain };
+    this.ambient = { source, gain, filter };
   }
 
   stopAmbient() {
