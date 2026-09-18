@@ -32,13 +32,13 @@ This matrix audits the purpose/Reality Ping pass without reopening the visual di
 | 24 | Build a simple session summary after leaving | **PASS** | Exit receipt shows duration, rounds, Ping count, exit-after-Ping observation, limit overrun and prior comparable session. |
 | 25 | Measure whether the intervention is working | **PASS IN PRODUCT DATA** | Run records/events store duration, rounds, action intervals, Ping shown/dismissed, exit-after-Ping, chosen limits, overruns, repeat timing and trends without optimizing for more play. |
 | 26 | Keep current visual work intact | **PASS** | Brown luxury system, Chinese/casino art, liquid glass, game cards, background symbols, motion and audio were preserved; only behavior surfaces/copy were added. |
-| 27 | The test | **PASS IN AUTOMATION / FINAL VISUAL REVIEW PENDING** | End-to-end QA covers the first-run flow, game loop, Pings, exit and summary; final screenshots of new intervention screens are being captured. |
+| 27 | The test | **PASS** | End-to-end QA covers first-run purpose framing, game loop, behavior-driven Pings, chosen limits, exit and summary. Mobile screenshots were inspected for quit reason, selected limit, ordinary/strong Pings and exit receipt. |
 | 28 | Test the Reality Ping system | **PASS IN UNIT + BROWSER** | Unit tests cover rapid replay, chasing, stake escalation, time, limits, near miss, win, personalization, dismissals and cooldown; browser tests cover strong limit/stake interventions and mobile layout. |
 | 29 | Copy review | **PASS** | Current Ping library uses contractions, normal American English and specific behavior/number language; banned generic RG phrasing is absent. |
-| 30 | Definition of done | **PENDING FINAL VISUAL CI** | Functional implementation is in place. This pass is not marked final until the latest combined CI and screenshot review pass. |
+| 30 | Definition of done | **PASS** | Intervention candidate `2e6b5eb5818bd2f41c77b0a416889346f4201c4e` passed core tests, TypeScript, lint, production build, browser QA and accessibility checks. CI artifact `spin-out-qa` from run `35382533789` was visually reviewed on mobile and desktop. |
 
 ## Release rule for this pass
 
-Do not mark item 30 complete until the current branch passes core tests, typecheck, lint, production build, browser QA, accessibility checks, and the new intervention screenshots have been inspected on mobile.
+Item 30 was closed only after the branch passed core tests, typecheck, lint, production build, browser QA and accessibility checks, and the new intervention screenshots were inspected on mobile.
 
 This pass does not authorize merging `main`; the broader RevenueCat/Paddle sandbox and GitHub-native deployment gates remain governed by `docs/PROMPT_IMPLEMENTATION_MATRIX.md`.
