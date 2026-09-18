@@ -987,3 +987,34 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .ping-actions button{flex:1}
   .ping-why{flex-basis:100%!important;margin-left:0}
 }
+
+.sidebar-exit-trend{
+  margin-top:12px;
+  padding-top:11px;
+  border-top:1px solid rgba(255,238,206,.08);
+}
+.sidebar-exit-trend>span{
+  display:block;
+  color:#79685c;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+.sidebar-exit-trend>div{
+  display:flex;
+  gap:7px;
+  margin-top:6px;
+}
+.sidebar-exit-trend b{
+  color:#d4ba95;
+  font-size:10px;
+  font-variant-numeric:tabular-nums;
+  font-weight:650;
+}
+.sidebar-exit-trend em{
+  display:block;
+  margin-top:5px;
+  color:#a88d73;
+  font-size:9px;
+  font-style:normal;
+}
