@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import type { GamblingType, ObligationType, RealityProfile, TriggerType } from '@/lib/types';
-import { isObligationExpired } from '@/lib/engine';
+import { isFinancialContextStale, isObligationExpired } from '@/lib/engine';
 import { spinAudio } from '@/lib/audio';
 
 const gameChoices: { value: GamblingType; label: string; art: string }[] = [
@@ -42,9 +42,15 @@ function dateFor(choice: string) {
 export function RealitySetup({ existing, onComplete }: { existing: RealityProfile | null; onComplete: (profile: RealityProfile) => void }) {
   const firstRun = !existing;
   const expired = existing?.obligationDueDate ? isObligationExpired(existing.obligationDueDate, new Date().toISOString().slice(0, 10)) : false;
-  const steps = useMemo<Step[]>(() => firstRun
-    ? ['wager','game','trigger','available','income','obligation','obligation-detail','lender','goal','urge']
-    : expired ? ['wager','trigger','obligation','obligation-detail','urge'] : ['wager','trigger','urge'], [firstRun, expired]);
+  const financeStale = existing ? isFinancialContextStale(existing) : false;
+  const steps = useMemo<Step[]>(() => {
+    if (firstRun) return ['wager','game','trigger','available','income','obligation','obligation-detail','lender','goal','urge'];
+    const next: Step[] = ['wager','trigger'];
+    if (financeStale) next.push('available','income','obligation','obligation-detail');
+    else if (expired) next.push('obligation','obligation-detail');
+    next.push('urge');
+    return next;
+  }, [firstRun, expired, financeStale]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -59,7 +65,7 @@ export function RealitySetup({ existing, onComplete }: { existing: RealityProfil
   const [obligationDate, setObligationDate] = useState<string | null>(existing?.obligationDueDate ?? null);
   const [customObligationDate, setCustomObligationDate] = useState(false);
   const [lenderName, setLenderName] = useState(existing?.recentLenderName ?? '');
-  const [lenderHelped, setLenderHelped] = useState(Boolean(existing?.recentLenderName));
+  const [lenderHelped, setLenderHelped] = useState(existing?.recentLenderHelpedRecently ?? false);
   const [lenderAmount, setLenderAmount] = useState<number | null>(existing?.recentLenderAmountCents ?? null);
   const [goal, setGoal] = useState(existing?.personalMoneyGoal ?? '');
 
@@ -94,9 +100,11 @@ export function RealitySetup({ existing, onComplete }: { existing: RealityProfil
       obligationAmountCents: obligation === 'none' ? null : obligationAmount,
       obligationDueDate: obligation === 'none' ? null : obligationDate,
       recentLenderName: lenderName.trim() || null,
-      recentLenderAmountCents: lenderHelped ? lenderAmount : null,
+      recentLenderHelpedRecently: Boolean(lenderName.trim()) && lenderHelped,
+      recentLenderAmountCents: lenderName.trim() && lenderHelped ? lenderAmount : null,
       personalMoneyGoal: goal.trim() || null,
       startingUrge,
+      financialContextUpdatedAt: new Date().toISOString(),
       createdAt: existing?.createdAt ?? new Date().toISOString(),
     };
     onComplete(profile);
@@ -131,7 +139,7 @@ export function RealitySetup({ existing, onComplete }: { existing: RealityProfil
           <button className="bare-link centered" type="button" onClick={() => { setAvailable(null); advance('not-sure'); }}>Not sure</button>
         </> : null}
 
-        {step === 'income' ? <><h1>When’s more money coming in?</h1><div className="choice-stack">{['Today','Tomorrow','This week','Next week'].map(v => chip(v, v, () => setIncomeDate(dateFor(v))))}<label className="choice-card date-card">Choose date<input type="date" onChange={e => { if (e.target.value) { setIncomeDate(e.target.value); advance('date'); } }}/></label></div></> : null}
+        {step === 'income' ? <><h1>When’s more money coming in?</h1><div className="choice-stack">{['Today','Tomorrow','This week','Next week'].map(v => chip(v, v, () => setIncomeDate(dateFor(v))))}<label className="choice-card date-card">Choose date<input type="date" onChange={e => { if (e.target.value) { setIncomeDate(e.target.value); advance('date'); } }}/></label><button type="button" className="choice-card" onClick={() => { setIncomeDate(null); advance('not-sure'); }}>Not sure</button></div></> : null}
 
         {step === 'obligation' ? <><h1>What’s the next thing that has to get paid?</h1><div className="obligation-grid">{obligations.map(c => chip(c.value, c.label, () => setObligation(c.value)))}</div></> : null}
 
@@ -163,7 +171,7 @@ export function RealitySetup({ existing, onComplete }: { existing: RealityProfil
 
         {step === 'urge' ? <><h1>How bad do you want to play right now?</h1><div className="urge-scale" role="group" aria-label="Urge from 1 to 10">{Array.from({ length: 10 }, (_, i) => i + 1).map(n => <button key={n} type="button" onClick={() => { if ('vibrate' in navigator) navigator.vibrate?.(8); finish(n); }} style={{ '--heat': n / 10 } as React.CSSProperties}>{n}</button>)}</div><div className="urge-labels"><span>Low</span><span>High</span></div></> : null}
       </section>
-      <p className="setup-privacy">Saved in this browser.</p>
+      <p className="setup-privacy">Private by default.</p>
     </main>
   );
 }
