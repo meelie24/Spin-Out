@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:core": "tsc -p tsconfig.core.json && node --test .core-test/tests/*.test.js",
-    "qa": "node qa/smoke.mjs",
+    "qa": "node qa/smoke.mjs && node qa/user-test-round2.mjs",
     "lint": "eslint ."
   },
   "dependencies": {
