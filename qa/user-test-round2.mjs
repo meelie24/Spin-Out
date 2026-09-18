@@ -1,9 +1,25 @@
 import { chromium } from 'playwright';
 
 const base = process.env.BASE_URL || 'http://127.0.0.1:3000';
+const failures = [];
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
+}
+
+async function check(name, fn) {
+  let context = null;
+  try {
+    context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await fn(context);
+    console.log('PASS', name);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    failures.push(name + ': ' + message);
+    console.error('FAIL', name, message);
+  } finally {
+    await context?.close().catch(() => {});
+  }
 }
 
 function isoFromNow(days) {
@@ -84,10 +100,7 @@ async function assertFocusInside(page, selector, label) {
 const browser = await chromium.launch({ headless: true });
 
 try {
-  // Low-friction home prompts should stay dismissed for the current browser-tab visit.
-  // A refresh or returning from a run should not immediately resurrect what the user just cleared.
-  {
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await check('same-visit home prompt dismissal', async context => {
     const page = await context.newPage();
     await page.goto(base, { waitUntil: 'domcontentloaded' });
     const prompt = page.getByRole('button', { name: /What usually happens after “one more”.*Dismiss/i });
@@ -95,15 +108,12 @@ try {
     await prompt.click();
     await prompt.waitFor({ state: 'detached' });
     await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(100);
     assert(await page.getByRole('button', { name: /What usually happens after “one more”.*Dismiss/i }).count() === 0,
       'dismissed homepage Reality Ping returned immediately after refresh');
-    await context.close();
-  }
+  });
 
-  // Run 10,000 should be educational without telling the user to continue, and its dialog
-  // should receive keyboard focus when it opens.
-  {
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await check('Run 10,000 copy and focus', async context => {
     const p = profile('slots');
     await seedActive(context, p, runFor(p, { actionCount: 2, balanceCents: 8_000 }));
     const page = await context.newPage();
@@ -115,12 +125,9 @@ try {
     await page.waitForTimeout(520);
     const text = await page.locator('.longrun-panel').innerText();
     assert(!/\bkeep going\b/i.test(text), 'Run 10,000 used directive "Keep going" copy');
-    await context.close();
-  }
+  });
 
-  // Ordinary Reality Ping should take focus instead of leaving the keyboard on the disabled game control.
-  {
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await check('Reality Ping focus', async context => {
     const p = profile('slots', {
       triggerType: 'other',
       availableUntilIncomeCents: null,
@@ -141,12 +148,9 @@ try {
     await page.locator('.game-action').click();
     await page.locator('.reality-ping').waitFor({ timeout: 9_000 });
     await assertFocusInside(page, '.reality-ping', 'Reality Ping');
-    await context.close();
-  }
+  });
 
-  // X-Ray should also take focus when stake escalation interrupts the run.
-  {
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await check('X-Ray focus', async context => {
     const p = profile('slots', {
       triggerType: 'other',
       availableUntilIncomeCents: null,
@@ -172,12 +176,9 @@ try {
     await page.getByRole('button', { name: 'Raise practice stake' }).click();
     await page.locator('.xray-moment').waitFor({ timeout: 5_000 });
     await assertFocusInside(page, '.xray-moment', 'X-Ray');
-    await context.close();
-  }
+  });
 
-  // My Reality is a real dialog, so keyboard focus should enter it when opened.
-  {
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await check('My Reality focus', async context => {
     const p = profile('slots');
     await context.addInitScript(({ profile }) => {
       localStorage.setItem('spinout.v2', JSON.stringify({
@@ -194,13 +195,9 @@ try {
     await page.getByRole('button', { name: 'My reality' }).first().click();
     await page.locator('.reality-context-dialog').waitFor();
     await assertFocusInside(page, '.reality-context-dialog', 'My Reality');
-    await context.close();
-  }
+  });
 
-  // A self-reported "No" can support "money kept", but the product should not claim
-  // that money is protected from future gambling.
-  {
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await check('truthful post-run availability language', async context => {
     const p = profile('slots');
     await seedActive(context, p, runFor(p));
     const page = await context.newPage();
@@ -217,7 +214,10 @@ try {
     const summary = await page.locator('.post-card').innerText();
     assert(!/\bPROTECTED\b/.test(summary), 'post-run summary overclaimed that self-reported money was protected');
     assert(/\bAVAILABLE\b/i.test(summary), 'post-run summary did not use truthful availability language');
-    await context.close();
+  });
+
+  if (failures.length) {
+    throw new Error('Round 2 user-test failures:\n- ' + failures.join('\n- '));
   }
 
   console.log('Round 2 user testing passed.');
