@@ -1,20 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminSupabase } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function presenceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-}
-
 export async function POST(request: Request) {
-  const supabase = presenceClient();
-  if (!supabase) {
-    return NextResponse.json({ available: false }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
+  const admin = createAdminSupabase();
+  if (!admin) {
+    return NextResponse.json(
+      { available: false, configured: false },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    );
   }
 
   let id = '';
@@ -29,11 +25,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ available: false }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
   }
 
-  const { data, error } = await supabase.rpc('touch_presence', { p_session_id: id });
-  if (error || typeof data !== 'number') {
-    console.error('Presence unavailable', error?.message);
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - 90_000).toISOString();
+  await admin.from('presence_sessions').delete().lt('seen_at', cutoff);
+
+  const { error } = await admin
+    .from('presence_sessions')
+    .upsert({ session_id: id, seen_at: now.toISOString() }, { onConflict: 'session_id' });
+
+  if (error) {
+    console.error('Presence unavailable', error.message);
     return NextResponse.json({ available: false }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
   }
 
-  return NextResponse.json({ available: true, otherCount: Math.max(0, Math.round(data)) }, { headers: { 'Cache-Control': 'no-store' } });
+  const { count, error: countError } = await admin
+    .from('presence_sessions')
+    .select('session_id', { head: true, count: 'exact' })
+    .gte('seen_at', cutoff);
+
+  if (countError || count == null) {
+    console.error('Presence count unavailable', countError?.message);
+    return NextResponse.json({ available: false }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
+  }
+
+  return NextResponse.json(
+    { available: true, otherCount: Math.max(0, count - 1) },
+    { headers: { 'Cache-Control': 'no-store' } },
+  );
 }
