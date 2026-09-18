@@ -158,6 +158,10 @@ try {
     await page.locator('.game-action').click();
     await page.locator('.reality-ping').waitFor({ timeout: 9_000 });
     await assertFocusInside(page, '.reality-ping', 'Reality Ping');
+    assert(await page.getByRole('button', { name: 'Keep going', exact: true }).count() === 0,
+      'strong Reality Ping used directive "Keep going" action copy');
+    assert(await page.getByRole('button', { name: 'Continue run', exact: true }).count() === 1,
+      'strong Reality Ping did not offer neutral continuation wording');
   });
 
   await check('X-Ray focus', async context => {
