@@ -195,6 +195,7 @@ try {
   await page.getByRole('button', { name: /Slots/ }).click();
   await page.getByRole('button', { name: /Win it back/ }).click();
   await page.getByRole('heading', { name: /Why are you trying to stop/i }).waitFor();
+  await page.screenshot({ path: `${out}/quit-reason-390.png`, fullPage: true });
   await page.getByRole('button', { name: 'Skip' }).click();
   await page.locator('input[name="available"]').fill('850');
   await page.getByRole('button', { name: 'Use' }).click();
@@ -229,6 +230,7 @@ try {
   await page.getByRole('button', { name: "I'm done" }).click();
   await page.getByText(/You left\./i).waitFor();
   assert(await page.getByText(/Reality Pings?/i).count() > 0, 'exit receipt did not show Reality Ping count');
+  await page.screenshot({ path: `${out}/exit-receipt-390.png`, fullPage: true });
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor();
   await page.getByRole('button', { name: '5' }).click();
@@ -476,6 +478,7 @@ try {
   await limitPing.waitFor({ timeout: 9000 });
   assert(await limitPing.getByText(/You decided on 5\. This is 7\./i).isVisible(), 'chosen-limit Ping did not reference the exact user limit');
   assert(await limitPing.getByRole('button', { name: "I'm done" }).isVisible(), 'strong limit intervention did not offer an immediate exit');
+  await limitPage.screenshot({ path: `${out}/reality-ping-limit-390.png`, fullPage: true });
   await limitContext.close();
 
   // Behavior-driven intervention: raising the simulated amount after a loss fires before another play.
