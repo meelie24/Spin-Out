@@ -218,6 +218,24 @@ test('a win after losses gets interpreted after the win', () => {
   assert.equal(candidate?.message, 'Would this win make you stay longer?');
 });
 
+test('returning soon after leaving becomes visible to the user', () => {
+  const candidates = buildPingCandidates(baseProfile, snap({
+    returnedAfterMs: 3 * 60_000,
+    actionCount: 5,
+  }), NOW);
+  const candidate = candidates.find(c => c.type === 'quick-return');
+  assert.match(candidate?.message ?? '', /back here 3 minutes/);
+});
+
+test('specific amount-through-session copy uses the actual tracked number', () => {
+  const candidates = buildPingCandidates(baseProfile, snap({
+    totalStakedCents: 42_000,
+    actionCount: 7,
+  }), NOW);
+  const candidate = candidates.find(c => c.type === 'amount-through');
+  assert.equal(candidate?.message, "You've put $420 through this session.");
+});
+
 test('recovery ping appears when an obligation shortfall is repaired', () => {
   const p = { ...baseProfile, intendedWagerCents: 60_000, availableUntilIncomeCents: 50_000, obligationAmountCents: 43_000 };
   const candidates = buildPingCandidates(p, snap({
