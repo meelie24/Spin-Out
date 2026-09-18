@@ -56,12 +56,13 @@ export function PayPalSubscription({
   useEffect(() => {
     let cancelled = false;
     let rendered = false;
+    const node = host.current;
 
     (async () => {
       try {
         await loadPayPal(clientId);
-        if (cancelled || !host.current || !window.paypal) return;
-        host.current.innerHTML = '';
+        if (cancelled || !node || !window.paypal) return;
+        node.innerHTML = '';
         await window.paypal.Buttons({
           style: { layout: 'vertical', shape: 'rect', label: 'subscribe', height: 44 },
           createSubscription: (_data, actions) => actions.subscription.create({ plan_id: planId }),
@@ -88,7 +89,7 @@ export function PayPalSubscription({
             console.error('PayPal checkout error', error);
             onError('Checkout could not be completed.');
           },
-        }).render(host.current);
+        }).render(node);
         rendered = true;
       } catch (error) {
         if (!cancelled) onError(error instanceof Error ? error.message : 'Checkout could not load.');
@@ -99,7 +100,7 @@ export function PayPalSubscription({
 
     return () => {
       cancelled = true;
-      if (rendered && host.current) host.current.innerHTML = '';
+      if (rendered && node) node.innerHTML = '';
     };
   }, [clientId, planId, plan, onApproved, onError]);
 
