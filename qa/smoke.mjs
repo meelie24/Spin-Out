@@ -561,6 +561,7 @@ try {
   const stakePing = stakePage.locator('.xray-moment');
   await stakePing.waitFor({ timeout: 5000 });
   assert(await stakePing.getByText(/You lost, then raised it\./i).isVisible(), 'stake-escalation X-Ray did not fire immediately');
+  await stakePage.screenshot({ path: `${out}/xray-stake-390.png`, fullPage: true });
   const afterStake = await stakePage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
   assert(afterStake?.actionCount === 3, 'stake-escalation intervention required another play before firing');
   await stakeContext.close();
@@ -614,11 +615,41 @@ try {
   await longPage.getByRole('button', { name: 'Run 10,000' }).click();
   await longPage.locator('.longrun-panel').waitFor({ timeout: 5000 });
   await longPage.getByText(/After 10,000 runs/i).waitFor({ timeout: 5000 });
+  await longPage.screenshot({ path: `${out}/longrun-10000-390.png`, fullPage: true });
   const duringLong = await longPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
   assert(duringLong?.actionCount === 2 && duringLong?.balanceCents === 8000, 'Run 10,000 mutated the live Reality Run');
   await longPage.getByRole('button', { name: 'Close' }).click();
   await longPage.locator('.longrun-panel').waitFor({ state: 'detached' });
   await longContext.close();
+
+  // Payday Shield and My Reality remain quiet built-in home surfaces.
+  const contextHome = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const contextProfile = profile('slots', {
+    nextIncomeDate: isoFromNow(1),
+    difficultTimes: ['payday'],
+    paydayPlanActions: ['move-bill-money','open-spinout'],
+    obligationType: 'car',
+    obligationAmountCents: 43_000,
+    obligationDueDate: isoFromNow(4),
+  });
+  await contextHome.addInitScript(({ p }) => {
+    localStorage.setItem('spinout.v2', JSON.stringify({
+      version:2,
+      profile:p,
+      runs:[],
+      pingLearning:{},
+      account:{ signedIn:false,email:null,billing:'free',paypalSubscriptionId:null,paypalPlan:null },
+      events:[],
+    }));
+  }, { p: contextProfile });
+  const contextPage = await contextHome.newPage();
+  await contextPage.goto(base, { waitUntil: 'domcontentloaded' });
+  await contextPage.getByText(/Payday's tomorrow\\./i).waitFor();
+  await contextPage.screenshot({ path: \`\${out}/payday-shield-390.png\`, fullPage: true });
+  await contextPage.getByRole('button', { name: 'My reality' }).click();
+  await contextPage.getByRole('heading', { name: /What should Spin Out keep in mind/i }).waitFor();
+  await contextPage.screenshot({ path: \`\${out}/my-reality-390.png\`, fullPage: true });
+  await contextHome.close();
 
   // Reduced motion stays playable.
   const reduced = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
