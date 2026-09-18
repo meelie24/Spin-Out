@@ -103,6 +103,15 @@ export function PlusDashboard({ authenticated, premium, serverRuns }: { authenti
       <article><span>Reality Runs</span><strong>{runs.length}</strong><small>{runs.filter(r=>r.exitReason==='voluntary').length} voluntary exits</small></article>
     </section>
 
+    {metrics.firstAvg != null && metrics.recentAvg != null ? <section className="plus-section exit-comparison">
+      <div className="section-title"><div><p className="kicker">Time to leave</p><h2>First 5 vs recent 5</h2></div></div>
+      <div className="exit-compare-grid">
+        <div><span>First 5</span><strong>{fmtTime(metrics.firstAvg)}</strong></div>
+        <div><span>Recent 5</span><strong>{fmtTime(metrics.recentAvg)}</strong></div>
+      </div>
+      <p className="metric-note">Voluntary exits only. Shorter time is the direction being measured.</p>
+    </section> : null}
+
     <section className="plus-section">
       <div className="section-title"><div><p className="kicker">Last 7 days</p><h2>Weekly readout</h2></div></div>
       <div className="week-grid">
