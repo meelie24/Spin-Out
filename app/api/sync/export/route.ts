@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { resolveAccess } from '@/lib/access';
 import { createServerSupabase } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -8,6 +9,8 @@ export async function GET() {
   if (!supabase) return NextResponse.json({ authenticated:false }, { status:503 });
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return NextResponse.json({ authenticated:false }, { status:401 });
+  const access = await resolveAccess(supabase, auth.user.id);
+  if (!access.active) return NextResponse.json({ authenticated:true, synced:false, premiumRequired:true }, { status:403 });
 
   const [profileResult, runsResult] = await Promise.all([
     supabase.from('user_profiles').select('profile').eq('user_id', auth.user.id).maybeSingle(),
