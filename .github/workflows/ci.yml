@@ -8,6 +8,9 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://vwjaoibxjklaepfllenk.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_MdPVpbAl0W7UQYlZy_lo6A_QQMX1pQW
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
