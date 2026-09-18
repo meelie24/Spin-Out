@@ -627,7 +627,8 @@ try {
   await longPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await longPage.getByRole('button', { name: 'Run 10,000' }).click();
   await longPage.locator('.longrun-panel').waitFor({ timeout: 5000 });
-  await longPage.getByText(/After 10,000 runs/i).waitFor({ timeout: 5000 });
+  await longPage.getByText(/This 10,000-run sample/i).waitFor({ timeout: 5000 });
+  await longPage.getByText(/Model expectation/i).waitFor({ timeout: 5000 });
   await longPage.screenshot({ path: `${out}/longrun-10000-390.png`, fullPage: true });
   const duringLong = await longPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
   assert(duringLong?.actionCount === 2 && duringLong?.balanceCents === 8000, 'Run 10,000 mutated the live Reality Run');
@@ -661,6 +662,9 @@ try {
   await contextPage.screenshot({ path: `${out}/payday-shield-390.png`, fullPage: true });
   await contextPage.getByRole('button', { name: 'My reality' }).click();
   await contextPage.getByRole('heading', { name: /What should Spin Out keep in mind/i }).waitFor();
+  const realitySave = contextPage.getByRole('button', { name: 'Save' });
+  await realitySave.waitFor();
+  assert(await realitySave.isVisible(), 'My Reality save action is not visible on mobile');
   await contextPage.screenshot({ path: `${out}/my-reality-390.png`, fullPage: true });
   await contextHome.close();
 
