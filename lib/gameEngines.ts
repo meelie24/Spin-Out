@@ -1,6 +1,6 @@
 import type { GamblingType, OutcomeBand } from './types';
 
-export type SlotSymbol = 'lemon' | 'cherry' | 'plum' | 'bell' | 'gem' | 'seven';
+export type SlotSymbol = 'lemon' | 'cherry' | 'plum' | 'bell' | 'gem' | 'bar' | 'seven';
 export type CardCode = string;
 
 export type GameVisual =
@@ -20,6 +20,7 @@ const SLOT_STRIP: SlotSymbol[] = [
   'lemon','cherry','plum','lemon','bell','cherry','lemon','gem',
   'plum','cherry','lemon','bell','plum','cherry','seven','lemon',
   'gem','plum','cherry','lemon','bell','cherry','plum','lemon',
+  'bar','lemon','bar','cherry','bar','plum','bar',
 ];
 
 const SLOT_LINES = [
@@ -36,6 +37,7 @@ const SLOT_PAYTABLE: Record<SlotSymbol, Record<number, number>> = {
   plum:   { 3: 15, 4: 40, 5: 105 },
   bell:   { 3: 25, 4: 70, 5: 165 },
   gem:    { 3: 38, 4: 105, 5: 300 },
+  bar:    { 3: 100, 4: 300, 5: 900 },
   seven:  { 3: 75, 4: 225, 5: 675 },
 };
 
