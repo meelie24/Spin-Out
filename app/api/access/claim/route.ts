@@ -53,11 +53,13 @@ export async function POST(request: Request) {
     row = refreshed.data;
   }
 
-  const sameRun = row?.trial_run_id === runId;
-  const notConsumed = !row?.trial_consumed_at;
-  const notExpired = row?.trial_ends_at && Date.parse(row.trial_ends_at) > Date.now();
-  if (sameRun && notConsumed && notExpired) {
-    return NextResponse.json({ access: 'trial', active: true, trial: true, endsAt: row.trial_ends_at, game: row.trial_game }, { headers: { 'Cache-Control': 'no-store' } });
+  if (row) {
+    const sameRun = row.trial_run_id === runId;
+    const notConsumed = !row.trial_consumed_at;
+    const notExpired = Boolean(row.trial_ends_at && Date.parse(row.trial_ends_at) > Date.now());
+    if (sameRun && notConsumed && notExpired) {
+      return NextResponse.json({ access: 'trial', active: true, trial: true, endsAt: row.trial_ends_at, game: row.trial_game }, { headers: { 'Cache-Control': 'no-store' } });
+    }
   }
 
   return NextResponse.json({ access: 'core', active: false, trial: false }, { headers: { 'Cache-Control': 'no-store' } });
