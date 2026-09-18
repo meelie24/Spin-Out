@@ -399,6 +399,14 @@ try {
 
     assert(errors.length === 0, `${gameType} environment errors: ${JSON.stringify(errors)}`);
     await envPage.screenshot({ path: `${out}/environment-${gameType}-390.png`, fullPage: true });
+
+    const beforeReload = await envPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
+    assert(beforeReload, `${gameType} active run missing before refresh`);
+    await envPage.reload({ waitUntil: 'networkidle' });
+    await envPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+    const afterReload = await envPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
+    assert(afterReload?.balanceCents === beforeReload.balanceCents, `${gameType} balance changed on refresh`);
+    assert(afterReload?.actionCount === beforeReload.actionCount, `${gameType} action count changed on refresh`);
     await envContext.close();
   }
 
