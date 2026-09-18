@@ -479,7 +479,8 @@ export function selectPing(candidates: PingCandidate[], learning: PingLearning, 
     const learnedStakeUp = shown ? (stat?.stakeUpAfter ?? 0) / shown : 0;
     const learnedContinue = shown ? (stat?.continuedAfter ?? 0) / shown : 0;
     const learnedRecoveryExit = shown ? (stat?.recoveryExitAfter ?? 0) / shown : 0;
-    const repeatPenalty = recentTypes.includes(candidate.type) ? 3 : 0;
+    const repeatPenalty = (recentTypes.includes(candidate.type) ? 3 : 0)
+      + (candidate.type === 'quit-reason' && shown > 0 ? 8 : 0);
     const behaviorScore =
       learnedExit * 1.4
       + learnedStakeDown * .7
