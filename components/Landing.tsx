@@ -99,6 +99,15 @@ export function Landing() {
 
   const kept = useMemo(() => totalMoneyKept(runs), [runs]);
   const recent = useMemo(() => recentExitAverageSeconds(runs), [runs]);
+  const exitTrend = useMemo(() => {
+    const voluntary = runs
+      .filter(run => run.timeToExitSeconds != null)
+      .slice(-3)
+      .map(run => run.timeToExitSeconds as number);
+    if (voluntary.length < 3) return null;
+    const improving = voluntary[0] > voluntary[1] && voluntary[1] > voluntary[2];
+    return improving ? voluntary : null;
+  }, [runs]);
   const returning = runs.length > 0;
 
   const dismissPrompt = (id: string) => {
@@ -156,6 +165,11 @@ export function Landing() {
             <strong>{formatMoney(kept)}</strong>
             <span>kept across {runs.length} {runs.length === 1 ? 'run' : 'runs'}</span>
             <div className="sidebar-stat"><span>Recent exit</span><b>{formatTime(recent)}</b></div>
+            {exitTrend ? <div className="sidebar-exit-trend">
+              <span>Your last 3</span>
+              <div>{exitTrend.map((seconds, index) => <b key={index}>{formatTime(seconds)}</b>)}</div>
+              <em>You're leaving sooner.</em>
+            </div> : null}
           </> : <>
             <strong>Run it here first.</strong>
             <span>Practice balance. Real-life context. Leave whenever you want.</span>
