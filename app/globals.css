@@ -1783,3 +1783,37 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .longrun-final>p{font-size:10px}
   .longrun-final>small{font-size:7px}
 }
+
+
+/* Retest fixes: keep personal-context save reachable and separate sample vs expectation */
+.reality-context-save{
+  position:sticky;
+  bottom:0;
+  z-index:6;
+  margin-top:12px;
+  box-shadow:0 -12px 24px rgba(250,242,231,.82),0 10px 24px rgba(58,35,25,.12);
+}
+.longrun-net-pair{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:end;
+  gap:10px;
+}
+.longrun-net-pair>div{
+  display:grid;
+  gap:3px;
+}
+.longrun-net-pair>div:last-child{
+  text-align:right;
+}
+.longrun-expectation{
+  padding-left:10px;
+  border-left:1px solid rgba(230,196,138,.1);
+}
+.longrun-net-pair strong{
+  font-size:25px;
+}
+@media(max-width:560px){
+  .longrun-net-pair strong{font-size:20px}
+  .longrun-net-pair span{font-size:7px}
+}
