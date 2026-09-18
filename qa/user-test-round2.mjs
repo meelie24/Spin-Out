@@ -97,9 +97,137 @@ async function assertFocusInside(page, selector, label) {
   assert(ok, `${label}: keyboard focus did not move into the surface`);
 }
 
+async function finishKnownGameCoreSetup(page, game = 'slots') {
+  await page.goto(`${base}/play?game=${game}`, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('heading', { name: 'How much were you about to put in?' }).waitFor();
+  await page.getByRole('button', { name: '$100', exact: true }).click();
+
+  await page.getByRole('heading', { name: 'What were you hoping would happen?' }).waitFor();
+  await page.getByRole('button', { name: 'Win back what I lost', exact: true }).click();
+
+  await page.getByRole('heading', { name: 'What does this money need to make it past?' }).waitFor();
+  await page.getByRole('button', { name: 'Car payment', exact: true }).click();
+
+  await page.getByRole('heading', { name: 'How bad do you want to play right now?' }).waitFor();
+  await page.getByRole('button', { name: '8', exact: true }).click();
+
+  await page.getByRole('heading', { name: 'Before you start, where do you want to stop?' }).waitFor();
+  await page.getByRole('button', { name: '10 rounds', exact: true }).click();
+
+  await page.locator('.run-intro').waitFor();
+}
+
+async function startKnownGameRealityRun(page, game = 'slots') {
+  await finishKnownGameCoreSetup(page, game);
+  assert(await page.locator('.deposit-terminal').count() === 0,
+    'old deposit gate appeared after the five core questions');
+  assert(await page.getByText(/The more context you add, the more immersive your experience will be\./i).count() === 1,
+    'pre-run explanation did not include the immersive-context hook');
+  await page.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
+  await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+}
+
+
 const browser = await chromium.launch({ headless: true });
 
 try {
+
+  await check('five-question entry reaches game without deposit gate', async context => {
+    const page = await context.newPage();
+    await finishKnownGameCoreSetup(page, 'slots');
+
+    assert(await page.locator('.deposit-terminal').count() === 0,
+      'old deposit screen still blocks the run after five questions');
+    assert(await page.locator('.phaser-stage').count() === 1,
+      'actual game surface is not visible behind the pre-run explanation');
+    assert(await page.getByRole('button', { name: 'Start Reality Run', exact: true }).count() === 1,
+      'pre-run explanation did not expose one Start Reality Run action');
+    assert(await page.getByText(/The rest of your setup will stay with you while you play\./i).count() === 1,
+      'mobile pre-run explanation did not explain that setup continues during play');
+  });
+
+  await check('mobile continuation setup stays compact and one-question-at-a-time', async context => {
+    const page = await context.newPage();
+    await startKnownGameRealityRun(page, 'slots');
+
+    const setup = page.locator('.in-run-setup');
+    await setup.waitFor();
+    assert(await setup.getAttribute('data-state') === 'expanded',
+      'continuation setup did not begin expanded after the run started');
+    assert(await page.locator('.in-run-setup .setup-question').count() === 1,
+      'continuation setup rendered more than one question at once');
+
+    const openBox = await setup.boundingBox();
+    assert(Boolean(openBox), 'mobile continuation setup had no measurable bounding box');
+    assert(openBox.height <= 140,
+      `mobile continuation setup was ${openBox.height}px tall; expected <= 140px`);
+
+    await page.getByRole('button', { name: /Collapse finish your setup/i }).click();
+    await page.locator('.in-run-setup[data-state="collapsed"]').waitFor();
+    const collapsedBox = await setup.boundingBox();
+    assert(Boolean(collapsedBox), 'collapsed setup rail had no measurable bounding box');
+    assert(collapsedBox.height <= 46,
+      `collapsed setup rail was ${collapsedBox.height}px tall; expected <= 46px`);
+  });
+
+  await check('continuation answer persists before next question', async context => {
+    const page = await context.newPage();
+    await startKnownGameRealityRun(page, 'slots');
+
+    const question = page.locator('.setup-question-title');
+    await question.waitFor();
+    const firstQuestion = (await question.innerText()).trim();
+    assert(/money coming in/i.test(firstQuestion),
+      `unexpected first continuation question: ${firstQuestion}`);
+
+    await page.getByRole('button', { name: 'This week', exact: true }).click();
+    await page.locator('.in-run-setup[data-state="consuming"]').waitFor();
+    await page.waitForTimeout(1_100);
+    const nextQuestion = (await page.locator('.setup-question-title').innerText()).trim();
+    assert(nextQuestion !== firstQuestion, 'next continuation question did not replace the completed one');
+
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2') || 'null'));
+    assert(Array.isArray(stored?.profile?.onboardingCompleted)
+      && stored.profile.onboardingCompleted.includes('income-date'),
+      'continuation answer was not persisted before advancing');
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    if (await page.locator('.in-run-setup[data-state="collapsed"]').count()) {
+      await page.getByRole('button', { name: /Finish your setup/i }).click();
+    }
+    const restoredQuestion = (await page.locator('.setup-question-title').innerText()).trim();
+    assert(!/money coming in/i.test(restoredQuestion),
+      'completed continuation question returned after active-run restore');
+  });
+
+  await check('foreground intervention collapses continuation setup', async context => {
+    const p = profile('slots', {
+      onboardingCompleted: [],
+      availableUntilIncomeCents: null,
+      nextIncomeDate: null,
+      obligationType: 'car',
+      obligationAmountCents: null,
+      obligationDueDate: null,
+      personalMoneyGoal: null,
+      quitReason: null,
+    });
+    await seedActive(context, p, runFor(p, {
+      actionCount: 2,
+      chosenLimitRounds: 3,
+      lastPingAction: -10,
+    }));
+
+    const page = await context.newPage();
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.locator('.in-run-setup').waitFor();
+    await page.locator('.game-action').click();
+    await page.locator('.reality-ping, .xray-moment').first().waitFor({ timeout: 9_000 });
+    assert(await page.locator('.in-run-setup').getAttribute('data-state') === 'collapsed',
+      'continuation setup stayed open while a foreground intervention was active');
+  });
+
   await check('same-visit home prompt dismissal', async context => {
     const page = await context.newPage();
     await page.goto(base, { waitUntil: 'domcontentloaded' });
