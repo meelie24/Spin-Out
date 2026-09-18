@@ -41,10 +41,10 @@ function run(id:string, patch:Partial<RunRecord>={}):RunRecord {
 }
 
 test('historical runs without newer arrays do not break insight analysis', () => {
-  const legacy = run('legacy') as RunRecord & { timeline?: RunRecord['timeline']; pings?: RunRecord['pings'] };
+  const legacy: Partial<RunRecord> = { ...run('legacy') };
   delete legacy.timeline;
   delete legacy.pings;
-  assert.doesNotThrow(() => buildRealityInsights([legacy, legacy, legacy]));
+  assert.doesNotThrow(() => buildRealityInsights([legacy as RunRecord, legacy as RunRecord, legacy as RunRecord]));
 });
 
 test('one session never becomes a Trigger Fingerprint', () => {
