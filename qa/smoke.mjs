@@ -208,8 +208,11 @@ try {
   assert(cashBox && cashBox.y >= 0 && cashBox.y + cashBox.height <= 844, 'Cash Out outside mobile viewport');
   await page.getByRole('button', { name: 'Mute sound' }).click();
   await page.getByRole('button', { name: 'Unmute sound' }).waitFor();
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Unmute sound' }).waitFor();
   await page.screenshot({ path: `${out}/run-390.png`, fullPage: true });
-  await cash.click();
+  await page.getByRole('button', { name: 'Cash Out' }).click();
   await page.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor();
   await page.getByRole('button', { name: '5' }).click();
   await page.getByRole('heading', { name: /Did you end up gambling/i }).waitFor();
@@ -364,13 +367,28 @@ try {
     }
 
     await waitActionReady(envPage);
-    await envPage.locator('.game-action').click();
+    await envPage.locator('.game-action').evaluate(button => {
+      for (let i = 0; i < 10; i++) button.click();
+    });
 
     if (gameType === 'poker') {
+      await envPage.waitForTimeout(380);
+      const dealt = await envPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null'));
+      assert(dealt?.run?.gameState?.poker, 'poker rapid input did not produce one held-hand state');
+      assert(dealt.run.balanceCents === dealt.run.initialBalanceCents - dealt.run.gameState.poker.wagerCents, 'poker rapid input deducted more than one deal');
+
       await envPage.locator('.poker-holds button').first().waitFor({ timeout: 5000 });
       await envPage.locator('.poker-holds button').first().click();
       await envPage.getByRole('button', { name: 'Draw' }).waitFor({ timeout: 5000 });
       await envPage.getByRole('button', { name: 'Draw' }).click();
+    } else {
+      await envPage.waitForFunction(() => {
+        const raw = localStorage.getItem('spinout.active.v2');
+        const active = raw ? JSON.parse(raw) : null;
+        return active?.run?.actionCount === 1;
+      }, null, { timeout: gameType === 'casino' ? 9000 : 7000 });
+      const active = await envPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null'));
+      assert(active?.run?.actionCount === 1, `${gameType} rapid input created duplicate actions`);
     }
 
     await envPage.waitForFunction(() => {
