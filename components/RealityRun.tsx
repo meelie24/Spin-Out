@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RealityGame, type RealityGameHandle } from './RealityGame';
 import { RealityPing } from './RealityPing';
 import { buildPingCandidates, selectPing } from '@/lib/pings';
-import { computeReality, formatMoney, sampleOutcome, shouldAutoEnd, stakeOptionsFor, daysUntil } from '@/lib/engine';
+import { computeReality, formatMoney, sampleOutcome, shouldAutoEnd, stakeOptionsFor, daysUntil, isFinancialContextStale } from '@/lib/engine';
 import { clearActiveRun, loadData, saveActiveRun, track, updateData } from '@/lib/storage';
 import { spinAudio } from '@/lib/audio';
 import type { ActiveRun, ExitReason, PingCandidate, RealityProfile } from '@/lib/types';
@@ -64,6 +64,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   const [muted, setMuted] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [pendingBalanceEnd, setPendingBalanceEnd] = useState(false);
+  const [gameDecision, setGameDecision] = useState<string>(() => profile.gamblingType === 'sports' ? 'North Harbor' : profile.gamblingType === 'casino' ? 'Red' : profile.gamblingType === 'poker' ? 'Hold' : '');
   const ended = useRef(false);
   const lastDismissedPing = useRef<{ type: string; dismissedAt: number; balanceAt: number; stakeAt: number } | null>(null);
   const stakes = useMemo(() => stakeOptionsFor(profile.intendedWagerCents), [profile.intendedWagerCents]);
@@ -162,7 +163,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       largestLossCents: Math.max(run.largestLossCents, Math.max(0, run.initialBalanceCents - balanceCents)),
       simulatedLossesCents: run.simulatedLossesCents + Math.max(0, -outcome.netCents),
       simulatedRecoveriesCents: run.simulatedRecoveriesCents + Math.max(0, outcome.netCents),
-      timeline: [...run.timeline, { kind: 'action', at: Date.now(), balanceCents, stakeCents: run.stakeCents, netCents: outcome.netCents }],
+      timeline: [...run.timeline, { kind: 'action', at: Date.now(), balanceCents, stakeCents: run.stakeCents, netCents: outcome.netCents, decision: gameDecision || undefined }],
     };
     setRun(next); runRef.current = next;
     const recentPing = lastDismissedPing.current;
@@ -180,7 +181,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       });
     }
     lastDismissedPing.current = null;
-    await game.current?.playOutcome({ ...outcome, balanceCents, actionCount: next.actionCount });
+    await game.current?.playOutcome({ ...outcome, balanceCents, actionCount: next.actionCount, decision: gameDecision || undefined });
     spinAudio.result(outcome.netCents);
     setAnimating(false);
     if (ended.current) return;
@@ -238,16 +239,20 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     if (pendingBalanceEnd) { setPendingBalanceEnd(false); window.setTimeout(() => finish('balance'), 80); }
   };
 
-  const days = daysUntil(profile.nextIncomeDate);
+  const financeFresh = !isFinancialContextStale(profile);
+  const days = financeFresh ? daysUntil(profile.nextIncomeDate) : null;
   const obligation = profile.obligationType === 'rent' ? 'RENT' : profile.obligationType === 'car' ? 'CAR PAYMENT' : profile.obligationType === 'none' ? null : profile.obligationType.replace('-', ' ').toUpperCase();
 
   return (
     <main className="run-shell" style={{ '--reality': intensity } as React.CSSProperties}>
       <div className="reality-background" aria-hidden="true">
-        {obligation && profile.obligationAmountCents ? <div className="context-ghost ghost-a"><span>{obligation}</span><strong>{formatMoney(profile.obligationAmountCents)}</strong></div> : null}
+        {financeFresh && obligation && profile.obligationAmountCents ? <div className="context-ghost ghost-a"><span>{obligation}</span><strong>{formatMoney(profile.obligationAmountCents)}</strong></div> : null}
         {days != null ? <div className="context-ghost ghost-b"><strong>{days}</strong><span>DAYS UNTIL MONEY</span></div> : null}
         {profile.personalMoneyGoal ? <div className="context-ghost ghost-c"><span>{profile.personalMoneyGoal.toUpperCase()}</span></div> : null}
-        {reality.obligationShortfallCents ? <div className="context-ghost ghost-d"><strong>{formatMoney(reality.obligationShortfallCents)}</strong><span>SHORT</span></div> : null}
+        {financeFresh && reality.obligationShortfallCents ? <div className="context-ghost ghost-d"><strong>{formatMoney(reality.obligationShortfallCents)}</strong><span>SHORT</span></div> : null}
+        {financeFresh && profile.availableUntilIncomeCents != null ? <div className="context-ghost ghost-e"><span>AVAILABLE UNTIL INCOME</span><strong>{formatMoney(profile.availableUntilIncomeCents)}</strong></div> : null}
+        {profile.recentLenderName && profile.recentLenderHelpedRecently ? <div className="context-ghost ghost-f"><span>{profile.recentLenderName.toUpperCase()}</span><strong>HELPED BEFORE</strong></div> : null}
+        {profile.additionalMoneyGoal ? <div className="context-ghost ghost-g"><span>{profile.additionalMoneyGoal.toUpperCase()}</span></div> : null}
       </div>
 
       <section className="run-card" aria-label="Reality Run">
@@ -267,6 +272,9 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
           <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button>
         </div>
 
+        {profile.gamblingType === 'sports' ? <div className="game-decision" role="group" aria-label="Fictional market selection">{['North Harbor','Cedar City','Riverside'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}</div> : null}
+        {profile.gamblingType === 'casino' ? <div className="game-decision" role="group" aria-label="Table choice">{['Red','Black'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}</div> : null}
+        {profile.gamblingType === 'poker' ? <div className="game-decision" role="group" aria-label="Poker decision">{['Hold','Draw'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}</div> : null}
         <div className="run-controls">
           <div className="stake-control" aria-label="Practice stake">
             <button type="button" onClick={() => setStake(-1)} aria-label="Lower practice stake" disabled={animating || stakes[0] === run.stakeCents}>−</button>
@@ -275,7 +283,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
           </div>
           <button type="button" className="game-action" onClick={act} disabled={animating || Boolean(ping) || run.balanceCents < run.stakeCents}>{animating ? '...' : actionLabel(profile.gamblingType)}</button>
         </div>
-        <p className="run-fineprint">Practice only. No real money. Leave whenever you want.</p>
+        <p className="run-fineprint">Simulation. Leave whenever you want.</p>
       </section>
     </main>
   );
