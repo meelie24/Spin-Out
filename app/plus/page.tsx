@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function PlusPage() {
   const supabase = await createServerSupabase();
-  if (!supabase) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} />;
+  if (!supabase) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} nowMs={Date.now()} />;
 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} />;
@@ -25,5 +25,5 @@ export default async function PlusPage() {
     .map(row => row.data as RunRecord)
     .filter(run => run && typeof run.id === 'string');
 
-  return <PlusDashboard authenticated premium={premium} serverRuns={serverRuns} />;
+  return <PlusDashboard authenticated premium={premium} serverRuns={serverRuns} nowMs={Date.now()} />;
 }
