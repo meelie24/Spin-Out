@@ -143,7 +143,79 @@ try {
   assert(await page.getByText(/No fake payment button is shown/i).isVisible(), 'unconfigured billing state is not honest');
   assert(await page.getByRole('button', { name: /Preview Plus/i }).count() === 0, 'fake Plus preview control returned');
   await page.screenshot({ path: `${out}/plus-390.png`, fullPage: true });
+  await page.getByRole('button', { name: 'Close' }).click();
+
+  // Premium features sold in Plus must exist and render from the real saved run.
+  await page.evaluate(() => {
+    const raw = localStorage.getItem('spinout.v2');
+    if (!raw) throw new Error('missing stored Spin Out data');
+    const data = JSON.parse(raw);
+    data.account = { ...data.account, billing: 'premium', paypalSubscriptionId: null, paypalPlan: null };
+    localStorage.setItem('spinout.v2', JSON.stringify(data));
+  });
+  await page.goto(`${base}/plus`, { waitUntil: 'networkidle' });
+  await page.getByRole('heading', { name: 'Your patterns.' }).waitFor();
+  assert(await page.getByText('Weekly readout').isVisible(), 'Plus weekly summary missing');
+  assert(await page.getByText('Every saved run').isVisible(), 'Plus run history missing');
+  assert(await page.getByText('Money kept', { exact: true }).first().isVisible(), 'Plus Money Kept trend missing');
+  assert(await page.locator('body').evaluate(el => el.scrollWidth <= window.innerWidth + 1), 'Plus dashboard overflows mobile');
+  await page.screenshot({ path: `${out}/plus-dashboard-390.png`, fullPage: true });
   await context.close();
+
+  // Every Reality Run environment must mount and accept its core action without browser errors.
+  for (const gameType of ['sports','casino','poker','lottery']) {
+    const envContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await envContext.addInitScript(({ type }) => {
+      const profile = {
+        version: 1,
+        intendedWagerCents: 10000,
+        gamblingType: type,
+        triggerType: 'win-it-back',
+        triggerCustom: null,
+        availableUntilIncomeCents: 85000,
+        nextIncomeDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0,10),
+        obligationType: 'car',
+        obligationAmountCents: 43000,
+        obligationDueDate: new Date(Date.now() + 4 * 86400000).toISOString().slice(0,10),
+        recentLenderName: null,
+        recentLenderAmountCents: null,
+        personalMoneyGoal: 'Savings',
+        startingUrge: 8,
+        createdAt: new Date().toISOString(),
+      };
+      const run = {
+        id: 'qa-' + type,
+        startedAt: Date.now(),
+        initialBalanceCents: 10000,
+        balanceCents: 10000,
+        previousBalanceCents: 10000,
+        stakeCents: 1000,
+        previousStakeCents: 1000,
+        actionCount: 0,
+        largestLossCents: 0,
+        simulatedLossesCents: 0,
+        simulatedRecoveriesCents: 0,
+        lastNetCents: 0,
+        lastPingAction: -10,
+        pings: [],
+      };
+      localStorage.setItem('spinout.active.v2', JSON.stringify({ profile, run }));
+    }, { type: gameType });
+    const envPage = await envContext.newPage();
+    const errors = [];
+    envPage.on('pageerror', error => errors.push(error.message));
+    await envPage.goto(`${base}/play`, { waitUntil: 'networkidle' });
+    await envPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+    const action = envPage.locator('.game-action');
+    await action.click();
+    await envPage.waitForFunction(() => {
+      const button = document.querySelector('.game-action');
+      return button instanceof HTMLButtonElement && !button.disabled;
+    }, null, { timeout: 5000 });
+    assert(errors.length === 0, `${gameType} environment errors: ${JSON.stringify(errors)}`);
+    await envPage.screenshot({ path: `${out}/environment-${gameType}-390.png`, fullPage: true });
+    await envContext.close();
+  }
 
   // Reduced motion remains playable.
   const reduced = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
