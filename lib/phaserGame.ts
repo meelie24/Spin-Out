@@ -203,25 +203,62 @@ export async function mountRealityGame(
     }
 
     private animateSlots(outcome: AnimatedOutcome, P: PhaserModule) {
-      const grid=gridForBand(outcome.band); const reelW=148,rowH=108,startX=130,startY=148;
-      return new Promise<void>(resolve=>{
-        let done=0;
-        for(let col=0;col<5;col++){
-          const old=this.reelContainers[col]; if(old) old.destroy(true);
-          const reel=this.add.container(startX+col*reelW,startY); reel.setMask(this.reelMasks[col]); this.slotRoot.add(reel); this.reelContainers[col]=reel;
-          const sequence:SymbolName[]=[]; for(let i=0;i<8;i++) sequence.push(STRIP[(i+col*2)%STRIP.length]); sequence.push(grid[0][col],grid[1][col],grid[2][col]);
-          sequence.forEach((s,i)=>{ const img=this.add.image(reelW/2,i*rowH+rowH/2,s).setDisplaySize(86,86); reel.add(img); });
-          reel.y=startY-8*rowH;
-          if(options.reducedMotion){ reel.y=startY; reel.removeAll(true); [grid[0][col],grid[1][col],grid[2][col]].forEach((s,i)=>reel.add(this.add.image(reelW/2,i*rowH+rowH/2,s).setDisplaySize(86,86))); done++; if(done===5) resolve(); continue; }
-          this.tweens.add({targets:reel,y:startY,duration:760+col*14,ease:'Cubic.easeOut',onComplete:()=>{ reel.removeAll(true); [grid[0][col],grid[1][col],grid[2][col]].forEach((s,i)=>reel.add(this.add.image(reelW/2,i*rowH+rowH/2,s).setDisplaySize(86,86))); done++; if(done===5) resolve(); }});
+      const grid = gridForBand(outcome.band); const reelW = 148, rowH = 108, startX = 130, startY = 148;
+      const finalize = () => {
+        for (let col = 0; col < 5; col++) {
+          const reel = this.reelContainers[col];
+          if (!reel) continue;
+          reel.y = startY;
+          reel.removeAll(true);
+          [grid[0][col], grid[1][col], grid[2][col]].forEach((symbol, row) => {
+            reel.add(this.add.image(reelW / 2, row * rowH + rowH / 2, symbol).setDisplaySize(86, 86));
+          });
         }
-      });
+      };
+
+      for (let col = 0; col < 5; col++) {
+        const old = this.reelContainers[col]; if (old) old.destroy(true);
+        const reel = this.add.container(startX + col * reelW, startY); reel.setMask(this.reelMasks[col]); this.slotRoot.add(reel); this.reelContainers[col] = reel;
+        const sequence: SymbolName[] = [];
+        for (let i = 0; i < 8; i++) sequence.push(STRIP[(i + col * 2) % STRIP.length]);
+        sequence.push(grid[0][col], grid[1][col], grid[2][col]);
+        sequence.forEach((symbol, i) => reel.add(this.add.image(reelW / 2, i * rowH + rowH / 2, symbol).setDisplaySize(86, 86)));
+        reel.y = startY - 8 * rowH;
+        if (!options.reducedMotion) this.tweens.add({ targets: reel, y: startY, duration: 760 + col * 14, ease: 'Cubic.easeOut' });
+      }
+
+      if (options.reducedMotion) { finalize(); return Promise.resolve(); }
+      return new Promise<void>(resolve => window.setTimeout(() => { finalize(); resolve(); }, 850));
     }
 
-    private animateRoulette(outcome: AnimatedOutcome, P: PhaserModule) { return new Promise<void>(resolve=>{ if(options.reducedMotion){resolve();return;} this.tweens.add({targets:this.wheel,angle:this.wheel.angle+720+outcome.actionCount*15,duration:900,ease:'Cubic.easeOut',onComplete:()=>resolve()}); }); }
-    private animatePoker(outcome: AnimatedOutcome, P: PhaserModule) { const hands:Record<OutcomeBand,string[]>={loss:['9♠','4♦','J♣','2♥','7♣'],'partial-loss':['Q♠','Q♦','5♣','8♥','2♣'],push:['A♠','K♦','8♣','5♥','3♣'],win:['K♠','K♦','K♣','6♥','3♣'],'big-win':['A♠','K♠','Q♠','J♠','10♠']}; return new Promise<void>(resolve=>{ const h=hands[outcome.band]; this.cards.forEach((c:any,i)=>{ c.text.setText(h[i]); c.card.setScale(.86); this.tweens.add({targets:c.card,scale:1,duration:options.reducedMotion?0:260,delay:i*55,ease:'Back.Out'}); }); this.time.delayedCall(options.reducedMotion?0:560,resolve); }); }
-    private animateLottery(outcome: AnimatedOutcome, P: PhaserModule) { const colors:Record<OutcomeBand,number>={loss:0x715548,'partial-loss':0x947254,push:0x9a855b,win:0xb5924d,'big-win':0xd5b56f}; return new Promise<void>(resolve=>{ this.ticketCells.forEach((c:any,i)=>this.tweens.add({targets:c,alpha:.25,duration:options.reducedMotion?0:110,delay:i*35,yoyo:true,onYoyo:()=>c.setFillStyle(colors[outcome.band])})); this.time.delayedCall(options.reducedMotion?0:650,resolve); }); }
-    private animateSports(outcome: AnimatedOutcome, P: PhaserModule) { return new Promise<void>(resolve=>{ const target=this.sportsRows[outcome.actionCount%this.sportsRows.length]; this.tweens.add({targets:target,alpha:{from:1,to:.38},duration:options.reducedMotion?0:220,yoyo:true,repeat:1,onComplete:()=>resolve()}); }); }
+    private animateRoulette(outcome: AnimatedOutcome, P: PhaserModule) {
+      if (options.reducedMotion) return Promise.resolve();
+      this.tweens.add({ targets: this.wheel, angle: this.wheel.angle + 720 + outcome.actionCount * 15, duration: 900, ease: 'Cubic.easeOut' });
+      return new Promise<void>(resolve => window.setTimeout(resolve, 930));
+    }
+
+    private animatePoker(outcome: AnimatedOutcome, P: PhaserModule) {
+      const hands: Record<OutcomeBand, string[]> = { loss:['9♠','4♦','J♣','2♥','7♣'], 'partial-loss':['Q♠','Q♦','5♣','8♥','2♣'], push:['A♠','K♦','8♣','5♥','3♣'], win:['K♠','K♦','K♣','6♥','3♣'], 'big-win':['A♠','K♠','Q♠','J♠','10♠'] };
+      const hand = hands[outcome.band];
+      this.cards.forEach((card: any, i) => {
+        card.text.setText(hand[i]); card.card.setScale(.86);
+        this.tweens.add({ targets: card.card, scale: 1, duration: options.reducedMotion ? 0 : 260, delay: i * 55, ease: 'Back.Out' });
+      });
+      return options.reducedMotion ? Promise.resolve() : new Promise<void>(resolve => window.setTimeout(resolve, 560));
+    }
+
+    private animateLottery(outcome: AnimatedOutcome, P: PhaserModule) {
+      const colors: Record<OutcomeBand, number> = { loss:0x715548, 'partial-loss':0x947254, push:0x9a855b, win:0xb5924d, 'big-win':0xd5b56f };
+      this.ticketCells.forEach((cell: any, i) => this.tweens.add({ targets: cell, alpha: .25, duration: options.reducedMotion ? 0 : 110, delay: i * 35, yoyo: true, onYoyo: () => cell.setFillStyle(colors[outcome.band]) }));
+      return options.reducedMotion ? Promise.resolve() : new Promise<void>(resolve => window.setTimeout(resolve, 650));
+    }
+
+    private animateSports(outcome: AnimatedOutcome, P: PhaserModule) {
+      const target = this.sportsRows[outcome.actionCount % this.sportsRows.length];
+      if (target) this.tweens.add({ targets: target, alpha: { from: 1, to: .38 }, duration: options.reducedMotion ? 0 : 220, yoyo: true, repeat: 1 });
+      return options.reducedMotion ? Promise.resolve() : new Promise<void>(resolve => window.setTimeout(resolve, 500));
+    }
+
   }
 
   const game = new Phaser.Game({
