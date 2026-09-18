@@ -1,13 +1,54 @@
 # Spin Out
 
-Private, simulated Reality Runs for adults considering gambling. No deposits, withdrawals, prizes or redeemable money.
+Spin Out is a browser-first pre-gambling Reality Run. It asks for enough real context to make a simulated gambling session personal, then lets the person leave at any moment and records how quickly they chose to leave.
 
-## Controlling specification
+## Stack
 
-The uploaded **SPIN OUT MASTER PRODUCT PROMPT** (69 sections) is the product specification. It replaces the earlier 20-spin practice exercise. The latest visual direction is minimalist ivory/royal-brown, restrained casino-rug detail, sleek sans-serif type and a convincing five-reel/three-row slot environment.
+- Next.js + React + TypeScript for product flow and UI
+- Phaser 4 + WebGL for the Reality Run game surface
+- GSAP for setup/deposit transitions
+- Web Audio API for reel, button, ambient and Reality Ping sound
+- localStorage for private on-device profile, run history and learning
+- ephemeral anonymous `/api/presence` heartbeat for the live “people are on this journey with you” counter
 
-## Rebuild in progress
+## Run locally
 
-The recovered v1.1 build provides reusable original artwork, responsive styling and tested interaction foundations. It is not the finished master-prompt product. Work is migrating to Reality Setup, finite 900-second Reality Runs, accurate personalized Reality Pings, voluntary-exit timing, post-run outcomes and Money Kept history. The old forced cooldown and 20-spin cap must not be carried forward.
+```bash
+npm install
+npm run dev
+```
 
-The implementation audit will distinguish shipped behavior, verified tests and integrations that require live service configuration. No clinical efficacy is claimed. This repository is the source of truth for the rebuild.
+## Verify
+
+```bash
+npm run test:core
+npm run typecheck
+npm run build
+npx playwright install chromium
+npm run qa
+```
+
+The master product prompt is kept at `docs/MASTER_PRODUCT_PROMPT.md`. The architecture spec and implementation plan live under `docs/superpowers/`.
+
+
+## Production configuration
+
+Canonical site URL: `https://spinitout.com`.
+
+Spin Out+ uses PayPal subscriptions after completed Reality Runs. Core Reality Runs do not require payment.
+
+Required production environment variables:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://spinitout.com
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=...
+PAYPAL_CLIENT_ID=...
+PAYPAL_CLIENT_SECRET=...
+NEXT_PUBLIC_PAYPAL_MONTHLY_PLAN_ID=...
+NEXT_PUBLIC_PAYPAL_YEARLY_PLAN_ID=...
+PAYPAL_ENV=live
+```
+
+The PayPal plans must be configured at **$4.99/month** and **$29.99/year**. Without these values, the product deliberately shows pricing without a checkout control rather than pretending billing works.
+
+Before taking live payments, confirm PayPal's merchant review requirements for this non-wagering gambling-harm software. Spin Out must remain practice-only: no entry fee, wagering, prizes, redeemable balance, operator links, or sportsbook/casino affiliate revenue.

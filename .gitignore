@@ -1,0 +1,6 @@
+node_modules
+.next
+out
+.core-test
+*.log
+.DS_Store
