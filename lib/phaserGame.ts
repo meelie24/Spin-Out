@@ -82,8 +82,8 @@ export async function mountRealityGame(
       this.balanceText = this.add.text(500, 65, money(options.initialBalanceCents), {
         fontFamily: 'Inter, Arial, sans-serif', fontSize: '23px', fontStyle: '600', color: '#fff7e8'
       }).setOrigin(.5);
-      this.add.text(500, 41, 'PRACTICE BALANCE', { fontFamily: 'Inter,Arial', fontSize: '10px', color: '#bcae99', letterSpacing: 2 }).setOrigin(.5);
-      this.add.text(500, 595, 'PRACTICE ONLY · NO REAL MONEY', { fontFamily: 'Inter,Arial', fontSize: '10px', color: '#907f6e', letterSpacing: 1.5 }).setOrigin(.5);
+      this.add.text(500, 41, 'BALANCE', { fontFamily: 'Inter,Arial', fontSize: '10px', color: '#bcae99', letterSpacing: 2 }).setOrigin(.5);
+      this.add.text(500, 595, 'SIMULATION', { fontFamily: 'Inter,Arial', fontSize: '10px', color: '#907f6e', letterSpacing: 1.5 }).setOrigin(.5);
       this.resultText = this.add.text(500, 540, '', { fontFamily: 'Inter,Arial', fontSize: '22px', fontStyle: '600', color: '#ead4ad' }).setOrigin(.5).setAlpha(0);
 
       switch (options.gameType) {
@@ -168,7 +168,7 @@ export async function mountRealityGame(
       for(let i=0;i<24;i++){ const a=i*Math.PI*2/24; const color=i%2?0x8d1f2d:0x171719; const wedge=this.add.graphics(); wedge.fillStyle(color,1).slice(0,0,128,a,a+Math.PI*2/24,true).fillPath(); wheel.add(wedge); }
       wheel.add(this.add.circle(0,0,55,0xc8a15e).setStrokeStyle(4,0xf2d596));
       root.add(this.add.text(580,230,'ROULETTE',{fontFamily:'Inter,Arial',fontSize:'28px',fontStyle:'700',color:'#f1dfbd'}));
-      root.add(this.add.text(580,274,'Practice table\nFake balance only',{fontFamily:'Inter,Arial',fontSize:'15px',color:'#aab8ae',lineSpacing:7}));
+      root.add(this.add.text(580,274,'Fictional table',{fontFamily:'Inter,Arial',fontSize:'15px',color:'#aab8ae',lineSpacing:7}));
     }
 
     private createPoker(P: PhaserModule) {
@@ -179,7 +179,7 @@ export async function mountRealityGame(
 
     private createLottery(P: PhaserModule) {
       const root=this.add.container(0,0); this.gameSurface=root; const paper=this.add.graphics(); paper.fillStyle(0xf2e6cd,.98).fillRoundedRect(160,142,680,332,16).lineStyle(3,0xc49a4e,.75).strokeRoundedRect(160,142,680,332,16); root.add(paper);
-      root.add(this.add.text(500,170,'SCRATCH PRACTICE',{fontFamily:'Inter,Arial',fontSize:'15px',fontStyle:'700',color:'#5e4729',letterSpacing:2}).setOrigin(.5));
+      root.add(this.add.text(500,170,'SCRATCH',{fontFamily:'Inter,Arial',fontSize:'15px',fontStyle:'700',color:'#5e4729',letterSpacing:2}).setOrigin(.5));
       for(let i=0;i<9;i++){ const x=325+(i%3)*175,y=245+Math.floor(i/3)*82; const c=this.add.rectangle(x,y,140,62,0x7f664c).setStrokeStyle(2,0xe0c38d,.8); root.add(c); this.ticketCells.push(c); }
     }
 
