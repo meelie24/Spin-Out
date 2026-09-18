@@ -10,6 +10,7 @@ import { AuthControl } from './AuthControl';
 import { JourneyCounter } from './JourneyCounter';
 import { AccessStatus } from './AccessStatus';
 import { RealityContextPanel } from './RealityContextPanel';
+import { buildRealityInsights } from '@/lib/realityEngine/insights';
 import type { RealityProfile } from '@/lib/types';
 
 const games: Array<{
@@ -113,6 +114,7 @@ export function Landing() {
     const improving = voluntary[0] > voluntary[1] && voluntary[1] > voluntary[2];
     return improving ? voluntary : null;
   }, [runs]);
+  const realityInsights = useMemo(() => buildRealityInsights(runs), [runs]);
   const returning = runs.length > 0;
 
   const dismissPrompt = (id: string) => {
@@ -181,6 +183,12 @@ export function Landing() {
             <span>Practice balance. Real-life context. Leave whenever you want.</span>
           </>}
         </div>
+
+        {(realityInsights.recovery[0] || realityInsights.fingerprint[0]) ? <div className="sidebar-insight">
+          <span>{realityInsights.recovery[0] ? 'Progress' : 'What keeps showing up'}</span>
+          <strong>{(realityInsights.recovery[0] ?? realityInsights.fingerprint[0]).title}</strong>
+          <p>{(realityInsights.recovery[0] ?? realityInsights.fingerprint[0]).detail}</p>
+        </div> : null}
 
         <div className="sidebar-bottom">
           <JourneyCounter />
