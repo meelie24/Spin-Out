@@ -310,10 +310,24 @@ try {
   assert(await page.getByRole('heading', { name: /Your history\./i }).count() === 0, 'premium dashboard rendered without server entitlement');
   await context.close();
 
-  // Deterministic Reality Ping from a restored losing state; keyboard dismissal must work immediately.
+  // Deterministic ordinary Reality Ping: the next action reaches the user's chosen round limit.
   const pingContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const pingProfile = profile('slots', { intendedWagerCents: 10_000, availableUntilIncomeCents: 6_000, obligationAmountCents: 8_000 });
-  const pingRun = runFor(pingProfile, { balanceCents: 5_000, previousBalanceCents: 5_500, stakeCents: 500, previousStakeCents: 500, actionCount: 2, largestLossCents: 5_000, simulatedLossesCents: 5_000 });
+  const pingProfile = profile('slots', {
+    triggerType: 'other',
+    availableUntilIncomeCents: null,
+    nextIncomeDate: null,
+    obligationType: 'none',
+    obligationAmountCents: null,
+    obligationDueDate: null,
+    personalMoneyGoal: null,
+    quitReason: null,
+  });
+  const pingRun = runFor(pingProfile, {
+    actionCount: 2,
+    chosenLimitRounds: 3,
+    chosenLimitMinutes: null,
+    lastPingAction: -10,
+  });
   await seedActive(pingContext, pingProfile, pingRun);
   const pingPage = await pingContext.newPage();
   await pingPage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
