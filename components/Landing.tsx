@@ -183,8 +183,8 @@ export function Landing() {
             <p className="kicker">Choose the game. Keep the money real.</p>
             <h1 id="home-title">{returning ? formatMoney(kept) + ' kept. Keep it.' : 'About to gamble?'}</h1>
             <p>{returning
-              ? 'Pick what you were about to play. Your Reality Run starts with the life around that money.'
-              : 'Pick the game you were about to open. Run the pull here first, with your real situation still in the room.'}</p>
+              ? 'Pick what you were about to play. This run keeps watching for the decisions that make stopping harder.'
+              : 'Pick the game you were about to open. Spin Out pays attention to how you play and calls out what usually keeps you going.'}</p>
             <div className="hero-actions">
               <a className="primary-cta" href="#games">Choose a game</a>
               <span>Practice only · no cash value</span>
@@ -214,7 +214,7 @@ export function Landing() {
               <p className="kicker">Reality Runs</p>
               <h2>What were you about to play?</h2>
             </div>
-            <p>Choose it here. We’ll use that choice in setup and take you straight toward the matching run.</p>
+            <p>Each simulation is built to catch a different part of the pull. Pick the one you were about to open.</p>
           </div>
 
           <div className="games-top-prompt">
