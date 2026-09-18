@@ -25,7 +25,7 @@ const obligations: { value: ObligationType; label: string }[] = [
 ];
 const goals = ['Savings', 'Mom / Dad / family', 'Birthday', 'Kids', 'Groceries', 'Trip', 'Debt', 'Car', 'Something I want', 'Other'];
 
-type Step = 'wager' | 'game' | 'trigger' | 'quit-reason' | 'available' | 'income' | 'obligation' | 'obligation-detail' | 'lender' | 'goal' | 'urge';
+type Step = 'wager' | 'game' | 'trigger' | 'quit-reason' | 'available' | 'obligation' | 'obligation-detail' | 'urge';
 
 function centsFrom(input: string) {
   const n = Number(input.replace(/[^0-9.]/g, ''));
@@ -44,9 +44,9 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
   const expired = existing?.obligationDueDate ? isObligationExpired(existing.obligationDueDate, new Date().toISOString().slice(0, 10)) : false;
   const financeStale = existing ? isFinancialContextStale(existing) : false;
   const steps = useMemo<Step[]>(() => {
-    if (firstRun) return initialGame ? ['wager','trigger','quit-reason','available','income','obligation','obligation-detail','lender','goal','urge'] : ['wager','game','trigger','quit-reason','available','income','obligation','obligation-detail','lender','goal','urge'];
+    if (firstRun) return initialGame ? ['wager','trigger','quit-reason','available','obligation','obligation-detail','urge'] : ['wager','game','trigger','quit-reason','available','obligation','obligation-detail','urge'];
     const next: Step[] = ['wager','trigger'];
-    if (financeStale) next.push('available','income','obligation','obligation-detail');
+    if (financeStale) next.push('available','obligation','obligation-detail');
     else if (expired) next.push('obligation','obligation-detail');
     next.push('urge');
     return next;
@@ -164,12 +164,47 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
           <button className="bare-link centered" type="button" onClick={() => { setQuitReason(''); advance('skip'); }}>Skip</button>
         </> : null}
 
-        {step === 'available' ? <><h1>How much have you actually got until more money comes in?</h1>
-          <form className="big-money-input" onSubmit={e => { e.preventDefault(); const v = centsFrom(String(new FormData(e.currentTarget).get('available'))); if (v != null) { setAvailable(v); advance('amount'); } }}><span>$</span><input name="available" inputMode="decimal" autoFocus placeholder="0"/><button type="submit">Use</button></form>
-          <button className="bare-link centered" type="button" onClick={() => { setAvailable(null); advance('not-sure'); }}>Not sure</button>
-        </> : null}
+        {step === 'available' ? <>
+          <h1>Until more money comes in</h1>
+          <p className="setup-note">Just enough context to make the run real.</p>
+          <div className="money-context-card">
+            <label>
+              <span>How much have you got?</span>
+              <div className="money-field">
+                <span>$</span>
+                <input
+                  inputMode="decimal"
+                  value={available == null ? '' : String(available / 100)}
+                  onChange={e => setAvailable(centsFrom(e.target.value))}
+                  placeholder="Not sure"
+                  aria-label="Money available until more comes in"
+                />
+              </div>
+              <button type="button" className="bare-link money-context-clear" onClick={() => setAvailable(null)}>Not sure on the amount</button>
+            </label>
 
-        {step === 'income' ? <><h1>When’s more money coming in?</h1><div className="choice-stack">{['Today','Tomorrow','This week','Next week'].map(v => chip(v, v, () => setIncomeDate(dateFor(v))))}<label className="choice-card date-card">Choose date<input type="date" onChange={e => { if (e.target.value) { setIncomeDate(e.target.value); advance('date'); } }}/></label><button type="button" className="choice-card" onClick={() => { setIncomeDate(null); advance('not-sure'); }}>Not sure</button></div></> : null}
+            <div className="money-context-date">
+              <span>When's more money coming in?</span>
+              <div className="due-quick" role="group" aria-label="Next income date">
+                {['Today','Tomorrow','This week','Next week'].map(choice => (
+                  <button
+                    key={choice}
+                    type="button"
+                    className={incomeDate === dateFor(choice) ? 'is-on' : ''}
+                    onClick={() => setIncomeDate(dateFor(choice))}
+                  >
+                    {choice}
+                  </button>
+                ))}
+                <label className="date-inline-choice">Choose date
+                  <input type="date" value={incomeDate ?? ''} onChange={e => setIncomeDate(e.target.value || null)} />
+                </label>
+                <button type="button" className={incomeDate == null ? 'is-on' : ''} onClick={() => setIncomeDate(null)}>Not sure</button>
+              </div>
+            </div>
+          </div>
+          <button className="primary-button setup-continue" type="button" onClick={() => advance('money-context')}>Continue</button>
+        </> : null}
 
         {step === 'obligation' ? <><h1>What’s the next thing that has to get paid?</h1><div className="obligation-grid">{obligations.map(c => chip(c.value, c.label, () => setObligation(c.value)))}</div></> : null}
 
@@ -186,17 +221,6 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
               <input name="due" type="hidden" value={obligationDate ?? ''}/>
             </label><button className="primary-button" type="submit" disabled={!obligationDate}>Lock it in</button>
           </form>
-        </> : null}
-
-        {step === 'lender' ? <><h1>If you came up short, who would you call?</h1><p className="setup-note">Optional. First name only.</p>
-          <div className="lender-card"><input aria-label="First name" value={lenderName} onChange={e => setLenderName(e.target.value.replace(/[^a-zA-Z '-]/g, '').slice(0, 32))} placeholder="First name"/>
-            {lenderName.trim() ? <><p>Have they helped you recently?</p><div className="inline-choices"><button type="button" onClick={() => setLenderHelped(true)} className={lenderHelped ? 'is-on' : ''}>Yes</button><button type="button" onClick={() => setLenderHelped(false)} className={!lenderHelped ? 'is-on' : ''}>No</button></div>{lenderHelped ? <div className="money-field small"><span>$</span><input inputMode="decimal" placeholder="Amount (optional)" onChange={e => setLenderAmount(centsFrom(e.target.value))}/></div> : null}<button type="button" className="primary-button" onClick={() => advance('lender')}>Use {lenderName.trim()}</button></> : null}
-          </div><button className="bare-link centered" type="button" onClick={() => { setLenderName(''); setLenderAmount(null); advance('skip'); }}>Skip</button>
-        </> : null}
-
-        {step === 'goal' ? <><h1>What would you rather keep this money for?</h1><p className="setup-note">Optional.</p><div className="obligation-grid">{goals.map(g => g === 'Other' ? <button key={g} type="button" className="choice-card" onClick={() => setGoal('')}>Other</button> : chip(g, g, () => setGoal(g)))}</div>
-          <form className="single-input" onSubmit={e => { e.preventDefault(); const v = String(new FormData(e.currentTarget).get('goal') ?? '').trim(); if (v) { setGoal(v.slice(0, 64)); advance('custom-goal'); } }}><input name="goal" placeholder="Custom label"/><button type="submit">Use</button></form>
-          <button className="bare-link centered" type="button" onClick={() => { setGoal(''); advance('skip'); }}>Skip</button>
         </> : null}
 
         {step === 'urge' ? <><h1>How bad do you want to play right now?</h1><div className="urge-scale" role="group" aria-label="Urge from 1 to 10">{Array.from({ length: 10 }, (_, i) => i + 1).map(n => <button key={n} type="button" onClick={() => { if ('vibrate' in navigator) navigator.vibrate?.(8); finish(n); }} style={{ '--heat': n / 10 } as React.CSSProperties}>{n}</button>)}</div><div className="urge-labels"><span>Low</span><span>High</span></div></> : null}
