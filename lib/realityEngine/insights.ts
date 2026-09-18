@@ -13,7 +13,7 @@ export interface RealityInsights {
 }
 
 function actionEvents(run: RunRecord) {
-  return run.timeline.filter((event): event is RunEvent & { kind:'action' } => event.kind === 'action');
+  return (run.timeline ?? []).filter((event): event is RunEvent & { kind:'action' } => event.kind === 'action');
 }
 
 function fasterAfterFirstLoss(run: RunRecord) {
@@ -117,7 +117,7 @@ export function buildRealityInsights(runs: RunRecord[]): RealityInsights {
   }
 
   const recentChaseRuns=runs.slice(-10).filter(run =>
-    run.pings.some(ping => ['stake-up','loss-streak','rapid-loop'].includes(ping.type))
+    (run.pings ?? []).some(ping => ['stake-up','loss-streak','rapid-loop'].includes(ping.type))
   );
   if (recentChaseRuns.length >= 3) {
     const exitedAfter=recentChaseRuns.filter(run => run.exitedAfterPing).length;
