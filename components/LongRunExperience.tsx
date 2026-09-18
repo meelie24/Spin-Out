@@ -65,9 +65,15 @@ export function LongRunExperience({
         </div>
       ) : (
         <div className="longrun-final" aria-live="polite">
-          <div className="longrun-net">
-            <span>After 10,000 runs</span>
-            <strong className={result.netCents < 0 ? 'is-negative' : ''}>{result.netCents >= 0 ? '+' : ''}{formatMoney(result.netCents)}</strong>
+          <div className="longrun-net longrun-net-pair">
+            <div>
+              <span>This 10,000-run sample</span>
+              <strong className={result.netCents < 0 ? 'is-negative' : ''}>{result.netCents >= 0 ? '+' : ''}{formatMoney(result.netCents)}</strong>
+            </div>
+            <div className="longrun-expectation">
+              <span>Model expectation</span>
+              <strong className={result.expectedNetCents < 0 ? 'is-negative' : ''}>{result.expectedNetCents >= 0 ? '+' : ''}{formatMoney(result.expectedNetCents)}</strong>
+            </div>
           </div>
           <div className="longrun-stats">
             <div><span>Wins</span><strong>{result.wins.toLocaleString()}</strong></div>
@@ -75,8 +81,11 @@ export function LongRunExperience({
             <div><span>Near misses</span><strong>{result.nearMisses.toLocaleString()}</strong></div>
             <div><span>Longest losing stretch</span><strong>{result.longestLossStreak}</strong></div>
           </div>
-          <p>Big wins happened. So did a lot of losing.</p>
-          <small>Staked: {formatMoney(result.totalStakedCents)} · Returned: {formatMoney(result.totalReturnedCents)}</small>
+          <p>{result.netCents >= 0
+            ? 'This sample finished ahead. That can happen. It does not change the game model.'
+            : 'This sample finished down. Individual runs still move around a lot.'}</p>
+          <small>{result.expectationBasis}: about {(result.modelReturnRate * 100).toFixed(1)}¢ back per $1 over repeated play.</small>
+          <small>Sample staked: {formatMoney(result.totalStakedCents)} · Sample returned: {formatMoney(result.totalReturnedCents)}</small>
           {result.strategyNote ? <small>{result.strategyNote}</small> : null}
         </div>
       )}
