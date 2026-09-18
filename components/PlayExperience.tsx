@@ -22,22 +22,27 @@ export function PlayExperience() {
   const [end, setEnd] = useState<RunEndData | null>(null);
 
   useEffect(() => {
-    const data = loadData();
-    const active = loadActiveRun<ActiveEnvelope>();
-    if (active?.profile && active?.run) {
-      setProfile(active.profile);
-      if (shouldAutoEnd(active.run.startedAt, Date.now())) {
-        clearActiveRun();
-        setEnd({ run: active.run, reason: 'timeout', endedAt: active.run.startedAt + 900_000, timeToExitSeconds: null });
-        setStage('post');
-      } else {
-        setRestored(active.run);
-        setStage('run');
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      const data = loadData();
+      const active = loadActiveRun<ActiveEnvelope>();
+      if (active?.profile && active?.run) {
+        setProfile(active.profile);
+        if (shouldAutoEnd(active.run.startedAt, Date.now())) {
+          clearActiveRun();
+          setEnd({ run: active.run, reason: 'timeout', endedAt: active.run.startedAt + 900_000, timeToExitSeconds: null });
+          setStage('post');
+        } else {
+          setRestored(active.run);
+          setStage('run');
+        }
+        return;
       }
-      return;
-    }
-    setProfile(data.profile);
-    setStage('setup');
+      setProfile(data.profile);
+      setStage('setup');
+    });
+    return () => { cancelled = true; };
   }, []);
 
   if (stage === 'loading') return <main className="loading-page"><span className="loading-dot"/>Loading</main>;
