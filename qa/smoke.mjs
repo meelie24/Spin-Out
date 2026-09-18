@@ -444,6 +444,74 @@ try {
     await restoreGameContext.close();
   }
 
+  // Behavior-driven intervention: a user-chosen round limit must be referenced exactly.
+  const limitContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const limitProfile = profile('slots', {
+    triggerType: 'other',
+    quitReason: null,
+    availableUntilIncomeCents: null,
+    nextIncomeDate: null,
+    obligationType: 'none',
+    obligationAmountCents: null,
+    obligationDueDate: null,
+    personalMoneyGoal: null,
+  });
+  const limitRun = runFor(limitProfile, {
+    actionCount: 6,
+    chosenLimitRounds: 5,
+    chosenLimitMinutes: null,
+    lastPingAction: 2,
+    lastNetCents: 0,
+    consecutiveLosses: 0,
+    consecutiveWins: 0,
+    actionIntervalsMs: [4000, 4200, 3900, 4100],
+  });
+  await seedActive(limitContext, limitProfile, limitRun);
+  const limitPage = await limitContext.newPage();
+  await limitPage.goto(\`\${base}/play\`, { waitUntil: 'domcontentloaded' });
+  await limitPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await waitActionReady(limitPage);
+  await limitPage.locator('.game-action').click();
+  const limitPing = limitPage.locator('.reality-ping');
+  await limitPing.waitFor({ timeout: 9000 });
+  assert(await limitPing.getByText(/You decided on 5\\. This is 7\\./i).isVisible(), 'chosen-limit Ping did not reference the exact user limit');
+  assert(await limitPing.getByRole('button', { name: "I'm done" }).isVisible(), 'strong limit intervention did not offer an immediate exit');
+  await limitContext.close();
+
+  // Behavior-driven intervention: raising the simulated amount after a loss fires before another play.
+  const stakeContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const stakeProfile = profile('slots', {
+    triggerType: 'other',
+    quitReason: null,
+    availableUntilIncomeCents: null,
+    nextIncomeDate: null,
+    obligationType: 'none',
+    obligationAmountCents: null,
+    obligationDueDate: null,
+    personalMoneyGoal: null,
+  });
+  const stakeRun = runFor(stakeProfile, {
+    balanceCents: 9000,
+    previousBalanceCents: 10000,
+    stakeCents: 1000,
+    previousStakeCents: 1000,
+    actionCount: 3,
+    lastNetCents: -1000,
+    lastPingAction: 0,
+    consecutiveLosses: 1,
+  });
+  await seedActive(stakeContext, stakeProfile, stakeRun);
+  const stakePage = await stakeContext.newPage();
+  await stakePage.goto(\`\${base}/play\`, { waitUntil: 'domcontentloaded' });
+  await stakePage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  await stakePage.getByRole('button', { name: 'Raise practice stake' }).click();
+  const stakePing = stakePage.locator('.reality-ping');
+  await stakePing.waitFor({ timeout: 5000 });
+  assert(await stakePing.getByText(/You lost, then raised it\\./i).isVisible(), 'stake-escalation Ping did not fire immediately');
+  const afterStake = await stakePage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
+  assert(afterStake?.actionCount === 3, 'stake-escalation intervention required another play before firing');
+  await stakeContext.close();
+
   // Reduced motion stays playable.
   const reduced = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
   const reducedProfile = profile('slots');
