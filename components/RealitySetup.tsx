@@ -7,8 +7,8 @@ import { isFinancialContextStale, isObligationExpired } from '@/lib/engine';
 import { spinAudio } from '@/lib/audio';
 
 const gameChoices: { value: GamblingType; label: string; art: string }[] = [
-  { value: 'slots', label: 'Slots', art: '◫' }, { value: 'sports', label: 'Sports', art: '◒' },
-  { value: 'casino', label: 'Casino', art: '◇' }, { value: 'poker', label: 'Poker', art: '♠' },
+  { value: 'slots', label: 'Slots', art: '◫' }, { value: 'sports', label: 'Sportsbook', art: '◒' },
+  { value: 'casino', label: 'Roulette', art: '◇' }, { value: 'poker', label: 'Video Poker', art: '♠' },
   { value: 'lottery', label: 'Lottery / scratch', art: '✦' }, { value: 'other', label: 'Other', art: '·' },
 ];
 const triggers: { value: TriggerType; label: string }[] = [
