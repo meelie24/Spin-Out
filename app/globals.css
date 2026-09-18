@@ -1629,3 +1629,157 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .longrun-stats{grid-template-columns:1fr 1fr}
   .longrun-net strong{font-size:26px}
 }
+
+
+/* User-test permanent fixes */
+.money-context-card{
+  width:min(620px,100%);
+  margin:0 auto 16px;
+  padding:18px;
+  border:1px solid rgba(72,49,37,.13);
+  border-radius:18px;
+  background:rgba(255,250,242,.72);
+  display:grid;
+  grid-template-columns:1fr 1.15fr;
+  gap:16px;
+  box-shadow:0 14px 38px rgba(64,38,25,.045);
+}
+.money-context-card>label,.money-context-date{
+  display:grid;
+  gap:8px;
+  color:#756257;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.money-context-clear{justify-self:start;padding:0;min-height:28px}
+.date-inline-choice{
+  min-height:38px;
+  padding:8px 10px;
+  border:1px solid rgba(99,72,55,.2);
+  border-radius:10px;
+  background:rgba(255,255,255,.44);
+  color:#604d40;
+  font-size:11px;
+  display:flex!important;
+  align-items:center;
+  gap:6px;
+  text-transform:none!important;
+  letter-spacing:0!important;
+}
+.date-inline-choice input{
+  width:24px;
+  min-height:24px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:transparent!important;
+}
+.setup-continue{display:block;width:min(620px,100%);margin:0 auto}
+
+.context-edit-details{
+  border-top:1px solid rgba(75,50,39,.1);
+}
+.context-edit-details summary{
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  color:#4b352c;
+  font-size:13px;
+  font-weight:650;
+  cursor:pointer;
+  list-style:none;
+}
+.context-edit-details summary::-webkit-details-marker{display:none}
+.context-edit-details summary:after{
+  content:'+';
+  color:#9a806d;
+  font-size:16px;
+  font-weight:400;
+}
+.context-edit-details[open] summary:after{content:'−'}
+.context-edit-details summary span{
+  margin-left:auto;
+  margin-right:10px;
+  color:#9a887b;
+  font-size:8px;
+  font-weight:500;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+.context-edit-details-body{
+  display:grid;
+  gap:10px;
+  padding:0 0 16px;
+}
+.context-edit-details-body label{
+  display:grid;
+  gap:6px;
+  color:#806c60;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+}
+.context-edit-details-body input{
+  width:100%;
+  min-height:44px;
+  border:1px solid rgba(71,47,37,.13);
+  border-radius:10px;
+  background:rgba(255,251,244,.78);
+  color:#4f392f;
+  padding:0 11px;
+  font-size:12px;
+  text-transform:none;
+  letter-spacing:0;
+}
+
+/* Run 10,000 should be findable but stay secondary. */
+.run-secondary>button{
+  min-height:35px;
+  padding:0 12px;
+  border:1px solid rgba(215,181,119,.16);
+  border-radius:999px;
+  background:rgba(43,26,21,.5);
+  color:#ad957b;
+  text-decoration:none;
+  box-shadow:inset 0 1px rgba(255,255,255,.035);
+}
+.run-secondary>button:hover:not(:disabled){
+  color:#e1c49a;
+  border-color:rgba(224,190,129,.3);
+  background:rgba(67,41,30,.56);
+}
+
+/* The final lesson must be above the fold on mobile. */
+.longrun-stream.phase-3{
+  flex:0 0 34px;
+  min-height:34px;
+  grid-template-columns:repeat(12,1fr);
+  grid-auto-rows:10px;
+  margin:8px 0 6px;
+  transform:none;
+  opacity:.58;
+}
+.longrun-stream.phase-3 i{min-height:9px;border-radius:3px}
+.longrun-panel{overflow-y:auto}
+.longrun-final{padding-bottom:2px}
+@media(max-width:560px){
+  .money-context-card{grid-template-columns:1fr;padding:15px;gap:13px}
+  .longrun-panel{overflow-y:auto}
+  .longrun-stream.phase-3{
+    grid-template-columns:repeat(12,1fr);
+    min-height:28px;
+    flex-basis:28px;
+    grid-auto-rows:8px;
+  }
+  .longrun-final{gap:7px}
+  .longrun-net{padding-top:7px}
+  .longrun-net strong{font-size:24px}
+  .longrun-stats{gap:4px}
+  .longrun-stats>div{padding:6px}
+  .longrun-stats strong{font-size:11px}
+  .longrun-final>p{font-size:10px}
+  .longrun-final>small{font-size:7px}
+}
