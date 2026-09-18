@@ -74,6 +74,7 @@ function PromptCard({
     >
       <span>{prompt.label}</span>
       <small>{prompt.detail}</small>
+      <b className="prompt-close" aria-hidden="true">×</b>
     </button>
   );
 }
