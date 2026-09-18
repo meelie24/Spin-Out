@@ -374,7 +374,7 @@ try {
   const contrast = await browser.newContext({ viewport: { width: 390, height: 844 }, forcedColors: 'active' });
   const cp = await contrast.newPage();
   await cp.goto(base, { waitUntil: 'networkidle' });
-  await cp.getByRole('link', { name: /^Start$/i }).waitFor();
+  await cp.getByRole('link', { name: /Enter Reality Run/i }).first().waitFor();
   await noHorizontalOverflow(cp, 'forced colors');
   await contrast.close();
 
@@ -385,8 +385,8 @@ try {
     await new Promise(resolve => setTimeout(resolve, 60));
     await route.continue();
   });
-  await sp.goto(base, { waitUntil: 'networkidle', timeout: 30_000 });
-  await sp.getByRole('link', { name: /^Start$/i }).waitFor();
+  await sp.goto(base, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+  await sp.getByRole('link', { name: /Enter Reality Run/i }).first().waitFor();
   await slow.close();
 
   assert(browserErrors.length === 0, `first-run browser errors: ${JSON.stringify(browserErrors)}`);
