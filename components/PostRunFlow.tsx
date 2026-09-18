@@ -86,6 +86,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
       limitExceededByRounds,
       limitExceededSeconds,
       exitedAfterPing,
+      returnedAfterMs: end.run.returnedAfterMs ?? null,
     };
 
     const next = updateData(data => ({
@@ -108,6 +109,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
       limitExceededByRounds,
       limitExceededSeconds,
       averageActionIntervalMs,
+      returnedAfterMs: end.run.returnedAfterMs ?? null,
     });
 
     void syncRunIfSignedIn(profile, record);
