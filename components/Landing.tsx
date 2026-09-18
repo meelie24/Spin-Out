@@ -20,9 +20,14 @@ export function Landing() {
   const [runs, setRuns] = useState<ReturnType<typeof loadData>['runs']>([]);
 
   useEffect(() => {
-    const data = loadData();
-    setRuns(data.runs);
-    setReady(true);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      const data = loadData();
+      setRuns(data.runs);
+      setReady(true);
+    });
+    return () => { cancelled = true; };
   }, []);
 
   const kept = useMemo(() => totalMoneyKept(runs), [runs]);
