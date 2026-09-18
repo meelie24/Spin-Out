@@ -127,6 +127,10 @@ export function Landing() {
             </span>
           ))}
         </div>
+        <div className="ambient-symbol ambient-seven"><Image src="/symbols/seven.svg" alt="" width={240} height={240} /></div>
+        <div className="ambient-symbol ambient-coin"><Image src="/symbols/cash-coin.svg" alt="" width={260} height={260} /></div>
+        <div className="ambient-symbol ambient-fu"><Image src="/symbols/fu.svg" alt="" width={220} height={220} /></div>
+        <div className="ambient-symbol ambient-bar"><Image src="/symbols/bar.svg" alt="" width={250} height={250} /></div>
         <div className="home-glow home-glow-a" />
         <div className="home-glow home-glow-b" />
       </div>
