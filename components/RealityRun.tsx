@@ -7,6 +7,7 @@ import { buildPingCandidates, selectPing } from '@/lib/pings';
 import { computeReality, formatMoney, sampleOutcome, shouldAutoEnd, stakeOptionsFor, daysUntil, isFinancialContextStale } from '@/lib/engine';
 import { clearActiveRun, loadData, saveActiveRun, track, updateData } from '@/lib/storage';
 import { spinAudio } from '@/lib/audio';
+import { createRunLease } from '@/lib/runLease';
 import type { ActiveRun, ExitReason, PingCandidate, RealityProfile } from '@/lib/types';
 
 export interface RunEndData {
@@ -64,14 +65,40 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   const [muted, setMuted] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [pendingBalanceEnd, setPendingBalanceEnd] = useState(false);
+  const [blockedByOtherTab, setBlockedByOtherTab] = useState(false);
   const [gameDecision, setGameDecision] = useState<string>(() => profile.gamblingType === 'sports' ? 'North Harbor' : profile.gamblingType === 'casino' ? 'Red' : profile.gamblingType === 'poker' ? 'Hold' : '');
   const ended = useRef(false);
+  const lease = useRef<ReturnType<typeof createRunLease> | null>(null);
   const lastDismissedPing = useRef<{ type: string; dismissedAt: number; balanceAt: number; stakeAt: number } | null>(null);
   const stakes = useMemo(() => stakeOptionsFor(profile.intendedWagerCents), [profile.intendedWagerCents]);
   const reality = useMemo(() => computeReality(profile, run.balanceCents), [profile, run.balanceCents]);
   const intensity = Math.min(1, reality.simulatedLossCents / Math.max(profile.intendedWagerCents, 1));
 
   useEffect(() => { runRef.current = run; saveActiveRun({ profile, run }); }, [profile, run]);
+  useEffect(() => {
+    lease.current = createRunLease(runRef.current.id);
+    const claim = lease.current.claim();
+    queueMicrotask(() => setBlockedByOtherTab(!claim));
+    const timer = window.setInterval(() => {
+      const current = lease.current;
+      if (!current) return;
+      if (current.heldByThisTab()) current.renew();
+      else setBlockedByOtherTab(true);
+    }, 5_000);
+    const onStorage = () => {
+      const current = lease.current;
+      if (!current) return;
+      setBlockedByOtherTab(!current.heldByThisTab());
+    };
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('storage', onStorage);
+      lease.current?.release();
+      lease.current = null;
+    };
+  }, []);
+
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     const sync = () => setReducedMotion(Boolean(media?.matches)); sync(); media?.addEventListener?.('change', sync);
@@ -111,9 +138,13 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   }, [onEnd]);
 
   useEffect(() => {
+    if (run.balanceCents < stakes[0] && !ended.current) {
+      const timer = window.setTimeout(() => finish('balance'), 80);
+      return () => window.clearTimeout(timer);
+    }
     const timer = window.setInterval(() => { if (shouldAutoEnd(runRef.current.startedAt, Date.now())) finish('timeout'); }, 1000);
     return () => window.clearInterval(timer);
-  }, [finish]);
+  }, [finish, run.balanceCents, stakes]);
 
   const showPing = useCallback((next: ActiveRun) => {
     const data = loadData();
@@ -148,7 +179,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   }, [profile]);
 
   const act = async () => {
-    if (animating || ping || ended.current || run.balanceCents < run.stakeCents) return;
+    if (blockedByOtherTab || animating || ping || ended.current || run.balanceCents < run.stakeCents) return;
     setAnimating(true);
     spinAudio.spin(860);
     const outcome = sampleOutcome(random01(), run.stakeCents);
@@ -194,7 +225,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   };
 
   const setStake = (direction: -1 | 1) => {
-    if (animating || ping) return;
+    if (blockedByOtherTab || animating || ping) return;
     const currentIndex = stakes.indexOf(run.stakeCents as never);
     const index = Math.max(0, Math.min(stakes.length - 1, (currentIndex < 0 ? 1 : currentIndex) + direction));
     const nextStake = stakes[index];
@@ -256,6 +287,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       </div>
 
       <section className="run-card" aria-label="Reality Run">
+        {blockedByOtherTab ? <div className="tab-lock" role="dialog" aria-modal="true" aria-label="Reality Run open in another tab"><strong>Reality Run is open in another tab.</strong><button type="button" onClick={() => { const ok = lease.current?.claim(true) ?? true; setBlockedByOtherTab(!ok); }}>Use this tab</button></div> : null}
         <div className="run-hud">
           <div><span>Balance</span><strong>{formatMoney(run.balanceCents)}</strong></div>
           <div><span>Stake</span><strong>{formatMoney(run.stakeCents)}</strong></div>
@@ -277,11 +309,11 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
         {profile.gamblingType === 'poker' ? <div className="game-decision" role="group" aria-label="Poker decision">{['Hold','Draw'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}</div> : null}
         <div className="run-controls">
           <div className="stake-control" aria-label="Practice stake">
-            <button type="button" onClick={() => setStake(-1)} aria-label="Lower practice stake" disabled={animating || stakes[0] === run.stakeCents}>−</button>
+            <button type="button" onClick={() => setStake(-1)} aria-label="Lower practice stake" disabled={blockedByOtherTab || animating || stakes[0] === run.stakeCents}>−</button>
             <span><small>Practice stake</small>{formatMoney(run.stakeCents)}</span>
-            <button type="button" onClick={() => setStake(1)} aria-label="Raise practice stake" disabled={animating || stakes[2] === run.stakeCents || stakes[Math.min(stakes.length-1,stakes.indexOf(run.stakeCents as never)+1)] > run.balanceCents}>+</button>
+            <button type="button" onClick={() => setStake(1)} aria-label="Raise practice stake" disabled={blockedByOtherTab || animating || stakes[2] === run.stakeCents || stakes[Math.min(stakes.length-1,stakes.indexOf(run.stakeCents as never)+1)] > run.balanceCents}>+</button>
           </div>
-          <button type="button" className="game-action" onClick={act} disabled={animating || Boolean(ping) || run.balanceCents < run.stakeCents}>{animating ? '...' : actionLabel(profile.gamblingType)}</button>
+          <button type="button" className="game-action" onClick={act} disabled={blockedByOtherTab || animating || Boolean(ping) || run.balanceCents < run.stakeCents}>{animating ? '...' : actionLabel(profile.gamblingType)}</button>
         </div>
         <p className="run-fineprint">Simulation. Leave whenever you want.</p>
       </section>
