@@ -19,6 +19,7 @@ export interface RealityProfile {
   recentLenderHelpedRecently: boolean;
   recentLenderAmountCents: number | null;
   personalMoneyGoal: string | null;
+  additionalMoneyGoal?: string | null;
   startingUrge: number;
   financialContextUpdatedAt: string;
   createdAt: string;
