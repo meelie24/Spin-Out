@@ -51,6 +51,7 @@ function freshRun(profile: RealityProfile): ActiveRun {
     lastNetCents: 0,
     lastPingAction: -10,
     pings: [],
+    timeline: [],
   };
 }
 
@@ -64,7 +65,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
   const [reducedMotion, setReducedMotion] = useState(false);
   const [pendingBalanceEnd, setPendingBalanceEnd] = useState(false);
   const ended = useRef(false);
-  const lastDismissedPing = useRef<{ type: string; dismissedAt: number } | null>(null);
+  const lastDismissedPing = useRef<{ type: string; dismissedAt: number; balanceAt: number; stakeAt: number } | null>(null);
   const stakes = useMemo(() => stakeOptionsFor(profile.intendedWagerCents), [profile.intendedWagerCents]);
   const reality = useMemo(() => computeReality(profile, run.balanceCents), [profile, run.balanceCents]);
   const intensity = Math.min(1, reality.simulatedLossCents / Math.max(profile.intendedWagerCents, 1));
@@ -88,7 +89,18 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     if (reason === 'voluntary' && lastPing && endedAt - lastPing.shownAt <= 60_000) {
       updateData(data => {
         const old = data.pingLearning[lastPing.type] ?? { shown: 0, exitsAfter: 0 };
-        return { ...data, pingLearning: { ...data.pingLearning, [lastPing.type]: { ...old, exitsAfter: old.exitsAfter + 1 } } };
+        const recovered = current.balanceCents >= current.initialBalanceCents && current.previousBalanceCents < current.initialBalanceCents;
+        return {
+          ...data,
+          pingLearning: {
+            ...data.pingLearning,
+            [lastPing.type]: {
+              ...old,
+              exitsAfter: old.exitsAfter + 1,
+              recoveryExitAfter: (old.recoveryExitAfter ?? 0) + (recovered ? 1 : 0),
+            },
+          },
+        };
       });
     }
     clearActiveRun();
@@ -113,12 +125,18 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       actionCount: next.actionCount,
       lastNetCents: next.lastNetCents,
       lastPingAction: next.lastPingAction,
+      lastPingAt: next.pings[next.pings.length - 1]?.shownAt ?? null,
     });
     const chosen = selectPing(candidates, data.pingLearning, next.pings.slice(-2).map(p => p.type));
     if (!chosen) return false;
     const shownAt = Date.now();
     const pingRecord = { ...chosen, shownAt, dismissedAt: null };
-    const updated = { ...next, lastPingAction: next.actionCount, pings: [...next.pings, pingRecord] };
+    const updated: ActiveRun = {
+      ...next,
+      lastPingAction: next.actionCount,
+      pings: [...next.pings, pingRecord],
+      timeline: [...next.timeline, { kind: 'ping-shown', at: shownAt, balanceCents: next.balanceCents, stakeCents: next.stakeCents, pingType: chosen.type }],
+    };
     setRun(updated); runRef.current = updated;
     updateData(current => {
       const old = current.pingLearning[chosen.type] ?? { shown: 0, exitsAfter: 0 };
@@ -144,10 +162,23 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       largestLossCents: Math.max(run.largestLossCents, Math.max(0, run.initialBalanceCents - balanceCents)),
       simulatedLossesCents: run.simulatedLossesCents + Math.max(0, -outcome.netCents),
       simulatedRecoveriesCents: run.simulatedRecoveriesCents + Math.max(0, outcome.netCents),
+      timeline: [...run.timeline, { kind: 'action', at: Date.now(), balanceCents, stakeCents: run.stakeCents, netCents: outcome.netCents }],
     };
     setRun(next); runRef.current = next;
     const recentPing = lastDismissedPing.current;
     track('run_action', { action: next.actionCount, net: outcome.netCents, balance: balanceCents, stake: next.stakeCents, afterPing: recentPing?.type ?? null, msAfterPing: recentPing ? Math.max(0, Date.now() - recentPing.dismissedAt) : null });
+    if (recentPing) {
+      updateData(data => {
+        const old = data.pingLearning[recentPing.type] ?? { shown: 0, exitsAfter: 0 };
+        return {
+          ...data,
+          pingLearning: {
+            ...data.pingLearning,
+            [recentPing.type]: { ...old, continuedAfter: (old.continuedAfter ?? 0) + 1 },
+          },
+        };
+      });
+    }
     lastDismissedPing.current = null;
     await game.current?.playOutcome({ ...outcome, balanceCents, actionCount: next.actionCount });
     spinAudio.result(outcome.netCents);
@@ -168,8 +199,27 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     const nextStake = stakes[index];
     if (nextStake > run.balanceCents) return;
     spinAudio.click();
-    track('stake_changed', { from: run.stakeCents, to: nextStake, balance: run.balanceCents, afterPing: lastDismissedPing.current?.type ?? null });
-    setRun(current => ({ ...current, previousStakeCents: current.stakeCents, stakeCents: nextStake }));
+    const recentPing = lastDismissedPing.current;
+    track('stake_changed', { from: run.stakeCents, to: nextStake, balance: run.balanceCents, afterPing: recentPing?.type ?? null });
+    if (recentPing) {
+      updateData(data => {
+        const old = data.pingLearning[recentPing.type] ?? { shown: 0, exitsAfter: 0 };
+        const key = nextStake < run.stakeCents ? 'stakeDownAfter' : 'stakeUpAfter';
+        return {
+          ...data,
+          pingLearning: {
+            ...data.pingLearning,
+            [recentPing.type]: { ...old, [key]: (old[key] ?? 0) + 1 },
+          },
+        };
+      });
+    }
+    setRun(current => ({
+      ...current,
+      previousStakeCents: current.stakeCents,
+      stakeCents: nextStake,
+      timeline: [...current.timeline, { kind: 'stake', at: Date.now(), balanceCents: current.balanceCents, stakeCents: nextStake }],
+    }));
   };
 
   const dismissPing = () => {
@@ -177,10 +227,14 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     if (ping) {
       const record = runRef.current.pings[runRef.current.pings.length - 1];
       track('reality_ping_dismissed', { type: ping.type, dwellMs: record ? Math.max(0, now - record.shownAt) : 0 });
-      lastDismissedPing.current = { type: ping.type, dismissedAt: now };
+      lastDismissedPing.current = { type: ping.type, dismissedAt: now, balanceAt: runRef.current.balanceCents, stakeAt: runRef.current.stakeCents };
     }
     setPing(null);
-    setRun(current => ({ ...current, pings: current.pings.map((p, i) => i === current.pings.length - 1 ? { ...p, dismissedAt: now } : p) }));
+    setRun(current => ({
+      ...current,
+      pings: current.pings.map((p, i) => i === current.pings.length - 1 ? { ...p, dismissedAt: now } : p),
+      timeline: [...current.timeline, { kind: 'ping-dismissed', at: now, balanceCents: current.balanceCents, stakeCents: current.stakeCents, pingType: ping?.type }],
+    }));
     if (pendingBalanceEnd) { setPendingBalanceEnd(false); window.setTimeout(() => finish('balance'), 80); }
   };
 
