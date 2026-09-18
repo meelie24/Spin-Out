@@ -75,8 +75,18 @@ try {
   assert(cashBox && cashBox.y >= 0 && cashBox.y + cashBox.height <= 844, 'Cash Out is outside mobile viewport');
   let sawPing = false;
   for (let i = 0; i < 4; i++) {
-    await page.getByRole('button', { name: /^Spin$/ }).click();
-    await page.waitForTimeout(1100);
+    const action = page.locator('.game-action');
+    await action.waitFor({ state: 'visible' });
+    await page.waitForFunction(() => {
+      const button = document.querySelector('.game-action');
+      return button instanceof HTMLButtonElement && !button.disabled;
+    });
+    await action.click();
+    await page.waitForFunction(() => {
+      const ping = document.querySelector('.reality-ping');
+      const button = document.querySelector('.game-action');
+      return Boolean(ping) || (button instanceof HTMLButtonElement && !button.disabled);
+    }, null, { timeout: 5000 });
     const ping = page.locator('.reality-ping');
     if (await ping.isVisible().catch(() => false)) {
       sawPing = true;
@@ -84,6 +94,10 @@ try {
       assert(blur.includes('blur'), `Reality Ping glass blur missing: ${blur}`);
       await page.screenshot({ path: `${out}/reality-ping-390.png`, fullPage: true });
       await ping.click();
+      await page.waitForFunction(() => {
+        const button = document.querySelector('.game-action');
+        return button instanceof HTMLButtonElement && !button.disabled;
+      });
     }
   }
   assert(sawPing, 'Reality Ping did not appear within four actions');

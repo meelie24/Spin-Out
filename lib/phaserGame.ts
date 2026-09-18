@@ -71,7 +71,7 @@ export async function mountRealityGame(
 
     preload() {
       if (options.gameType === 'slots' || options.gameType === 'other') {
-        for (const symbol of SYMBOLS) this.load.svg(symbol, `/symbols/${symbol}.svg`);
+        for (const symbol of SYMBOLS) this.load.svg(symbol, `/symbols/${symbol}.svg`, { width: 180, height: 180 });
       }
     }
 
