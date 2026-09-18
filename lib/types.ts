@@ -78,6 +78,13 @@ export interface RunSnapshot {
   totalStakedCents?: number;
 }
 
+export interface InterventionDirectorState {
+  lastForegroundAt: number | null;
+  lastForegroundFamily: string | null;
+  recentFamilies: Array<{ family: string; at: number }>;
+  ambientMode: 'normal' | 'cooling' | 'ledger' | 'strong';
+}
+
 export interface PingRecord {
   id: string;
   type: string;
@@ -85,6 +92,7 @@ export interface PingRecord {
   message: string;
   shownAt: number;
   dismissedAt: number | null;
+  surface?: 'ping' | 'xray' | 'strong';
 }
 
 export interface RunEvent {
@@ -173,6 +181,7 @@ export interface ActiveRun {
   limitExceededAt?: number | null;
   returnedAfterMs?: number | null;
   totalStakedCents?: number;
+  directorState?: InterventionDirectorState;
   gameState?: {
     poker?: {
       hand: string[];
