@@ -184,7 +184,7 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
             </label>
 
             <div className="money-context-date">
-              <span>When's more money coming in?</span>
+              <span>{"When's more money coming in?"}</span>
               <div className="due-quick" role="group" aria-label="Next income date">
                 {['Today','Tomorrow','This week','Next week'].map(choice => (
                   <button
