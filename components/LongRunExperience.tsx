@@ -33,7 +33,7 @@ export function LongRunExperience({
   }, [reduced]);
 
   const phase = phases[phaseIndex];
-  const sampleCount = phaseIndex === 0 ? 1 : phaseIndex === 1 ? 14 : phaseIndex === 2 ? 30 : 48;
+  const sampleCount = phaseIndex === 0 ? 1 : phaseIndex === 1 ? 14 : phaseIndex === 2 ? 30 : 12;
   const samples = useMemo(() => result.samples.slice(0, sampleCount), [result.samples, sampleCount]);
 
   return (
