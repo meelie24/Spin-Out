@@ -76,6 +76,12 @@ export function RealitySetup({ existing, onComplete }: { existing: RealityProfil
     gsap.fromTo(panel.current, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: .28, ease: 'power2.out' });
   }, [index]);
 
+  useEffect(() => {
+    if (step !== 'obligation-detail' || obligation !== 'none') return;
+    const timer = window.setTimeout(() => setIndex(i => Math.min(i + 1, steps.length - 1)), 80);
+    return () => window.clearTimeout(timer);
+  }, [step, obligation, steps.length]);
+
   const advance = (value?: string) => {
     spinAudio.click();
     if (value) setSelected(value);
@@ -143,7 +149,7 @@ export function RealitySetup({ existing, onComplete }: { existing: RealityProfil
 
         {step === 'obligation' ? <><h1>What’s the next thing that has to get paid?</h1><div className="obligation-grid">{obligations.map(c => chip(c.value, c.label, () => setObligation(c.value)))}</div></> : null}
 
-        {step === 'obligation-detail' ? obligation === 'none' ? <div className="auto-forward" ref={el => { if (el) window.setTimeout(() => advance('none'), 30); }}><h1>Nothing urgent.</h1></div> : <>
+        {step === 'obligation-detail' ? obligation === 'none' ? <div className="auto-forward"><h1>Nothing urgent.</h1></div> : <>
           <p className="kicker">{obligations.find(o => o.value === obligation)?.label}</p><h1>How much, and when?</h1>
           <form className="obligation-card" onSubmit={e => { e.preventDefault(); const fd = new FormData(e.currentTarget); const amount = centsFrom(String(fd.get('amount'))); const due = String(fd.get('due')); if (amount != null && amount > 0 && due) { setObligationAmount(amount); setObligationDate(due); advance('details'); } }}>
             <label>Amount<div className="money-field"><span>$</span><input name="amount" inputMode="decimal" defaultValue={obligationAmount ? obligationAmount / 100 : ''} required/></div></label>
