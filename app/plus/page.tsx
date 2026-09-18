@@ -7,10 +7,10 @@ export const dynamic = 'force-dynamic';
 
 export default async function PlusPage() {
   const supabase = await createServerSupabase();
-  if (!supabase) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} nowMs={Date.now()} />;
+  if (!supabase) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} />;
 
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} nowMs={Date.now()} />;
+  if (!auth.user) return <PlusDashboard authenticated={false} premium={false} serverRuns={[]} />;
 
   const [entitlementResult, runsResult] = await Promise.all([
     supabase.from('entitlements').select('status').eq('user_id', auth.user.id).maybeSingle(),
@@ -25,5 +25,5 @@ export default async function PlusPage() {
     .map(row => row.data as RunRecord)
     .filter(run => run && typeof run.id === 'string');
 
-  return <PlusDashboard authenticated premium={premium} serverRuns={serverRuns} nowMs={Date.now()} />;
+  return <PlusDashboard authenticated premium={premium} serverRuns={serverRuns} />;
 }
