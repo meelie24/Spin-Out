@@ -14,6 +14,7 @@
     "lib/engine.ts",
     "lib/pings.ts",
     "lib/gameEngines.ts",
+    "lib/realityEngine/director.ts",
     "tests/*.test.ts",
     "types/node-shim.d.ts"
   ]
