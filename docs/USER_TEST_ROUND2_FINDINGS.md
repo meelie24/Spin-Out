@@ -22,6 +22,7 @@
 | Finding | What happened | Likely user reaction | Severity | Root cause | Required fix |
 |---|---|---|---|---|---|
 | Run 10,000 tells the user "Keep going." during its build animation | The second animation phase uses a direct gambling-continuation phrase before revealing the long-run lesson | "Why is the quit-gambling app telling me to keep going?" | **HIGH** | Animation copy was written for momentum rather than the product's behavioral goal | Replace directive language with neutral progression copy. Add browser regression that rejects "keep going" inside Run 10,000. |
+| Strong Reality Ping action says "Keep going" | A strong limit intervention offers "Keep going" beside "I'm done" | "Why is the intervention itself telling me to keep gambling?" | **HIGH** | The control describes continuation with motivational wording instead of a neutral action label | Keep the user's choice, but rename the action to **Continue run** and regression-test the wording. |
 | Intervention dialogs do not explicitly take keyboard focus | Reality Ping, X-Ray and Run 10,000 appear visually, but focus can remain on the underlying game control | Keyboard/switch user may continue interacting with the wrong layer or not know an interruption appeared | **MEDIUM** | These surfaces have dialog semantics but no focus-on-open behavior | Move focus into each dialog on mount, make the container programmatically focusable and retain the existing single-foreground behavior. |
 | My Reality does not explicitly take focus | The modal opens visually while keyboard focus can stay on the underlying homepage control | "The panel opened, but Tab starts somewhere weird." | **MEDIUM** | Modal semantics were added without matching focus management | Focus the My Reality dialog when it opens. |
 | Dismissed homepage Reality Pings immediately return after refresh/navigation | Dismissal only lives in component state | "I just cleared that. Why is it back already?" | **MEDIUM** | No same-visit dismissal memory | Remember dismissed home prompts for the browser-tab session only. Do not turn this into permanent suppression. |
@@ -40,6 +41,7 @@ The following cases are being added to CI before fixes are applied:
 5. X-Ray takes keyboard focus when shown.
 6. My Reality takes keyboard focus when opened.
 7. A self-reported "No" outcome may show Money Kept but must not call the money "PROTECTED"; it should use truthful availability language.
+8. Strong Reality Ping choices must use neutral **Continue run** language, never "Keep going".
 
 ## Release rule
 
