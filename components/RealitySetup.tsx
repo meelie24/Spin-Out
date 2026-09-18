@@ -25,7 +25,7 @@ const obligations: { value: ObligationType; label: string }[] = [
 ];
 const goals = ['Savings', 'Mom / Dad / family', 'Birthday', 'Kids', 'Groceries', 'Trip', 'Debt', 'Car', 'Something I want', 'Other'];
 
-type Step = 'wager' | 'game' | 'trigger' | 'available' | 'income' | 'obligation' | 'obligation-detail' | 'lender' | 'goal' | 'urge';
+type Step = 'wager' | 'game' | 'trigger' | 'quit-reason' | 'available' | 'income' | 'obligation' | 'obligation-detail' | 'lender' | 'goal' | 'urge';
 
 function centsFrom(input: string) {
   const n = Number(input.replace(/[^0-9.]/g, ''));
@@ -44,7 +44,7 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
   const expired = existing?.obligationDueDate ? isObligationExpired(existing.obligationDueDate, new Date().toISOString().slice(0, 10)) : false;
   const financeStale = existing ? isFinancialContextStale(existing) : false;
   const steps = useMemo<Step[]>(() => {
-    if (firstRun) return initialGame ? ['wager','trigger','available','income','obligation','obligation-detail','lender','goal','urge'] : ['wager','game','trigger','available','income','obligation','obligation-detail','lender','goal','urge'];
+    if (firstRun) return initialGame ? ['wager','trigger','quit-reason','available','income','obligation','obligation-detail','lender','goal','urge'] : ['wager','game','trigger','quit-reason','available','income','obligation','obligation-detail','lender','goal','urge'];
     const next: Step[] = ['wager','trigger'];
     if (financeStale) next.push('available','income','obligation','obligation-detail');
     else if (expired) next.push('obligation','obligation-detail');
@@ -58,6 +58,7 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
   const [game, setGame] = useState<GamblingType>(initialGame ?? existing?.gamblingType ?? 'slots');
   const [trigger, setTrigger] = useState<TriggerType>(existing?.triggerType ?? 'win-it-back');
   const [triggerCustom, setTriggerCustom] = useState(existing?.triggerCustom ?? '');
+  const [quitReason, setQuitReason] = useState(existing?.quitReason ?? '');
   const [available, setAvailable] = useState<number | null>(existing?.availableUntilIncomeCents ?? null);
   const [incomeDate, setIncomeDate] = useState<string | null>(existing?.nextIncomeDate ?? null);
   const [obligation, setObligation] = useState<ObligationType>(existing?.obligationType ?? 'car');
@@ -100,6 +101,7 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
       gamblingType: game,
       triggerType: trigger,
       triggerCustom: trigger === 'other' ? triggerCustom || null : null,
+      quitReason: quitReason.trim() || null,
       availableUntilIncomeCents: available,
       nextIncomeDate: incomeDate,
       obligationType: obligation,
@@ -139,6 +141,28 @@ export function RealitySetup({ existing, initialGame = null, onComplete }: { exi
         {step === 'trigger' ? <><h1>What’s pulling you in?</h1><div className="choice-stack">{triggers.map(c => c.value === 'other' ? (
           <div key={c.value} className="custom-choice"><button type="button" className="choice-card" onClick={() => setTrigger('other')}>{c.label}</button>{trigger === 'other' ? <form onSubmit={e => { e.preventDefault(); advance('other'); }}><input autoFocus value={triggerCustom} onChange={e => setTriggerCustom(e.target.value)} maxLength={64} placeholder="Optional"/><button type="submit">Use</button></form> : null}</div>
         ) : chip(c.value, c.label, () => setTrigger(c.value)))}</div></> : null}
+
+        {step === 'quit-reason' ? <>
+          <h1>Why are you trying to stop?</h1>
+          <p className="setup-note">Your words. Keep it short.</p>
+          <form className="reason-input" onSubmit={e => {
+            e.preventDefault();
+            const value = String(new FormData(e.currentTarget).get('reason') ?? '').trim();
+            setQuitReason(value.slice(0, 160));
+            advance(value ? 'reason' : 'skip');
+          }}>
+            <input
+              name="reason"
+              autoFocus
+              maxLength={160}
+              defaultValue={quitReason}
+              placeholder="I'm tired of..."
+              aria-label="Why you are trying to stop"
+            />
+            <button type="submit">Use</button>
+          </form>
+          <button className="bare-link centered" type="button" onClick={() => { setQuitReason(''); advance('skip'); }}>Skip</button>
+        </> : null}
 
         {step === 'available' ? <><h1>How much have you actually got until more money comes in?</h1>
           <form className="big-money-input" onSubmit={e => { e.preventDefault(); const v = centsFrom(String(new FormData(e.currentTarget).get('available'))); if (v != null) { setAvailable(v); advance('amount'); } }}><span>$</span><input name="available" inputMode="decimal" autoFocus placeholder="0"/><button type="submit">Use</button></form>
