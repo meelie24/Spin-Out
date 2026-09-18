@@ -3,6 +3,8 @@ import Link from 'next/link';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://spinitout.com'),
+  alternates: { canonical: '/' },
   title: 'Spin Out',
   description: 'A private pre-gambling Reality Run built to make leaving feel real before money is on the line.',
 };
