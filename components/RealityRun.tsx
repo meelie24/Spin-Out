@@ -475,6 +475,8 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     { name:market.home, odds:market.homeOdds },
     { name:market.away, odds:market.awayOdds },
   ]);
+  const selectedSports = sportsChoices.find(choice => choice.name === gameDecision) ?? sportsChoices[0];
+  const sportsPotentialReturn = Math.round(run.stakeCents * selectedSports.odds);
 
   return (
     <main className="run-shell" style={{ '--reality': intensity } as React.CSSProperties}>
@@ -508,11 +510,18 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
           <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button>
         </div>
 
-        {profile.gamblingType === 'sports' ? <div className="game-decision sports-picks" role="group" aria-label="Fictional moneyline market">
-          {sportsChoices.map(choice => <button key={choice.name} type="button" className={gameDecision === choice.name ? 'is-on' : ''} onClick={() => setGameDecision(choice.name)} disabled={animating || Boolean(ping)}>
-            <span>{choice.name}</span><strong>{choice.odds.toFixed(2)}</strong>
-          </button>)}
-        </div> : null}
+        {profile.gamblingType === 'sports' ? <>
+          <div className="game-decision sports-picks" role="group" aria-label="Fictional moneyline market">
+            {sportsChoices.map(choice => <button key={choice.name} type="button" className={gameDecision === choice.name ? 'is-on' : ''} onClick={() => setGameDecision(choice.name)} disabled={animating || Boolean(ping)}>
+              <span>{choice.name}</span><strong>{choice.odds.toFixed(2)}</strong>
+            </button>)}
+          </div>
+          <div className="bet-slip-summary" aria-live="polite">
+            <span>Selection <strong>{selectedSports.name}</strong></span>
+            <span>Odds <strong>{selectedSports.odds.toFixed(2)}</strong></span>
+            <span>Potential return <strong>{formatMoney(sportsPotentialReturn)}</strong></span>
+          </div>
+        </> : null}
 
         {profile.gamblingType === 'casino' ? <div className="game-decision" role="group" aria-label="Roulette color">
           {['Red','Black'].map(name => <button key={name} type="button" className={gameDecision === name ? 'is-on' : ''} onClick={() => setGameDecision(name)} disabled={animating || Boolean(ping)}>{name}</button>)}
