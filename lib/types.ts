@@ -117,6 +117,14 @@ export interface ActiveRun {
   lastPingAction: number;
   pings: PingRecord[];
   timeline: RunEvent[];
+  gameState?: {
+    poker?: {
+      hand: string[];
+      deck: string[];
+      held: boolean[];
+      phase: 'hold';
+    };
+  };
 }
 
 export interface RealityMath {
