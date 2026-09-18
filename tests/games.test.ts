@@ -85,6 +85,32 @@ test('slot engine pays the actual visible paylines and is calibrated near a mid-
   assert.ok(rtp > .90 && rtp < .99, 'slot RTP outside calibration window: ' + rtp);
 });
 
+test('near-miss flags come from the generated game result, not the Ping layer', () => {
+  const slotRng = seeded(123);
+  let slotNearMiss = null;
+  for (let i = 0; i < 10_000; i++) {
+    const outcome = resolveSlots(slotRng, 500);
+    if (outcome.nearMiss) {
+      slotNearMiss = outcome;
+      break;
+    }
+  }
+  assert.ok(slotNearMiss, 'expected to encounter a slot near miss in deterministic sample');
+  assert.ok((slotNearMiss?.netCents ?? 0) < 0);
+
+  const scratchRng = seeded(321);
+  let scratchNearMiss = null;
+  for (let i = 0; i < 10_000; i++) {
+    const outcome = resolveScratch(scratchRng, 200);
+    if (outcome.nearMiss) {
+      scratchNearMiss = outcome;
+      break;
+    }
+  }
+  assert.ok(scratchNearMiss, 'expected to encounter a scratch near miss in deterministic sample');
+  assert.equal(scratchNearMiss?.visual.kind, 'scratch');
+});
+
 test('scratch ticket result is predetermined and loss layouts never contain three matching prize amounts', () => {
   const rng = seeded(99);
   const stake = 200;
