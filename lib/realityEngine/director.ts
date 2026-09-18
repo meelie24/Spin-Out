@@ -69,6 +69,17 @@ const FAMILY: Record<string, string> = {
   'loss-total': 'loss',
 };
 
+const TYPE_PRIORITY: Record<string, number> = {
+  'limit-exceeded': 12,
+  'time-limit-exceeded': 12,
+  'stake-up': 10,
+  'loss-streak': 8,
+  'rapid-loop': 7,
+  dismissals: 6,
+  'near-miss': 5,
+  'win-after-losses': 5,
+};
+
 const FAMILY_PRIORITY: Record<string, number> = {
   limit: 100,
   chasing: 90,
@@ -145,7 +156,7 @@ function surfaceFor(candidate: PingCandidate): InterventionSurface {
 
 function priority(candidate: PingCandidate) {
   const family = interventionFamily(candidate.type);
-  return (FAMILY_PRIORITY[family] ?? 25) + candidate.level;
+  return (FAMILY_PRIORITY[family] ?? 25) + candidate.level + (TYPE_PRIORITY[candidate.type] ?? 0);
 }
 
 function ambientFor(candidates: PingCandidate[]): AmbientMode {
