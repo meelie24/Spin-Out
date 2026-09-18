@@ -9,6 +9,8 @@ import type { GamblingType } from '@/lib/types';
 import { AuthControl } from './AuthControl';
 import { JourneyCounter } from './JourneyCounter';
 import { AccessStatus } from './AccessStatus';
+import { RealityContextPanel } from './RealityContextPanel';
+import type { RealityProfile } from '@/lib/types';
 
 const games: Array<{
   id: GamblingType;
@@ -83,6 +85,8 @@ function PromptCard({
 export function Landing() {
   const [ready, setReady] = useState(false);
   const [runs, setRuns] = useState<ReturnType<typeof loadData>['runs']>([]);
+  const [profile, setProfile] = useState<RealityProfile | null>(null);
+  const [contextOpen, setContextOpen] = useState(false);
   const [hiddenPrompts, setHiddenPrompts] = useState<string[]>([]);
   const [dismissingPrompts, setDismissingPrompts] = useState<string[]>([]);
 
@@ -92,6 +96,7 @@ export function Landing() {
       if (cancelled) return;
       const data = loadData();
       setRuns(data.runs);
+      setProfile(data.profile);
       setReady(true);
     });
     return () => { cancelled = true; };
@@ -154,9 +159,10 @@ export function Landing() {
 
         <nav className="hub-nav">
           <a className="is-active" href="#games"><span>01</span>Games</a>
-          <Link href="/plus"><span>02</span>Spin Out+</Link>
-          <Link href="/research"><span>03</span>Research</Link>
-          <Link href="/help"><span>04</span>Get help</Link>
+          <button type="button" onClick={() => setContextOpen(true)}><span>02</span>My reality</button>
+          <Link href="/plus"><span>03</span>Spin Out+</Link>
+          <Link href="/research"><span>04</span>Research</Link>
+          <Link href="/help"><span>05</span>Get help</Link>
         </nav>
 
         <div className="sidebar-summary">
@@ -189,7 +195,10 @@ export function Landing() {
             <span className="hub-brand-mark">S</span>
             <div><strong>Spin Out</strong><small>Reality Run</small></div>
           </div>
-          <Link href="/help">Get help</Link>
+          <div className="hub-mobile-actions">
+            <button type="button" onClick={() => setContextOpen(true)}>My reality</button>
+            <Link href="/help">Get help</Link>
+          </div>
         </header>
 
         <section className="hub-hero" aria-labelledby="home-title">
@@ -280,6 +289,12 @@ export function Landing() {
 
         {!ready ? <span className="sr-only">Loading</span> : null}
       </section>
+
+      {contextOpen ? <RealityContextPanel
+        profile={profile}
+        onClose={() => setContextOpen(false)}
+        onSaved={next => setProfile(next)}
+      /> : null}
     </main>
   );
 }
