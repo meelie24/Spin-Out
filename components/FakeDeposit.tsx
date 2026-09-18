@@ -31,7 +31,7 @@ export function FakeDeposit({
   const amountRef = useRef<HTMLDivElement>(null);
   const trayRef = useRef<HTMLDivElement>(null);
   const committing = useRef(false);
-  const [limit, setLimit] = useState<SessionLimit>({ rounds:5, minutes:null });
+  const [limit, setLimit] = useState<SessionLimit>({ rounds:null, minutes:null });
   const obligation = obligationLabel(profile);
 
   const commit = () => {
@@ -74,7 +74,7 @@ export function FakeDeposit({
 
         <div className="pre-run-limit">
           <span>Before you start</span>
-          <strong>Where are you stopping?</strong>
+          <strong>Set a stopping point if you want one.</strong>
           <div className="limit-choices" role="group" aria-label="Reality Run stopping point">
             {limitChoices.map(choice => (
               <button
