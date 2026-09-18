@@ -592,13 +592,13 @@ try {
   });
   await seedActive(overloadContext, overloadProfile, overloadRun);
   const overloadPage = await overloadContext.newPage();
-  await overloadPage.goto(\`\${base}/play\`, { waitUntil: 'domcontentloaded' });
+  await overloadPage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await overloadPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await waitActionReady(overloadPage);
   await overloadPage.locator('.game-action').click();
   await overloadPage.locator('.reality-ping,.xray-moment').waitFor({ timeout: 9000 });
   assert(await overloadPage.locator('.reality-ping,.xray-moment').count() === 1, 'overload scenario stacked foreground interventions');
-  assert(await overloadPage.getByText(/You decided on 5\\. This is 7\\./i).isVisible(), 'overload scenario did not prioritize the chosen limit');
+  assert(await overloadPage.getByText(/You decided on 5\. This is 7\./i).isVisible(), 'overload scenario did not prioritize the chosen limit');
   assert(await overloadPage.locator('.run-shell.ambient-strong').count() === 1, 'overload scenario did not apply quiet ambient escalation');
   assert(await overloadPage.locator('.payday-shield-card').count() === 0, 'Payday Shield appeared during active gameplay');
   await overloadContext.close();
@@ -609,7 +609,7 @@ try {
   const longRunState = runFor(longProfile, { actionCount: 2, balanceCents: 8_000 });
   await seedActive(longContext, longProfile, longRunState);
   const longPage = await longContext.newPage();
-  await longPage.goto(\`\${base}/play\`, { waitUntil: 'domcontentloaded' });
+  await longPage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await longPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await longPage.getByRole('button', { name: 'Run 10,000' }).click();
   await longPage.locator('.longrun-panel').waitFor({ timeout: 5000 });
