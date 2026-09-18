@@ -260,6 +260,20 @@ export function RealityRun({
       lastNetCents: next.lastNetCents,
       lastPingAction: next.lastPingAction,
       lastPingAt: next.pings[next.pings.length - 1]?.shownAt ?? null,
+      startedAt: next.startedAt,
+      lastActionAt: next.lastActionAt ?? null,
+      actionIntervalsMs: next.actionIntervalsMs ?? [],
+      consecutiveLosses: next.consecutiveLosses ?? 0,
+      consecutiveWins: next.consecutiveWins ?? 0,
+      lossesBeforeLastWin: next.lossesBeforeLastWin ?? 0,
+      lastOutcomeBand: next.lastOutcomeBand ?? null,
+      nearMiss: next.lastNearMiss ?? false,
+      pingDismissalStreak: next.pingDismissalStreak ?? 0,
+      chosenLimitRounds: next.chosenLimitRounds ?? null,
+      chosenLimitMinutes: next.chosenLimitMinutes ?? null,
+      limitExceededAt: next.limitExceededAt ?? null,
+      returnedAfterMs: next.returnedAfterMs ?? null,
+      totalStakedCents: next.totalStakedCents ?? 0,
     });
     const chosen = selectPing(candidates, data.pingLearning, next.pings.slice(-2).map(p => p.type));
     if (!chosen) return false;
@@ -329,23 +343,48 @@ export function RealityRun({
   ) => {
     const current = runRef.current;
     const previousBalance = previousBalanceOverride ?? current.balanceCents;
+    const actionAt = Date.now();
+    const intervalMs = current.lastActionAt == null ? null : Math.max(0, actionAt - current.lastActionAt);
+    const actionIntervalsMs = intervalMs == null
+      ? (current.actionIntervalsMs ?? [])
+      : [...(current.actionIntervalsMs ?? []), intervalMs].slice(-12);
+    const actionCount = current.actionCount + 1;
+    const consecutiveLosses = outcome.netCents < 0 ? (current.consecutiveLosses ?? 0) + 1 : 0;
+    const lossesBeforeLastWin = outcome.netCents > 0 ? (current.consecutiveLosses ?? 0) : 0;
+    const consecutiveWins = outcome.netCents > 0 ? (current.consecutiveWins ?? 0) + 1 : 0;
+    const roundsExceeded = current.chosenLimitRounds != null && actionCount > current.chosenLimitRounds;
+    const timeExceeded = current.chosenLimitMinutes != null && actionAt - current.startedAt > current.chosenLimitMinutes * 60_000;
+    const limitExceededAt = current.limitExceededAt ?? (roundsExceeded || timeExceeded ? actionAt : null);
+
     const next: ActiveRun = {
       ...current,
       previousBalanceCents: previousBalance,
       balanceCents,
       previousStakeCents: current.stakeCents,
-      actionCount: current.actionCount + 1,
+      actionCount,
       lastNetCents: outcome.netCents,
       largestLossCents: Math.max(current.largestLossCents, Math.max(0, current.initialBalanceCents - balanceCents)),
       simulatedLossesCents: current.simulatedLossesCents + Math.max(0, -outcome.netCents),
       simulatedRecoveriesCents: current.simulatedRecoveriesCents + Math.max(0, outcome.netCents),
+      lastActionAt: actionAt,
+      actionIntervalsMs,
+      consecutiveLosses,
+      consecutiveWins,
+      lossesBeforeLastWin,
+      lastOutcomeBand: outcome.band,
+      lastNearMiss: outcome.nearMiss === true,
+      totalStakedCents: (current.totalStakedCents ?? 0) + current.stakeCents,
+      limitExceededAt,
       timeline: [...current.timeline, {
         kind: 'action',
-        at: Date.now(),
+        at: actionAt,
         balanceCents,
         stakeCents: current.stakeCents,
         netCents: outcome.netCents,
         decision,
+        intervalMs,
+        outcomeBand: outcome.band,
+        nearMiss: outcome.nearMiss === true,
       }],
       gameState: undefined,
     };
