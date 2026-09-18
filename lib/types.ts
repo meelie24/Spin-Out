@@ -141,6 +141,7 @@ export interface RunRecord {
   limitExceededByRounds?: number;
   limitExceededSeconds?: number;
   exitedAfterPing?: boolean;
+  returnedAfterMs?: number | null;
 }
 
 export interface ActiveRun {
