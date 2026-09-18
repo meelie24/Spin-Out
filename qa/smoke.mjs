@@ -102,13 +102,13 @@ try {
     for (let i = 0; i < 6; i++) {
       const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
       const page = await context.newPage();
-      await page.goto(base, { waitUntil: 'networkidle' });
+      await page.goto(base, { waitUntil: 'domcontentloaded' });
       counterContexts.push(context);
     }
     const firstCounterPage = counterContexts[0].pages()[0];
     let counterText = '';
     for (let i = 0; i < 12; i++) {
-      await firstCounterPage.reload({ waitUntil: 'networkidle' });
+      await firstCounterPage.reload({ waitUntil: 'domcontentloaded' });
       counterText = await firstCounterPage.locator('.journey-counter').textContent().catch(() => '') || '';
       if (/other people? (?:are|is) here right now/i.test(counterText)) break;
       await firstCounterPage.waitForTimeout(500);
@@ -125,7 +125,7 @@ try {
   const noPresence = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const np = await noPresence.newPage();
   await np.route('**/api/presence', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"available":false}' }));
-  await np.goto(base, { waitUntil: 'networkidle' });
+  await np.goto(base, { waitUntil: 'domcontentloaded' });
   await np.waitForTimeout(250);
   assert(await np.locator('.journey-counter').count() === 0, 'presence failure displayed a count');
   await noPresence.close();
@@ -143,7 +143,7 @@ try {
   for (const [name, width, height] of sizes) {
     const context = await browser.newContext({ viewport: { width, height } });
     const page = await context.newPage();
-    await page.goto(base, { waitUntil: 'networkidle' });
+    await page.goto(base, { waitUntil: 'domcontentloaded' });
     await page.getByRole('link', { name: /Enter Reality Run/i }).first().waitFor();
     assert(await page.getByRole('link', { name: /Enter Reality Run/i }).count() === 6, `${name}: homepage did not expose all six game choices`);
     await noHorizontalOverflow(page, name);
@@ -155,7 +155,7 @@ try {
   // Homepage hub behavior: intervention cards dismiss and game tiles preselect the run type.
   const hubContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const hubPage = await hubContext.newPage();
-  await hubPage.goto(base, { waitUntil: 'networkidle' });
+  await hubPage.goto(base, { waitUntil: 'domcontentloaded' });
   const moneyPrompt = hubPage.getByRole('button', { name: /That money already has a job/i });
   await moneyPrompt.waitFor();
   await moneyPrompt.click();
@@ -171,7 +171,7 @@ try {
   // Real auth UI: keyboard focus, Escape, focus return. No simulated sign-in state.
   const authContext = await browser.newContext({ viewport: { width: 1024, height: 768 } });
   const authPage = await authContext.newPage();
-  await authPage.goto(base, { waitUntil: 'networkidle' });
+  await authPage.goto(base, { waitUntil: 'domcontentloaded' });
   const signIn = authPage.getByRole('button', { name: 'Sign in' });
   await signIn.waitFor();
   await signIn.click();
@@ -189,7 +189,7 @@ try {
   const browserErrors = [];
   page.on('pageerror', error => browserErrors.push(`pageerror: ${error.message}`));
   page.on('console', message => { if (message.type() === 'error') browserErrors.push(`console: ${message.text()}`); });
-  await page.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
 
   await page.getByRole('button', { name: '$100' }).click();
   await page.getByRole('button', { name: /Slots/ }).click();
@@ -220,7 +220,7 @@ try {
   assert(cashBox && cashBox.y >= 0 && cashBox.y + cashBox.height <= 844, 'Cash Out outside mobile viewport');
   await page.getByRole('button', { name: 'Mute sound' }).click();
   await page.getByRole('button', { name: 'Unmute sound' }).waitFor();
-  await page.reload({ waitUntil: 'networkidle' });
+  await page.reload({ waitUntil: 'domcontentloaded' });
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await page.getByRole('button', { name: 'Unmute sound' }).waitFor();
   await page.screenshot({ path: `${out}/run-390.png`, fullPage: true });
@@ -245,7 +245,7 @@ try {
     data.account = { signedIn: true, email: 'fake@example.com', billing: 'premium', paypalSubscriptionId: 'FAKE', paypalPlan: 'yearly' };
     localStorage.setItem('spinout.v2', JSON.stringify(data));
   });
-  await page.goto(`${base}/plus`, { waitUntil: 'networkidle' });
+  await page.goto(`${base}/plus`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('heading', { name: /Your full history/i }).waitFor();
   assert(await page.getByText(/Sign in to claim your one-run Plus trial or use paid Plus across devices/i).isVisible(), 'localStorage unlocked Plus');
   assert(await page.getByRole('heading', { name: /Your history\./i }).count() === 0, 'premium dashboard rendered without server entitlement');
@@ -257,7 +257,7 @@ try {
   const pingRun = runFor(pingProfile, { balanceCents: 5_000, previousBalanceCents: 5_500, stakeCents: 500, previousStakeCents: 500, actionCount: 2, largestLossCents: 5_000, simulatedLossesCents: 5_000 });
   await seedActive(pingContext, pingProfile, pingRun);
   const pingPage = await pingContext.newPage();
-  await pingPage.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await pingPage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await pingPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await waitActionReady(pingPage);
   await pingPage.locator('.game-action').click();
@@ -272,7 +272,7 @@ try {
   // First-run alternate path: unknown cash/income, no urgent obligation, lender+goal skipped.
   const unknownContext = await browser.newContext({ viewport: { width: 375, height: 667 } });
   const unknown = await unknownContext.newPage();
-  await unknown.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await unknown.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await unknown.getByRole('button', { name: '$20', exact: true }).click();
   await unknown.getByRole('button', { name: /Slots/ }).click();
   await unknown.getByRole('button', { name: /Bored/ }).click();
@@ -292,7 +292,7 @@ try {
     localStorage.setItem('spinout.v2', JSON.stringify({ version:2, profile:p, runs:[], pingLearning:{}, events:[], account:{} }));
   }, { p: profile('slots', { nextIncomeDate: isoFromNow(-1), obligationDueDate: isoFromNow(-1), financialContextUpdatedAt: new Date(Date.now() - 3 * 86_400_000).toISOString() }) });
   const stale = await staleContext.newPage();
-  await stale.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await stale.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await stale.getByRole('button', { name: '$50', exact: true }).click();
   await stale.getByRole('button', { name: /Win it back/ }).click();
   await stale.getByRole('heading', { name: /How much have you actually got/i }).waitFor();
@@ -303,7 +303,7 @@ try {
   for (const [label, amount] of [['small','1'],['large','10000']]) {
     const customContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const custom = await customContext.newPage();
-    await custom.goto(`${base}/play`, { waitUntil: 'networkidle' });
+    await custom.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
     await custom.getByRole('textbox', { name: 'Other wager amount' }).fill(amount);
     await custom.getByRole('button', { name: 'Use' }).click();
     await custom.getByRole('heading', { name: /What were you about to play/i }).waitFor();
@@ -317,9 +317,9 @@ try {
   const restoreRun = runFor(restoreProfile);
   await seedActive(restoreContext, restoreProfile, restoreRun);
   const restore = await restoreContext.newPage();
-  await restore.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await restore.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await restore.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
-  await restore.reload({ waitUntil: 'networkidle' });
+  await restore.reload({ waitUntil: 'domcontentloaded' });
   await restore.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await restoreContext.close();
 
@@ -329,10 +329,10 @@ try {
   const multiRun = runFor(multiProfile);
   await seedActive(multiContext, multiProfile, multiRun);
   const tab1 = await multiContext.newPage();
-  await tab1.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await tab1.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await tab1.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   const tab2 = await multiContext.newPage();
-  await tab2.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await tab2.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   const lock2 = tab2.getByRole('dialog', { name: /open in another tab/i });
   await lock2.waitFor({ timeout: 5000 });
   await lock2.getByRole('button', { name: 'Use this tab' }).click();
@@ -345,7 +345,7 @@ try {
   const exhaustedRun = runFor(exhaustedProfile, { balanceCents: 50, previousBalanceCents: 100, stakeCents: 500, previousStakeCents: 500 });
   await seedActive(exhaustedContext, exhaustedProfile, exhaustedRun);
   const exhausted = await exhaustedContext.newPage();
-  await exhausted.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await exhausted.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await exhausted.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor({ timeout: 5000 });
   await exhaustedContext.close();
 
@@ -355,7 +355,7 @@ try {
   const timeoutRun = runFor(timeoutProfile, { startedAt: Date.now() - 901_000 });
   await seedActive(timeoutContext, timeoutProfile, timeoutRun);
   const timeout = await timeoutContext.newPage();
-  await timeout.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await timeout.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await timeout.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor({ timeout: 5000 });
   await timeoutContext.close();
 
@@ -368,7 +368,7 @@ try {
     const envPage = await envContext.newPage();
     const errors = [];
     envPage.on('pageerror', error => errors.push(error.message));
-    await envPage.goto(`${base}/play`, { waitUntil: 'networkidle' });
+    await envPage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
     await envPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
 
     if (gameType === 'sports') {
@@ -425,7 +425,7 @@ try {
       storageState: persistedState,
     });
     const restoreGamePage = await restoreGameContext.newPage();
-    await restoreGamePage.goto(`${base}/play`, { waitUntil: 'networkidle' });
+    await restoreGamePage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
     await restoreGamePage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
     const afterReload = await restoreGamePage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
     assert(afterReload?.balanceCents === beforeReload.balanceCents, `${gameType} balance changed on restore: ${beforeReload.balanceCents} → ${afterReload?.balanceCents}`);
@@ -438,7 +438,7 @@ try {
   const reducedProfile = profile('slots');
   await seedActive(reduced, reducedProfile, runFor(reducedProfile));
   const rp = await reduced.newPage();
-  await rp.goto(`${base}/play`, { waitUntil: 'networkidle' });
+  await rp.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await rp.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await waitActionReady(rp);
   await rp.locator('.game-action').click();
@@ -452,7 +452,7 @@ try {
   // Forced colors remains understandable.
   const contrast = await browser.newContext({ viewport: { width: 390, height: 844 }, forcedColors: 'active' });
   const cp = await contrast.newPage();
-  await cp.goto(base, { waitUntil: 'networkidle' });
+  await cp.goto(base, { waitUntil: 'domcontentloaded' });
   await cp.getByRole('link', { name: /Enter Reality Run/i }).first().waitFor();
   await noHorizontalOverflow(cp, 'forced colors');
   await contrast.close();
