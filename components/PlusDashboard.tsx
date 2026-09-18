@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { formatMoney, recentExitAverageSeconds } from '@/lib/engine';
-import { currentMonthMoneyKept, loadData, totalMoneyKept, updateData } from '@/lib/storage';
+import { currentMonthMoneyKept, loadData, totalMoneyKept } from '@/lib/storage';
 import type { RunRecord } from '@/lib/types';
 import { PlusPanel } from './PlusPanel';
 
@@ -22,34 +22,19 @@ function labelTrigger(trigger: RunRecord['triggerType']) {
   return trigger.replaceAll('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-export function PlusDashboard() {
+export function PlusDashboard({ authenticated, premium, serverRuns }: { authenticated: boolean; premium: boolean; serverRuns: RunRecord[] }) {
   const [data, setData] = useState<ReturnType<typeof loadData> | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => {
     const current = loadData();
-    setData(current);
-
-    const id = current.account.paypalSubscriptionId;
-    const plan = current.account.paypalPlan;
-    if (current.account.billing === 'premium' && id && plan) {
-      void fetch('/api/billing/paypal/verify', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ subscriptionId: id, plan }),
-      }).then(async response => {
-        const payload = await response.json().catch(() => ({})) as { verified?: boolean; status?: string };
-        if (payload.verified) return;
-        if (['CANCELLED','CANCELED','SUSPENDED','EXPIRED'].includes(payload.status ?? '')) {
-          const next = updateData(old => ({ ...old, account: { ...old.account, billing: 'canceled' } }));
-          setData(next);
-        }
-      }).catch(() => {});
-    }
-  }, []);
+    const merged = new Map<string, RunRecord>();
+    for (const run of serverRuns) merged.set(run.id, run);
+    for (const run of current.runs) merged.set(run.id, run);
+    setData({ ...current, runs: [...merged.values()].sort((a,b) => a.endedAt - b.endedAt) });
+  }, [serverRuns]);
 
   const runs = data?.runs ?? [];
-  const premium = data?.account.billing === 'premium';
 
   const metrics = useMemo(() => {
     const voluntary = runs.filter(r => r.timeToExitSeconds != null).map(r => r.timeToExitSeconds as number);
@@ -91,11 +76,11 @@ export function PlusDashboard() {
       <section className="plus-gate">
         <p className="kicker">Spin Out+</p>
         <h1>Longer-term patterns live here.</h1>
-        <p>Core Reality Runs stay free. Plus keeps the deeper history and trend views.</p>
-        <button className="primary-button" type="button" onClick={() => setUpgradeOpen(true)}>See Plus</button>
+        <p>{authenticated ? 'Core Reality Runs stay free. Plus keeps your full history and trend views.' : 'Sign in to use Plus across devices and keep paid access tied to your account.'}</p>
+        {authenticated ? <button className="primary-button" type="button" onClick={() => setUpgradeOpen(true)}>See Plus</button> : <Link className="primary-button" href="/">Sign in</Link>}
         <Link className="bare-link" href="/">Back home</Link>
       </section>
-      {upgradeOpen ? <PlusPanel onClose={() => setUpgradeOpen(false)} /> : null}
+      {authenticated && upgradeOpen ? <PlusPanel onClose={() => setUpgradeOpen(false)} /> : null}
     </main>;
   }
 
