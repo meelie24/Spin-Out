@@ -132,7 +132,7 @@ export function RealityContextPanel({
 
       <div className="context-edit-section">
         <div className="context-edit-title"><strong>Life Ledger</strong><button type="button" className="bare-link" onClick={clearLedger}>Clear</button></div>
-        <label>What's due next?
+        <label>{"What's due next?"}
           <select value={draft.obligationType} onChange={e => setDraft({ ...draft, obligationType:e.target.value as ObligationType })}>
             {obligations.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
