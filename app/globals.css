@@ -533,3 +533,51 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
 @media(prefers-reduced-motion:reduce){
   .home-game-card,.home-prompt,.hub-nav a,.game-enter b{transition:none!important}
 }
+
+
+/* Home hub visual correction after screenshot review */
+.home-hub .motif-field{opacity:.34}
+.home-hub .motif-item{color:rgba(238,209,163,.3);text-shadow:0 9px 30px rgba(0,0,0,.4)}
+.home-hub .motif-item img{opacity:.42;filter:sepia(.48) saturate(.75) brightness(.95) drop-shadow(0 8px 18px rgba(0,0,0,.2))}
+.home-hub .hub-content:before{
+  content:"QUIT   ◆   7   QUIT   ★   BAR   QUIT";
+  position:absolute;
+  z-index:-1;
+  left:1%;
+  right:1%;
+  top:735px;
+  white-space:pre;
+  overflow:hidden;
+  color:rgba(219,180,119,.055);
+  font-size:clamp(48px,7vw,112px);
+  font-weight:900;
+  letter-spacing:.08em;
+  line-height:1;
+  transform:rotate(-4deg);
+  pointer-events:none;
+}
+.games-mid-prompt{
+  min-height:84px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding:14px 4% 16px 8%;
+}
+.games-mid-prompt .prompt-grid{
+  min-height:0;
+  width:min(260px,100%);
+  justify-self:auto;
+  transform:rotate(-1.2deg);
+}
+.home-game-grid-second{margin-top:0}
+@media(max-width:820px){
+  .home-hub .motif-field{opacity:.25}
+  .home-hub .hub-content:before{top:980px;color:rgba(219,180,119,.045);font-size:64px}
+  .games-mid-prompt{min-height:70px;padding:12px 0 14px 0}
+}
+@media(max-width:560px){
+  .home-hub .motif-field{opacity:.23}
+  .home-hub .motif-item{color:rgba(238,209,163,.24)}
+  .games-mid-prompt{padding:10px 0 12px}
+  .games-mid-prompt .prompt-grid{width:100%;transform:none}
+}

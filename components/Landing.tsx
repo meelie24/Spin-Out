@@ -225,9 +225,13 @@ export function Landing() {
                 <div className="game-enter"><span>Enter Reality Run</span><b>↗</b></div>
               </Link>
             ))}
+          </div>
 
+          <div className="games-mid-prompt">
             <PromptCard prompt={prompts[2]} {...promptProps('exit')} className="prompt-grid" />
+          </div>
 
+          <div className="home-game-grid home-game-grid-second">
             {games.slice(3).map((game, index) => (
               <Link className={'home-game-card game-' + game.tone} href={'/play?game=' + game.id} key={game.id}>
                 <div className="game-card-glow" aria-hidden="true" />
