@@ -43,6 +43,11 @@ try {
 
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
+  const browserErrors = [];
+  page.on('pageerror', error => browserErrors.push(`pageerror: ${error.message}`));
+  page.on('console', message => {
+    if (message.type() === 'error') browserErrors.push(`console: ${message.text()}`);
+  });
   await page.goto(`${base}/play`, { waitUntil: 'networkidle' });
 
   // First-run setup. One decision per screen.
@@ -82,11 +87,24 @@ try {
       return button instanceof HTMLButtonElement && !button.disabled;
     });
     await action.click();
-    await page.waitForFunction(() => {
-      const ping = document.querySelector('.reality-ping');
-      const button = document.querySelector('.game-action');
-      return Boolean(ping) || (button instanceof HTMLButtonElement && !button.disabled);
-    }, null, { timeout: 5000 });
+    try {
+      await page.waitForFunction(() => {
+        const ping = document.querySelector('.reality-ping');
+        const button = document.querySelector('.game-action');
+        return Boolean(ping) || (button instanceof HTMLButtonElement && !button.disabled);
+      }, null, { timeout: 5000 });
+    } catch (error) {
+      const state = await page.evaluate(() => {
+        const button = document.querySelector('.game-action');
+        return {
+          buttonText: button?.textContent,
+          buttonDisabled: button instanceof HTMLButtonElement ? button.disabled : null,
+          ping: Boolean(document.querySelector('.reality-ping')),
+          stageReady: document.querySelector('.phaser-stage')?.getAttribute('data-ready'),
+        };
+      });
+      throw new Error(`Reality action stalled: ${JSON.stringify(state)} browserErrors=${JSON.stringify(browserErrors)} original=${error.message}`);
+    }
     const ping = page.locator('.reality-ping');
     if (await ping.isVisible().catch(() => false)) {
       sawPing = true;
@@ -100,6 +118,7 @@ try {
       });
     }
   }
+  assert(browserErrors.length === 0, `browser errors: ${JSON.stringify(browserErrors)}`);
   assert(sawPing, 'Reality Ping did not appear within four actions');
   assert(await cash.isVisible(), 'Cash Out is not available after a Reality Ping');
   await cash.click();
