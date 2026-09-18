@@ -7,6 +7,7 @@ export function RealityPing({ ping, reducedMotion, onDismiss }: { ping: PingCand
     <button
       type="button"
       className={`reality-ping ${reducedMotion ? 'reduced' : ''}`}
+      style={{ backdropFilter: 'blur(24px) saturate(1.25)', WebkitBackdropFilter: 'blur(24px) saturate(1.25)' }}
       onClick={onDismiss}
       aria-label={`${ping.message} Tap to dismiss`}
     >
