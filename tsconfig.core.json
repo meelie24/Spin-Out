@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": ".core-test",
+    "rootDir": "."
+  },
+  "include": ["lib/types.ts", "lib/engine.ts", "lib/pings.ts", "lib/presence.ts", "tests/*.test.ts", "types/node-shim.d.ts"]
+}
