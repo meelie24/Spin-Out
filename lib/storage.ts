@@ -5,7 +5,7 @@ import type { PingLearning, RealityProfile, RunRecord } from './types';
 const KEY = 'spinout.v2';
 
 export type BillingState = 'free' | 'premium' | 'payment-failed' | 'canceled';
-export interface LocalAccount { signedIn: boolean; email: string | null; billing: BillingState }
+export interface LocalAccount { signedIn: boolean; email: string | null; billing: BillingState; paypalSubscriptionId: string | null; paypalPlan: 'monthly' | 'yearly' | null }
 export interface LocalEvent { name: string; at: number; data?: Record<string, string | number | boolean | null> }
 
 export interface StoredData {
@@ -22,7 +22,7 @@ const EMPTY: StoredData = {
   profile: null,
   runs: [],
   pingLearning: {},
-  account: { signedIn: false, email: null, billing: 'free' },
+  account: { signedIn: false, email: null, billing: 'free', paypalSubscriptionId: null, paypalPlan: null },
   events: [],
 };
 
