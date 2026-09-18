@@ -119,7 +119,7 @@ export function RealitySetup({ existing, onComplete }: { existing: RealityProfil
   return (
     <main className="setup-shell">
       <div className="setup-top"><span className="brand-quiet">Spin Out</span><span>{firstRun ? 'Reality setup' : 'Quick setup'}</span></div>
-      <section className="setup-panel" ref={panel}>
+      <section className="setup-panel" ref={panel} data-committing={selected ? "true" : "false"}>
         {step === 'wager' ? <>
           <h1>How much were you about to put in?</h1>
           <div className="amount-grid">{[20,50,100,200].map(n => chip(String(n), `$${n}`, () => setWager(n * 100)))}</div>
