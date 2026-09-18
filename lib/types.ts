@@ -16,9 +16,11 @@ export interface RealityProfile {
   obligationAmountCents: number | null;
   obligationDueDate: string | null;
   recentLenderName: string | null;
+  recentLenderHelpedRecently: boolean;
   recentLenderAmountCents: number | null;
   personalMoneyGoal: string | null;
   startingUrge: number;
+  financialContextUpdatedAt: string;
   createdAt: string;
 }
 
@@ -30,10 +32,11 @@ export interface PingCandidate {
   factual: boolean;
 }
 
-export interface PingLearningStat { shown: number; exitsAfter: number }
+export interface PingLearningStat { shown: number; exitsAfter: number; stakeDownAfter?: number; stakeUpAfter?: number; continuedAfter?: number; recoveryExitAfter?: number }
 export type PingLearning = Record<string, PingLearningStat>;
 
 export interface RunSnapshot {
+  lastPingAt?: number | null;
   initialBalanceCents: number;
   balanceCents: number;
   previousBalanceCents: number;
@@ -53,6 +56,29 @@ export interface PingRecord {
   dismissedAt: number | null;
 }
 
+export interface RunEvent {
+  kind: 'action' | 'stake' | 'ping-shown' | 'ping-dismissed';
+  at: number;
+  balanceCents?: number;
+  stakeCents?: number;
+  netCents?: number;
+  pingType?: string;
+}
+
+export interface RunContextSnapshot {
+  availableUntilIncomeCents: number | null;
+  nextIncomeDate: string | null;
+  obligationType: ObligationType;
+  obligationAmountCents: number | null;
+  obligationDueDate: string | null;
+  recentLenderName: string | null;
+  recentLenderHelpedRecently: boolean;
+  recentLenderAmountCents: number | null;
+  personalMoneyGoal: string | null;
+}
+
+export type RealWorldOutcome = 'did-not-gamble' | 'gambled-less' | 'gambled-planned' | 'gambled-more';
+
 export interface RunRecord {
   id: string;
   startedAt: number;
@@ -66,7 +92,10 @@ export interface RunRecord {
   endingUrge: number;
   gamblingType: GamblingType;
   triggerType: TriggerType;
+  realWorldOutcome: RealWorldOutcome;
+  context: RunContextSnapshot;
   pings: PingRecord[];
+  timeline: RunEvent[];
   actions: number;
 }
 
@@ -85,6 +114,7 @@ export interface ActiveRun {
   lastNetCents: number;
   lastPingAction: number;
   pings: PingRecord[];
+  timeline: RunEvent[];
 }
 
 export interface RealityMath {
