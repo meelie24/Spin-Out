@@ -342,6 +342,17 @@ export function buildPingCandidates(profile: RealityProfile, snapshot: RunSnapsh
     });
   }
 
+  if ((snapshot.totalStakedCents ?? 0) >= profile.intendedWagerCents && snapshot.actionCount >= 4) {
+    candidates.push({
+      id: id('amount-through', snapshot),
+      type: 'amount-through',
+      level: 2,
+      factual: true,
+      message: `You've put ${dollars(snapshot.totalStakedCents ?? 0)} through this session.`,
+      detail: 'Is that more than you meant to put through?',
+    });
+  }
+
   // The person's own reason is rare and only appears once the session has earned the reminder.
   const reason = cleanReason(profile.quitReason);
   if (
