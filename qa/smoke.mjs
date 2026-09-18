@@ -88,26 +88,38 @@ async function assertA11y(page, label) {
 
 const browser = await chromium.launch({ headless: true });
 try {
-  // Shared anonymous presence: six isolated browser sessions should produce at least five "other" sessions.
-  const counterContexts = [];
-  for (let i = 0; i < 6; i++) {
-    const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-    const page = await context.newPage();
-    await page.goto(base, { waitUntil: 'networkidle' });
-    counterContexts.push(context);
+  // Shared anonymous presence is verified when the production server secret is configured.
+  // CI intentionally has no service-role secret, so an unconfigured response must fail closed.
+  const presenceProbe = await fetch(`${base}/api/presence`, {
+    method: 'POST',
+    headers: { 'content-type':'application/json' },
+    body: JSON.stringify({ id: 'qa-presence-probe-0001' }),
+  }).catch(() => null);
+  const presencePayload = presenceProbe ? await presenceProbe.json().catch(() => null) : null;
+
+  if (presencePayload?.available === true) {
+    const counterContexts = [];
+    for (let i = 0; i < 6; i++) {
+      const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+      const page = await context.newPage();
+      await page.goto(base, { waitUntil: 'networkidle' });
+      counterContexts.push(context);
+    }
+    const firstCounterPage = counterContexts[0].pages()[0];
+    let counterText = '';
+    for (let i = 0; i < 12; i++) {
+      await firstCounterPage.reload({ waitUntil: 'networkidle' });
+      counterText = await firstCounterPage.locator('.journey-counter').textContent().catch(() => '') || '';
+      if (/other people? (?:are|is) here right now/i.test(counterText)) break;
+      await firstCounterPage.waitForTimeout(500);
+    }
+    assert(/other people? (?:are|is) here right now/i.test(counterText), `shared presence missing: ${counterText}`);
+    const count = Number(counterText.match(/\d+/)?.[0] ?? 0);
+    assert(count >= 5, `shared presence undercounted six sessions: ${counterText}`);
+    for (const c of counterContexts) await c.close();
+  } else {
+    assert(presencePayload?.configured === false, 'presence failed for an unexpected reason');
   }
-  const firstCounterPage = counterContexts[0].pages()[0];
-  let counterText = '';
-  for (let i = 0; i < 12; i++) {
-    await firstCounterPage.reload({ waitUntil: 'networkidle' });
-    counterText = await firstCounterPage.locator('.journey-counter').textContent().catch(() => '') || '';
-    if (/other people? (?:are|is) here right now/i.test(counterText)) break;
-    await firstCounterPage.waitForTimeout(500);
-  }
-  assert(/other people? (?:are|is) here right now/i.test(counterText), `shared presence missing: ${counterText}`);
-  const count = Number(counterText.match(/\d+/)?.[0] ?? 0);
-  assert(count >= 5, `shared presence undercounted six sessions: ${counterText}`);
-  for (const c of counterContexts) await c.close();
 
   // Presence failure must hide the number rather than invent one.
   const noPresence = await browser.newContext({ viewport: { width: 390, height: 844 } });
