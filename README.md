@@ -29,3 +29,26 @@ npm run qa
 ```
 
 The master product prompt is kept at `docs/MASTER_PRODUCT_PROMPT.md`. The architecture spec and implementation plan live under `docs/superpowers/`.
+
+
+## Production configuration
+
+Canonical site URL: `https://spinitout.com`.
+
+Spin Out+ uses PayPal subscriptions after completed Reality Runs. Core Reality Runs do not require payment.
+
+Required production environment variables:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://spinitout.com
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=...
+PAYPAL_CLIENT_ID=...
+PAYPAL_CLIENT_SECRET=...
+NEXT_PUBLIC_PAYPAL_MONTHLY_PLAN_ID=...
+NEXT_PUBLIC_PAYPAL_YEARLY_PLAN_ID=...
+PAYPAL_ENV=live
+```
+
+The PayPal plans must be configured at **$4.99/month** and **$29.99/year**. Without these values, the product deliberately shows pricing without a checkout control rather than pretending billing works.
+
+Before taking live payments, confirm PayPal's merchant review requirements for this non-wagering gambling-harm software. Spin Out must remain practice-only: no entry fee, wagering, prizes, redeemable balance, operator links, or sportsbook/casino affiliate revenue.
