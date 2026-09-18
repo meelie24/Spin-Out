@@ -1018,3 +1018,140 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   font-size:9px;
   font-style:normal;
 }
+
+
+/* Reality Engine ambient + X-Ray surfaces */
+.run-shell.ambient-cooling .run-card{
+  filter:saturate(calc(.91 - var(--reality)*.16)) brightness(.965);
+}
+.run-shell.ambient-ledger .run-card{
+  filter:saturate(calc(.94 - var(--reality)*.14)) brightness(.975);
+}
+.run-shell.ambient-strong .run-card{
+  filter:saturate(calc(.84 - var(--reality)*.12)) brightness(.94);
+}
+.run-shell.ambient-cooling .context-ghost,
+.run-shell.ambient-ledger .context-ghost,
+.run-shell.ambient-strong .context-ghost{
+  opacity:calc(.09 + var(--reality)*.5);
+}
+.run-shell.ambient-ledger .context-ghost{filter:blur(calc((1 - var(--reality))*1.5px))}
+.run-shell.ambient-strong .context-ghost{
+  opacity:calc(.14 + var(--reality)*.54);
+  filter:blur(calc((1 - var(--reality))*.8px));
+}
+.run-shell.ambient-cooling:after{
+  background:
+    radial-gradient(ellipse at center,rgba(40,48,46,.08) 0 38%,rgba(5,2,2,.66) 100%);
+}
+.run-shell.ambient-strong:after{
+  background:
+    radial-gradient(ellipse at center,rgba(46,46,42,.06) 0 34%,rgba(4,2,2,.72) 100%);
+}
+
+.xray-moment{
+  position:absolute;
+  z-index:28;
+  left:50%;
+  bottom:22px;
+  transform:translateX(-50%);
+  width:min(660px,calc(100% - 70px));
+  border:1px solid rgba(239,208,154,.3);
+  border-radius:20px;
+  padding:20px 22px;
+  background:
+    linear-gradient(145deg,rgba(31,23,21,.93),rgba(15,11,10,.9)),
+    rgba(19,13,12,.92);
+  color:#f6ead8;
+  box-shadow:0 28px 80px rgba(0,0,0,.52),inset 0 1px rgba(255,255,255,.08);
+  backdrop-filter:blur(16px) saturate(.92);
+  -webkit-backdrop-filter:blur(16px) saturate(.92);
+}
+.xray-rule{
+  position:absolute;
+  left:0;
+  top:16px;
+  bottom:16px;
+  width:2px;
+  border-radius:99px;
+  background:linear-gradient(#e2bc79,#7b5134);
+}
+.xray-label{
+  display:block;
+  margin-bottom:8px;
+  color:#bca58d;
+  font-size:8px;
+  font-weight:750;
+  letter-spacing:.17em;
+  text-transform:uppercase;
+}
+.xray-moment>strong{
+  display:block;
+  max-width:24ch;
+  color:#fff2df;
+  font-size:clamp(20px,3vw,30px);
+  line-height:1.08;
+  letter-spacing:-.03em;
+  font-weight:640;
+}
+.xray-moment>p{
+  margin:8px 0 0;
+  max-width:42ch;
+  color:#c9b6a5;
+  font-size:12px;
+  line-height:1.5;
+}
+.xray-explanation{
+  margin-top:12px;
+  padding:11px 12px;
+  border-radius:11px;
+  border:1px solid rgba(241,210,158,.1);
+  background:rgba(255,255,255,.035);
+  color:#cdbbab;
+  font-size:11px;
+  line-height:1.5;
+}
+.xray-actions{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:15px;
+}
+.xray-actions button{
+  min-height:38px;
+  border-radius:10px;
+  padding:0 12px;
+  font-size:9px;
+  font-weight:720;
+}
+.xray-primary{
+  border:1px solid rgba(234,204,154,.22);
+  background:rgba(255,255,255,.065);
+  color:#f1deca;
+}
+.xray-leave{
+  border:1px solid rgba(214,177,111,.28);
+  background:#c8a062;
+  color:#2a1813;
+}
+.xray-link{
+  border:0;
+  background:transparent;
+  color:#ad9784;
+  text-decoration:underline;
+  text-decoration-color:rgba(173,151,132,.28);
+  text-underline-offset:4px;
+}
+@media(max-width:560px){
+  .xray-moment{
+    bottom:12px;
+    width:calc(100% - 28px);
+    padding:17px 16px 16px 19px;
+    border-radius:16px;
+  }
+  .xray-moment>strong{font-size:21px}
+  .xray-actions{align-items:stretch}
+  .xray-actions button{flex:1}
+  .xray-link{flex-basis:100%!important}
+}
