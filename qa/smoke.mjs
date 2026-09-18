@@ -194,6 +194,8 @@ try {
   await page.getByRole('button', { name: '$100' }).click();
   await page.getByRole('button', { name: /Slots/ }).click();
   await page.getByRole('button', { name: /Win it back/ }).click();
+  await page.getByRole('heading', { name: /Why are you trying to stop/i }).waitFor();
+  await page.getByRole('button', { name: 'Skip' }).click();
   await page.locator('input[name="available"]').fill('850');
   await page.getByRole('button', { name: 'Use' }).click();
   await page.getByRole('button', { name: 'Next week' }).click();
@@ -214,7 +216,7 @@ try {
   const canvasBox = await page.locator('.phaser-stage canvas').boundingBox();
   assert(canvasBox && canvasBox.width > 300, 'Phaser canvas did not render at usable mobile size');
 
-  const cash = page.getByRole('button', { name: 'Cash Out' });
+  const cash = page.getByRole('button', { name: "I'm done" });
   await cash.waitFor();
   const cashBox = await cash.boundingBox();
   assert(cashBox && cashBox.y >= 0 && cashBox.y + cashBox.height <= 844, 'Cash Out outside mobile viewport');
@@ -224,7 +226,10 @@ try {
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await page.getByRole('button', { name: 'Unmute sound' }).waitFor();
   await page.screenshot({ path: `${out}/run-390.png`, fullPage: true });
-  await page.getByRole('button', { name: 'Cash Out' }).click();
+  await page.getByRole('button', { name: "I'm done" }).click();
+  await page.getByText(/You left\./i).waitFor();
+  assert(await page.getByText(/Reality Pings?/i).count() > 0, 'exit receipt did not show Reality Ping count');
+  await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor();
   await page.getByRole('button', { name: '5' }).click();
   await page.getByRole('heading', { name: /Did you end up gambling/i }).waitFor();
@@ -264,8 +269,8 @@ try {
   const ping = pingPage.locator('.reality-ping');
   await ping.waitFor({ timeout: 7000 });
   await pingPage.screenshot({ path: `${out}/reality-ping-390.png`, fullPage: true });
-  await ping.focus();
-  await pingPage.keyboard.press('Enter');
+  assert(await ping.getByText(/Reality Ping/i).isVisible(), 'Reality Ping label missing');
+  await ping.getByRole('button', { name: 'Keep going' }).click();
   await ping.waitFor({ state: 'detached' });
   await pingContext.close();
 
@@ -276,6 +281,8 @@ try {
   await unknown.getByRole('button', { name: '$20', exact: true }).click();
   await unknown.getByRole('button', { name: /Slots/ }).click();
   await unknown.getByRole('button', { name: /Bored/ }).click();
+  await unknown.getByRole('heading', { name: /Why are you trying to stop/i }).waitFor();
+  await unknown.getByRole('button', { name: 'Skip' }).click();
   await unknown.getByRole('button', { name: 'Not sure' }).click();
   await unknown.getByRole('button', { name: 'Not sure' }).click();
   await unknown.getByRole('button', { name: /Nothing urgent/ }).click();
@@ -346,6 +353,8 @@ try {
   await seedActive(exhaustedContext, exhaustedProfile, exhaustedRun);
   const exhausted = await exhaustedContext.newPage();
   await exhausted.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  await exhausted.getByRole('button', { name: 'Continue' }).waitFor({ timeout: 5000 });
+  await exhausted.getByRole('button', { name: 'Continue' }).click();
   await exhausted.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor({ timeout: 5000 });
   await exhaustedContext.close();
 
@@ -356,6 +365,8 @@ try {
   await seedActive(timeoutContext, timeoutProfile, timeoutRun);
   const timeout = await timeoutContext.newPage();
   await timeout.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  await timeout.getByRole('button', { name: 'Continue' }).waitFor({ timeout: 5000 });
+  await timeout.getByRole('button', { name: 'Continue' }).click();
   await timeout.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor({ timeout: 5000 });
   await timeoutContext.close();
 
