@@ -247,6 +247,9 @@ try {
   await page.locator('input[name="amount"]').fill('430');
   await page.getByRole('button', { name: 'This week' }).click();
   await page.getByRole('button', { name: /Lock it in/ }).click();
+  await page.getByRole('heading', { name: /How bad do you want to play right now/i }).waitFor();
+  assert(await page.getByRole('heading', { name: /If you came up short/i }).count() === 0, 'optional lender question returned to first-run setup');
+  assert(await page.getByRole('heading', { name: /What would you rather keep this money for/i }).count() === 0, 'optional goal question returned to first-run setup');
   await page.getByRole('button', { name: '8' }).click();
 
   const loadButton = page.getByRole('button', { name: /Load \$100/ });
@@ -574,6 +577,7 @@ try {
   const stakePing = stakePage.locator('.xray-moment');
   await stakePing.waitFor({ timeout: 5000 });
   assert(await stakePing.getByText(/You lost, then raised it\./i).isVisible(), 'stake-escalation X-Ray did not fire immediately');
+  assert(await stakePage.getByRole('button', { name: "I'm done" }).count() === 1, 'X-Ray exposed duplicate exit actions');
   await stakePage.screenshot({ path: `${out}/xray-stake-390.png`, fullPage: true });
   const afterStake = await stakePage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
   assert(afterStake?.actionCount === 3, 'stake-escalation intervention required another play before firing');
