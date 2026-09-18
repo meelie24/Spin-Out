@@ -1,15 +1,18 @@
 # Spin Out
 
-Spin Out is a browser-first pre-gambling Reality Run. It asks for enough real context to make a simulated gambling session personal, then lets the person leave at any moment and records how quickly they chose to leave.
+Spin Out is a browser-first pre-gambling Reality Run. It asks for enough real context to make a simulated gambling session personal, lets the person leave at any moment, and records how quickly they chose to leave.
 
 ## Stack
 
 - Next.js + React + TypeScript for product flow and UI
-- Phaser 4 + WebGL for the Reality Run game surface
+- Phaser 4 + WebGL for the calibrated game surfaces
 - GSAP for setup/deposit transitions
-- Web Audio API for reel, button, ambient and Reality Ping sound
-- localStorage for private on-device profile, run history and learning
-- ephemeral anonymous `/api/presence` heartbeat for the live “people are on this journey with you” counter
+- Web Audio API for game and Reality Ping sound
+- Supabase Auth + Postgres for identity, one-run Plus trial state, and Plus cross-device sync
+- RevenueCat Web for the canonical `premium` subscription entitlement
+- Paddle Billing as the first web billing engine configured through RevenueCat
+- localStorage for private Core on-device profile, run history, and learning
+- ephemeral anonymous `/api/presence` heartbeat for the live journey counter
 
 ## Run locally
 
@@ -23,43 +26,51 @@ npm run dev
 ```bash
 npm run test:core
 npm run typecheck
+npm run lint
 npm run build
 npx playwright install chromium
 npm run qa
 ```
 
-The master product prompt is kept at `docs/MASTER_PRODUCT_PROMPT.md`. The architecture spec and implementation plan live under `docs/superpowers/`.
+The production master prompt is kept at `docs/MASTER_PRODUCT_PROMPT.md`.
 
+## Plus access model
 
-## Production configuration
+Core Reality Runs remain usable without a subscription.
 
-Canonical site URL: `https://spinitout.com`.
+For an authenticated account that has never used the trial, the **first Reality Run** claims one full Spin Out+ session:
 
-Spin Out+ uses a provider-agnostic subscription entitlement. Core Reality Runs do not require payment. Lemon Squeezy is the preferred broad checkout, with direct PayPal subscriptions retained as a fallback.
+- the chosen first game gets the complete Plus access layer;
+- the trial is bound server-side to that Reality Run ID and game;
+- the access window ends when that run is consumed or after the same 15-minute maximum as the Reality Run;
+- clearing browser data, logging out, or changing browsers does not create another first-run trial;
+- a second Reality Run uses Core unless RevenueCat reports the `premium` entitlement active.
+
+## Subscription architecture
+
+RevenueCat is the canonical paid-entitlement source. The authenticated Supabase user ID is also the RevenueCat App User ID. Paddle Billing is the first web billing engine / merchant-of-record configuration.
+
+Current plans:
+
+- **$4.99/month**
+- **$29.99/year**
 
 Required production environment variables:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://spinitout.com
 
-# Lemon Squeezy: cards, Apple Pay, Google Pay and PayPal subscriptions
-LEMONSQUEEZY_API_KEY=...
-LEMONSQUEEZY_STORE_ID=...
-LEMONSQUEEZY_MONTHLY_VARIANT_ID=...
-LEMONSQUEEZY_YEARLY_VARIANT_ID=...
-LEMONSQUEEZY_WEBHOOK_SECRET=...
-LEMONSQUEEZY_TEST_MODE=false
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
 
-# Direct PayPal subscription fallback
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=...
-PAYPAL_CLIENT_ID=...
-PAYPAL_CLIENT_SECRET=...
-NEXT_PUBLIC_PAYPAL_MONTHLY_PLAN_ID=...
-NEXT_PUBLIC_PAYPAL_YEARLY_PLAN_ID=...
-PAYPAL_WEBHOOK_ID=...
-PAYPAL_ENV=live
+# RevenueCat Web SDK: intentionally public
+NEXT_PUBLIC_REVENUECAT_WEB_API_KEY=...
+
+# RevenueCat REST entitlement lookup: server-only secret
+REVENUECAT_SECRET_API_KEY=...
 ```
 
-Configure the Lemon Squeezy subscription variants and/or PayPal plans at **$4.99/month** and **$29.99/year**. Lemon Squeezy checkout can surface cards, Apple Pay, Google Pay and PayPal depending on the customer's device and location. Without a complete provider configuration, the product deliberately shows pricing without a checkout control rather than pretending billing works.
+The Paddle sandbox product, prices, RevenueCat Paddle app, `premium` entitlement, offering, and monthly/annual packages must be configured in the provider dashboards before checkout can become live. The repository does not fabricate successful Paddle purchases or merchant approval.
 
-Before taking live payments, complete the selected merchant provider's production review and configure the signed subscription webhook. Spin Out must remain practice-only: no entry fee, wagering, prizes, redeemable balance, operator links, or sportsbook/casino affiliate revenue.
+Spin Out remains software with simulated balances: there are no real-money game deposits, cash prizes, redeemable game credits, or operator/affiliate wagering links.
