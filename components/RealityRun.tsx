@@ -9,6 +9,7 @@ import { dealPoker, drawPoker, resolveSimpleGame, SPORTS_MARKETS, type ResolvedG
 import { clearActiveRun, loadData, saveActiveRun, track, updateData } from '@/lib/storage';
 import { spinAudio } from '@/lib/audio';
 import { createRunLease } from '@/lib/runLease';
+import { decideIntervention, initialDirectorState, interventionFamily, type AmbientMode, type InterventionSurface } from '@/lib/realityEngine/director';
 import type { ActiveRun, ExitReason, PingCandidate, RealityProfile, SessionLimit } from '@/lib/types';
 
 export interface RunEndData {
@@ -83,6 +84,7 @@ function freshRun(profile: RealityProfile, limit: SessionLimit): ActiveRun {
     limitExceededAt: null,
     returnedAfterMs: previousEndEvent ? Math.max(0, startedAt - previousEndEvent.at) : previous ? Math.max(0, startedAt - previous.endedAt) : null,
     totalStakedCents: 0,
+    directorState: initialDirectorState(),
   };
 }
 
@@ -102,6 +104,7 @@ function hydrateRun(run: ActiveRun): ActiveRun {
     limitExceededAt: run.limitExceededAt ?? null,
     returnedAfterMs: run.returnedAfterMs ?? null,
     totalStakedCents: run.totalStakedCents ?? 0,
+    directorState: run.directorState ?? initialDirectorState(),
   };
 }
 
@@ -121,6 +124,8 @@ export function RealityRun({
   const runRef = useRef(run);
   const [animating, setAnimating] = useState(false);
   const [ping, setPing] = useState<PingCandidate | null>(null);
+  const [interventionSurface, setInterventionSurface] = useState<InterventionSurface | null>(null);
+  const [ambientMode, setAmbientMode] = useState<AmbientMode>(() => restoredRun?.directorState?.ambientMode ?? 'normal');
   const [muted, setMuted] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(() =>
     typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
@@ -281,22 +286,59 @@ export function RealityRun({
       returnedAfterMs: next.returnedAfterMs ?? null,
       totalStakedCents: next.totalStakedCents ?? 0,
     });
-    const chosen = selectPing(candidates, data.pingLearning, next.pings.slice(-2).map(p => p.type));
-    if (!chosen) return false;
-    const shownAt = Date.now();
-    const pingRecord = { ...chosen, shownAt, dismissedAt: null };
-    const updated: ActiveRun = {
+
+    const recentTypes = next.pings.slice(-3).map(item => item.type);
+    const byFamily = new Map<string, PingCandidate[]>();
+    for (const candidate of candidates) {
+      const family = interventionFamily(candidate.type);
+      byFamily.set(family, [...(byFamily.get(family) ?? []), candidate]);
+    }
+
+    const representatives = [...byFamily.values()]
+      .map(group => selectPing(group, data.pingLearning, recentTypes))
+      .filter((candidate): candidate is PingCandidate => Boolean(candidate));
+
+    const decision = decideIntervention({
+      now: Date.now(),
+      candidates: representatives,
+      foregroundOpen: Boolean(ping),
+      state: next.directorState ?? initialDirectorState(),
+    });
+
+    setAmbientMode(decision.ambientMode);
+
+    const directedRun: ActiveRun = {
       ...next,
-      lastPingAction: next.actionCount,
-      pings: [...next.pings, pingRecord],
-      timeline: [...next.timeline, {
+      directorState: decision.nextState,
+    };
+
+    if (!decision.foreground) {
+      setRun(directedRun);
+      runRef.current = directedRun;
+      return false;
+    }
+
+    const chosen = decision.foreground.candidate;
+    const shownAt = Date.now();
+    const pingRecord = {
+      ...chosen,
+      shownAt,
+      dismissedAt: null,
+      surface: decision.foreground.surface,
+    };
+    const updated: ActiveRun = {
+      ...directedRun,
+      lastPingAction: directedRun.actionCount,
+      pings: [...directedRun.pings, pingRecord],
+      timeline: [...directedRun.timeline, {
         kind: 'ping-shown',
         at: shownAt,
-        balanceCents: next.balanceCents,
-        stakeCents: next.stakeCents,
+        balanceCents: directedRun.balanceCents,
+        stakeCents: directedRun.stakeCents,
         pingType: chosen.type,
       }],
     };
+
     setRun(updated);
     runRef.current = updated;
     updateData(current => {
@@ -309,11 +351,18 @@ export function RealityRun({
         },
       };
     });
+
     spinAudio.ping();
+    setInterventionSurface(decision.foreground.surface);
     setPing(chosen);
-    track('reality_ping', { type: chosen.type, level: chosen.level });
+    track('reality_intervention', {
+      type: chosen.type,
+      level: chosen.level,
+      surface: decision.foreground.surface,
+      family: decision.foreground.family,
+    });
     return true;
-  }, [profile]);
+  }, [ping, profile]);
 
   const notePostPingContinuation = (next: ActiveRun, outcome: ResolvedGameOutcome) => {
     const recentPing = lastDismissedPing.current;
@@ -585,6 +634,7 @@ export function RealityRun({
     };
 
     setPing(null);
+    setInterventionSurface(null);
     setRun(updated);
     runRef.current = updated;
 
@@ -617,7 +667,7 @@ export function RealityRun({
   const sportsPotentialReturn = Math.round(run.stakeCents * selectedSports.odds);
 
   return (
-    <main className="run-shell" style={{ '--reality': intensity } as React.CSSProperties}>
+    <main className={`run-shell ambient-${ambientMode}`} data-intervention-surface={interventionSurface ?? 'none'} style={{ '--reality': intensity } as React.CSSProperties}>
       <div className="reality-background" aria-hidden="true">
         {financeFresh && obligation && profile.obligationAmountCents ? <div className="context-ghost ghost-a"><span>{obligation}</span><strong>{formatMoney(profile.obligationAmountCents)}</strong></div> : null}
         {days != null ? <div className="context-ghost ghost-b"><strong>{days}</strong><span>DAYS UNTIL MONEY</span></div> : null}
