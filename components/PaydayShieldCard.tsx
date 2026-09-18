@@ -19,7 +19,7 @@ export function PaydayShieldCard({
     {card.plan.length ? <div className="payday-plan-lines">{card.plan.map(line=><span key={line}>{line}</span>)}</div> : null}
     {(onReview||onDismiss) ? <div className="payday-shield-actions">
       {onReview ? <button type="button" onClick={onReview}>{card.plan.length?'Review plan':'Set my plan'}</button> : null}
-      {onDismiss ? <button type="button" className="bare-link" onClick={onDismiss}>I'm good</button> : null}
+      {onDismiss ? <button type="button" className="bare-link" onClick={onDismiss}>{"I'm good"}</button> : null}
     </div> : null}
   </section>;
 }
