@@ -168,6 +168,49 @@ try {
   assert(await hubPage.getByRole('button', { name: /Slots/i }).count() === 0, 'homepage game preselection did not skip the redundant game question');
   await hubContext.close();
 
+  // Exit-progress copy only appears when the last three exits really are getting shorter.
+  const trendContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  await trendContext.addInitScript(() => {
+    const now = Date.now();
+    localStorage.setItem('spinout.v2', JSON.stringify({
+      version: 2,
+      profile: null,
+      pingLearning: {},
+      events: [],
+      account: {},
+      runs: [
+        { id:'trend-1', endedAt:now - 300000, moneyKeptCents:1000, timeToExitSeconds:674 },
+        { id:'trend-2', endedAt:now - 200000, moneyKeptCents:1200, timeToExitSeconds:422 },
+        { id:'trend-3', endedAt:now - 100000, moneyKeptCents:1500, timeToExitSeconds:276 },
+      ],
+    }));
+  });
+  const trendPage = await trendContext.newPage();
+  await trendPage.goto(base, { waitUntil: 'domcontentloaded' });
+  await trendPage.getByText(/You're leaving sooner\./i).waitFor();
+  await trendContext.close();
+
+  const flatTrendContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  await flatTrendContext.addInitScript(() => {
+    const now = Date.now();
+    localStorage.setItem('spinout.v2', JSON.stringify({
+      version: 2,
+      profile: null,
+      pingLearning: {},
+      events: [],
+      account: {},
+      runs: [
+        { id:'flat-1', endedAt:now - 300000, moneyKeptCents:1000, timeToExitSeconds:500 },
+        { id:'flat-2', endedAt:now - 200000, moneyKeptCents:1200, timeToExitSeconds:650 },
+        { id:'flat-3', endedAt:now - 100000, moneyKeptCents:1500, timeToExitSeconds:430 },
+      ],
+    }));
+  });
+  const flatTrendPage = await flatTrendContext.newPage();
+  await flatTrendPage.goto(base, { waitUntil: 'domcontentloaded' });
+  assert(await flatTrendPage.getByText(/You're leaving sooner\./i).count() === 0, 'exit improvement copy appeared without a real trend');
+  await flatTrendContext.close();
+
   // Real auth UI: keyboard focus, Escape, focus return. No simulated sign-in state.
   const authContext = await browser.newContext({ viewport: { width: 1024, height: 768 } });
   const authPage = await authContext.newPage();
