@@ -146,6 +146,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     const sync = () => setReducedMotion(Boolean(media?.matches));
     sync();
     media?.addEventListener?.('change', sync);
+    queueMicrotask(() => setMuted(spinAudio.isMuted()));
     spinAudio.startAmbient();
     track('session_start', { game: profile.gamblingType, trigger: profile.triggerType, intended: profile.intendedWagerCents });
     return () => {
@@ -313,7 +314,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       decision,
     });
 
-    spinAudio.result(outcome.netCents);
+    spinAudio.result(outcome.netCents, profile.gamblingType);
     setAnimating(false);
     if (ended.current) return;
 
@@ -358,7 +359,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
       }
 
       setAnimating(true);
-      spinAudio.spin(520);
+      spinAudio.spin(520, 'poker');
       const result = drawPoker(pokerRound.hand, pokerRound.deck, pokerRound.held, pokerRound.wagerCents);
       const payoutCents = result.outcome.netCents + pokerRound.wagerCents;
       const balanceCents = run.balanceCents + payoutCents;
@@ -371,7 +372,7 @@ export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityPr
     if (run.balanceCents < run.stakeCents) return;
     setAnimating(true);
     const duration = profile.gamblingType === 'casino' ? 1500 : profile.gamblingType === 'slots' || profile.gamblingType === 'other' ? 1200 : profile.gamblingType === 'lottery' ? 820 : 520;
-    spinAudio.spin(duration);
+    spinAudio.spin(duration, profile.gamblingType);
     const outcome = resolveSimpleGame(profile.gamblingType, random01, run.stakeCents, gameDecision);
     const balanceCents = Math.max(0, run.balanceCents + outcome.netCents);
     await completeOutcome(outcome, balanceCents, gameDecision || undefined);
