@@ -23,6 +23,10 @@ export function AccountSync() {
       const { data } = await supabase.auth.getUser();
       if (!data.user || cancelled) return;
 
+      const accessResponse = await fetch('/api/entitlement', { cache:'no-store' }).catch(()=>null);
+      const access = accessResponse?.ok ? await accessResponse.json().catch(()=>null) as { active?:boolean } | null : null;
+      if (!access?.active || cancelled) return;
+
       const local = loadData();
       await fetch('/api/sync/import', {
         method:'POST',
@@ -48,7 +52,12 @@ export function AccountSync() {
     const { data } = supabase.auth.onAuthStateChange(event => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') void sync();
     });
-    return () => { cancelled = true; data.subscription.unsubscribe(); };
+    window.addEventListener('spinout:access-changed', sync);
+    return () => {
+      cancelled = true;
+      data.subscription.unsubscribe();
+      window.removeEventListener('spinout:access-changed', sync);
+    };
   }, []);
 
   return null;
