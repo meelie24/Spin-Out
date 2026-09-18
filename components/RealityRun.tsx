@@ -9,7 +9,7 @@ import { dealPoker, drawPoker, resolveSimpleGame, SPORTS_MARKETS, type ResolvedG
 import { clearActiveRun, loadData, saveActiveRun, track, updateData } from '@/lib/storage';
 import { spinAudio } from '@/lib/audio';
 import { createRunLease } from '@/lib/runLease';
-import type { ActiveRun, ExitReason, PingCandidate, RealityProfile } from '@/lib/types';
+import type { ActiveRun, ExitReason, PingCandidate, RealityProfile, SessionLimit } from '@/lib/types';
 
 export interface RunEndData {
   run: ActiveRun;
@@ -32,9 +32,9 @@ function actionLabel(type: RealityProfile['gamblingType'], pokerHolding: boolean
 }
 
 function exitLabel(type: RealityProfile['gamblingType']) {
-  if (type === 'slots') return 'Cash Out';
-  if (type === 'poker' || type === 'casino') return 'Leave Table';
-  return 'Leave';
+  if (type === 'poker' || type === 'casino') return 'Leave table';
+  if (type === 'sports') return 'Leave game';
+  return "I'm done";
 }
 
 function cardLabel(code: string) {
@@ -43,11 +43,14 @@ function cardLabel(code: string) {
   return rank + (suit === 'S' ? '♠' : suit === 'H' ? '♥' : suit === 'D' ? '♦' : '♣');
 }
 
-function freshRun(profile: RealityProfile): ActiveRun {
+function freshRun(profile: RealityProfile, limit: SessionLimit): ActiveRun {
   const stakes = stakeOptionsFor(profile.intendedWagerCents);
+  const runs = loadData().runs;
+  const previous = runs.length ? runs[runs.length - 1] : null;
+  const startedAt = Date.now();
   return {
     id: crypto.randomUUID(),
-    startedAt: Date.now(),
+    startedAt,
     initialBalanceCents: profile.intendedWagerCents,
     balanceCents: profile.intendedWagerCents,
     previousBalanceCents: profile.intendedWagerCents,
@@ -61,12 +64,54 @@ function freshRun(profile: RealityProfile): ActiveRun {
     lastPingAction: -10,
     pings: [],
     timeline: [],
+    lastActionAt: null,
+    actionIntervalsMs: [],
+    consecutiveLosses: 0,
+    consecutiveWins: 0,
+    lossesBeforeLastWin: 0,
+    lastOutcomeBand: null,
+    lastNearMiss: false,
+    pingDismissalStreak: 0,
+    chosenLimitRounds: limit.rounds,
+    chosenLimitMinutes: limit.minutes,
+    limitExceededAt: null,
+    returnedAfterMs: previous ? Math.max(0, startedAt - previous.endedAt) : null,
+    totalStakedCents: 0,
   };
 }
 
-export function RealityRun({ profile, restoredRun, onEnd }: { profile: RealityProfile; restoredRun?: ActiveRun | null; onEnd: (data: RunEndData) => void }) {
+function hydrateRun(run: ActiveRun): ActiveRun {
+  return {
+    ...run,
+    lastActionAt: run.lastActionAt ?? null,
+    actionIntervalsMs: run.actionIntervalsMs ?? [],
+    consecutiveLosses: run.consecutiveLosses ?? 0,
+    consecutiveWins: run.consecutiveWins ?? 0,
+    lossesBeforeLastWin: run.lossesBeforeLastWin ?? 0,
+    lastOutcomeBand: run.lastOutcomeBand ?? null,
+    lastNearMiss: run.lastNearMiss ?? false,
+    pingDismissalStreak: run.pingDismissalStreak ?? 0,
+    chosenLimitRounds: run.chosenLimitRounds ?? null,
+    chosenLimitMinutes: run.chosenLimitMinutes ?? null,
+    limitExceededAt: run.limitExceededAt ?? null,
+    returnedAfterMs: run.returnedAfterMs ?? null,
+    totalStakedCents: run.totalStakedCents ?? 0,
+  };
+}
+
+export function RealityRun({
+  profile,
+  restoredRun,
+  sessionLimit,
+  onEnd,
+}: {
+  profile: RealityProfile;
+  restoredRun?: ActiveRun | null;
+  sessionLimit: SessionLimit;
+  onEnd: (data: RunEndData) => void;
+}) {
   const game = useRef<RealityGameHandle>(null);
-  const [run, setRun] = useState<ActiveRun>(() => restoredRun ?? freshRun(profile));
+  const [run, setRun] = useState<ActiveRun>(() => hydrateRun(restoredRun ?? freshRun(profile, sessionLimit)));
   const runRef = useRef(run);
   const [animating, setAnimating] = useState(false);
   const [ping, setPing] = useState<PingCandidate | null>(null);
