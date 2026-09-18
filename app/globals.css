@@ -581,3 +581,25 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .games-mid-prompt{padding:10px 0 12px}
   .games-mid-prompt .prompt-grid{width:100%;transform:none}
 }
+
+
+/* Multi-method Plus checkout */
+.multi-method-checkout{margin-top:15px;display:grid;gap:11px}
+.checkout-methods{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.checkout-methods span{
+  min-height:38px;
+  display:grid;
+  place-items:center;
+  padding:7px 5px;
+  border:1px solid rgba(73,49,38,.12);
+  border-radius:10px;
+  background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(238,224,207,.5));
+  color:#5d4b40;
+  font-size:10px;
+  font-weight:720;
+  letter-spacing:-.01em;
+  box-shadow:inset 0 1px rgba(255,255,255,.75),0 6px 16px rgba(61,39,28,.035);
+}
+.checkout-primary{width:100%}
+.checkout-availability{margin:0;text-align:center;color:#8b786b;font-size:10px;line-height:1.45}
+@media(max-width:560px){.checkout-methods{grid-template-columns:1fr 1fr}}

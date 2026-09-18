@@ -22,7 +22,7 @@ function labelTrigger(trigger: RunRecord['triggerType']) {
   return trigger.replaceAll('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-export function PlusDashboard({ authenticated, premium, serverRuns }: { authenticated: boolean; premium: boolean; serverRuns: RunRecord[] }) {
+export function PlusDashboard({ authenticated, premium, serverRuns, manageUrl }: { authenticated: boolean; premium: boolean; serverRuns: RunRecord[]; manageUrl: string | null }) {
   const [data, setData] = useState<ReturnType<typeof loadData> | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [clockMs, setClockMs] = useState(0);
@@ -161,6 +161,6 @@ export function PlusDashboard({ authenticated, premium, serverRuns }: { authenti
       </div>
     </section>
 
-    <footer className="plus-foot"><Link href="/">Back home</Link><a href="https://www.paypal.com/myaccount/autopay/" target="_blank" rel="noreferrer">Manage subscription</a></footer>
+    <footer className="plus-foot"><Link href="/">Back home</Link>{manageUrl ? <a href={manageUrl} target="_blank" rel="noreferrer">Manage subscription</a> : null}</footer>
   </main>;
 }
