@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PingCandidate } from '@/lib/types';
 
 export function RealityPing({
@@ -15,12 +15,20 @@ export function RealityPing({
   onExit: () => void;
 }) {
   const [whyOpen, setWhyOpen] = useState(false);
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    dialogRef.current?.focus();
+  }, []);
 
   return (
     <section
+      ref={dialogRef}
+      tabIndex={-1}
       className={`reality-ping ${reducedMotion ? 'reduced' : ''} ${ping.requiresChoice ? 'requires-choice' : ''}`}
       style={{ backdropFilter: 'blur(24px) saturate(1.25)', WebkitBackdropFilter: 'blur(24px) saturate(1.25)' }}
       role="dialog"
+      aria-modal="true"
       aria-label="Reality Ping"
     >
       <span className="ping-glint" aria-hidden="true" />

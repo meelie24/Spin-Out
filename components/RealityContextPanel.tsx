@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { syncProfileIfSignedIn } from '@/lib/sync';
 import { updateData } from '@/lib/storage';
 import type { DifficultTime, ObligationType, PaydayPlanAction, RealityProfile } from '@/lib/types';
@@ -58,12 +58,17 @@ export function RealityContextPanel({
   const [amount, setAmount] = useState(profile ? moneyValue(profile.obligationAmountCents) : '');
   const [available, setAvailable] = useState(profile ? moneyValue(profile.availableUntilIncomeCents) : '');
   const [saved, setSaved] = useState(false);
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    dialogRef.current?.focus();
+  }, []);
 
   const selectedPlans = useMemo(() => draft?.paydayPlanActions ?? [], [draft?.paydayPlanActions]);
 
   if (!draft) {
     return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
-      <section className="glass-dialog reality-context-dialog" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
+      <section ref={dialogRef} tabIndex={-1} className="glass-dialog reality-context-dialog" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
         <p className="kicker">My reality</p>
         <h2 id="reality-context-title">Set this up during your first Reality Run.</h2>
         <p className="provider-note">Spin Out only asks for the money and timing it can actually use during a run.</p>
@@ -124,7 +129,7 @@ export function RealityContextPanel({
   };
 
   return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
-    <section className="glass-dialog reality-context-dialog" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
+    <section ref={dialogRef} tabIndex={-1} className="glass-dialog reality-context-dialog" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
       <div className="reality-context-head">
         <div><p className="kicker">My reality</p><h2 id="reality-context-title">What should Spin Out keep in mind?</h2></div>
         <button className="bare-link" type="button" onClick={onClose}>Close</button>

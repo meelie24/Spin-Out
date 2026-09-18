@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PingCandidate } from '@/lib/types';
 
 export function XRayMoment({
@@ -15,9 +15,14 @@ export function XRayMoment({
   onRunLong?: () => void;
 }) {
   const [whyOpen, setWhyOpen] = useState(false);
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    dialogRef.current?.focus();
+  }, []);
 
   return (
-    <section className="xray-moment" role="dialog" aria-label="X-Ray">
+    <section ref={dialogRef} tabIndex={-1} className="xray-moment" role="dialog" aria-modal="true" aria-label="X-Ray">
       <div className="xray-rule" aria-hidden="true" />
       <span className="xray-label">X-Ray</span>
       <strong>{insight.message}</strong>

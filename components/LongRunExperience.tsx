@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatMoney } from '@/lib/engine';
 import type { LongRunResult } from '@/lib/realityEngine/longRun';
 
@@ -16,8 +16,13 @@ export function LongRunExperience({
   onClose: () => void;
 }) {
   const [phaseIndex, setPhaseIndex] = useState(0);
+  const panelRef = useRef<HTMLElement>(null);
   const reduced = typeof window !== 'undefined'
     && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+
+  useEffect(() => {
+    panelRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (reduced) {
@@ -37,7 +42,7 @@ export function LongRunExperience({
   const samples = useMemo(() => result.samples.slice(0, sampleCount), [result.samples, sampleCount]);
 
   return (
-    <section className="longrun-panel" role="dialog" aria-modal="true" aria-label="10,000 run view">
+    <section ref={panelRef} tabIndex={-1} className="longrun-panel" role="dialog" aria-modal="true" aria-label="10,000 run view">
       <div className="longrun-head">
         <div>
           <span>Long run · {gameLabel}</span>
@@ -60,7 +65,7 @@ export function LongRunExperience({
 
       {phaseIndex < 3 ? (
         <div className="longrun-build">
-          <strong>{phaseIndex === 0 ? 'Again.' : phaseIndex === 1 ? 'Keep going.' : 'Now pull back.'}</strong>
+          <strong>{phaseIndex === 0 ? 'One result.' : phaseIndex === 1 ? 'Now 100.' : 'Now 1,000.'}</strong>
           <span>One result can feel huge. This is what happens when the same game keeps running.</span>
         </div>
       ) : (

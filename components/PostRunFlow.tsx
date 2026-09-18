@@ -236,7 +236,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
             <div className="protected-card">
               <span>{profile.obligationType.replace('-', ' ').toUpperCase()}</span>
               <strong>{formatMoney(Math.min(money.keptCents, profile.obligationAmountCents))} / {formatMoney(profile.obligationAmountCents)}</strong>
-              <em>PROTECTED</em>
+              <em>AVAILABLE</em>
             </div>
           ) : null}
 
