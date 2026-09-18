@@ -1,2402 +1,2745 @@
-SPIN OUT
-MASTER PRODUCT PROMPT
+# SPIN OUT — FINAL PRODUCTION MASTER PROMPT
 
-This is the authoritative product specification for Spin Out.
+## READ THIS FIRST
 
-Build the product described here.
+Continue directly from the existing Spin Out repository and all work already completed.
 
-Do not revert to earlier concepts.
+DO NOT restart the project.
 
-Do not add Shield, gambling blockers, forced cooldowns, giant Stop buttons, generic therapy exercises, recovery streaks, community feeds, or unnecessary wellness features.
+DO NOT recreate the application from scratch.
 
-Every major behavior is defined below.
+DO NOT create a simplified replacement because an existing implementation is difficult to understand.
 
-Where a technical implementation detail is missing, choose the simplest solution that preserves the intended experience.
+DO NOT remove working systems merely because rewriting them would be easier.
 
-==================================================
-1. WHAT SPIN OUT IS
-==================================================
+The GitHub repository is the canonical source of truth.
 
-Spin Out is a web experience for somebody who is thinking about gambling.
+The objective of this chat is to take the current Spin Out build through its **final production pass**.
 
-The user opens Spin Out before putting real money into gambling.
+The custom domain itself may remain unpurchased for now. Everything required to support that domain should be prepared correctly before this work is considered finished.
 
-Spin Out quickly learns enough about their current situation to make the experience personal.
+The final standard is:
 
-Then the user enters a realistic simulated gambling environment.
+**implemented → rendered → inspected → compared → tested → corrected → deployed from GitHub → tested again.**
 
-During the simulation, the money gradually stops feeling like meaningless game money.
+Do not treat any feature as complete merely because code exists.
 
-Their actual life begins appearing inside the experience:
+---
 
-rent
+# 1. PRIMARY CHAT GOAL
 
-car payment
+By the end of this chat, Spin Out should be a fully functional, visually premium web product with:
 
-groceries
+- A homepage that serves as the main game-selection hub.
+  - **Example:** A new visitor should immediately see the available games instead of needing to navigate through another menu to discover them.
+- Every game visible and selectable directly from the homepage.
+  - **Example:** Slots should have its own large visual card showing actual premium game artwork rather than a text-only button saying “Slots.”
+- Casino-level game visuals.
+  - **Example:** Reels, symbols, lighting, controls, result states and backgrounds should feel authored like a real gaming product rather than a coded demonstration.
+- The supplied Dribbble designs used as strict visual references.
+  - **Example:** The liquid-glass sidebar should influence the actual construction, translucency, depth and active-state treatment of our sidebar instead of merely inspiring a blur effect.
+- Spin Out’s existing premium brown visual identity preserved.
+  - **Example:** Adapt reference-quality red/gold/green casino visuals into espresso, oxblood, bronze, warm cream, charcoal brown and controlled gold.
+- Rich and accurate casino symbolism throughout the product.
+  - **Example:** Cherries, BARs, bells, 7s, coins, gems and culturally specific symbols should be actual designed assets, not emojis or generic icons.
+- Accurate Chinese symbols and cultural motifs where they fit the chosen casino visual language.
+  - **Example:** A real Chinese character must remain linguistically correct after being redrawn into Spin Out’s visual style.
+- Red intervention prompts distributed across the homepage.
+  - **Example:** One may appear beside the game library while another appears lower in the page rather than six alerts being stacked together.
+- No homepage intervention prompts sitting over an active game.
+  - **Example:** Entering Slots removes the homepage prompt layer from the gameplay view.
+- Sports betting completely removed.
+  - **Example:** No sportsbook card, sports route, sports icon, sports copy or hidden abandoned `/sports` experience remains.
+- New users receiving a real 48-hour trial.
+  - **Example:** A trial created at 2:14 PM Monday expires at 2:14 PM Wednesday based on server time.
+- RevenueCat used for subscription entitlement management.
+  - **Example:** Paid access is determined from the authenticated RevenueCat customer rather than `localStorage`.
+- Paddle used as the first billing provider to implement/test with RevenueCat, subject to merchant approval.
+  - **Example:** A sandbox Paddle purchase becomes a RevenueCat paid entitlement for the same authenticated Spin Out account.
+- Payment and subscription data trackable.
+  - **Example:** Revenue, subscriptions, cancellations and customer status should be visible through the billing/RevenueCat systems and structured so Spin Out can later surface selected metrics internally.
+- GitHub-native deployment.
+  - **Example:** The production host clones the complete repository instead of receiving 79 project files through a limited file-upload action.
+- A clean official-domain path.
+  - **Example:** The deployed app can run temporarily on the host’s supplied URL and later switch to `spinitout.com` or another purchased domain through configuration rather than code rewrites.
 
-childcare
+---
 
-credit card
+# 2. STRICT VISUAL REFERENCES
 
-days until payday
+Use these references throughout the implementation.
 
-savings goals
+### REFERENCE A
 
-people they recently borrowed from
+Liquid Glass Effect Sidebar UI
+[https://dribbble.com/shots/26138509--Liquid-Glass-Effect-Sidebar-UI](https://dribbble.com/shots/26138509--Liquid-Glass-Effect-Sidebar-UI)
 
-things they would rather use the money for
+### REFERENCE B
 
-The player can leave at any point.
+Casino Website Design in Chinese Style
+[https://dribbble.com/shots/26710647-Casino-Website-Design-in-Chinese-Style](https://dribbble.com/shots/26710647-Casino-Website-Design-in-Chinese-Style)
 
-A Reality Run can last for a maximum of 15 minutes.
+### REFERENCE C
 
-The goal is for users to leave sooner over time.
+Casino Website | Gambling
+[https://dribbble.com/shots/26768357-Casino-Website-Gambling](https://dribbble.com/shots/26768357-Casino-Website-Gambling)
 
-Spin Out tracks how long each user takes to voluntarily leave.
+These are not casual inspiration.
 
-==================================================
-2. THE CORE EXPERIENCE
-==================================================
+Study them closely.
 
-OPEN SPIN OUT
+For each major visual section:
 
-↓
+1. Inspect the reference.
+2. Identify what gives it its visual quality.
+3. Reproduce those principles in Spin Out.
+4. Preserve Spin Out’s identity.
+5. Render the result.
+6. Compare it visually.
+7. Identify the largest remaining visual gap.
+8. Correct that gap.
+9. Repeat.
 
-FAST REALITY SETUP
+Do not stop after one pass.
 
-↓
+---
 
-REALITY RUN
+# 3. REFERENCE A — LIQUID GLASS SIDEBAR
 
-↓
+Use Reference A specifically for the navigation system.
 
-REALITY PINGS BEGIN
+## Floating construction
 
-↓
+The sidebar should feel like a floating object.
 
-REAL-LIFE CONSEQUENCES GROW MORE PERSONAL
+- **Example:** Leave controlled space between the panel and the browser edge rather than attaching a flat rectangle directly to the viewport.
 
-↓
+## Continuous glass body
 
-PLAYER CONTINUES OR LEAVES
+Use one intentional glass surface.
 
-↓
+- **Example:** Navigation items can sit within a large translucent brown-glass panel instead of each destination becoming a separate unrelated glass card.
 
-TIME TO LEAVE IS RECORDED
+## Transparency
 
-↓
+The environment should remain faintly visible through the panel.
 
-ENDING URGE CHECK
+- **Example:** Background `QUIT` typography or lighting may subtly bleed through the sidebar without reducing navigation readability.
 
-↓
+## Blur
 
-DID THEY ACTUALLY GAMBLE?
+Use proper backdrop separation.
 
-↓
+- **Example:** Content behind the sidebar should soften through the glass rather than remain perfectly sharp.
 
-MONEY KEPT
+## Edge lighting
 
-↓
+Give the panel a delicate premium edge.
 
-DONE
+- **Example:** A faint warm-cream/bronze highlight can run along the edge where virtual light catches the glass.
 
-The experience should feel simple even though the system underneath it is sophisticated.
+## Depth
 
-==================================================
-3. DESIGN PHILOSOPHY
-==================================================
+It should appear elevated.
 
-The product should feel:
+- **Example:** Use layered shadows, ambient light and internal highlights rather than a single generic `box-shadow`.
 
-premium
+## Active navigation
 
-minimal
+The selected destination should appear integrated into the glass.
 
-realistic
+- **Example:** HOME can sit inside a brighter internal glass capsule with increased opacity and subtle internal illumination.
 
-mature
+## Navigation icons
 
-fast
+All icons need consistent visual weight.
 
-cinematic
+- **Bad example:** One thin Lucide icon beside a thick custom SVG beside an emoji.
+- **Correct example:** One coherent icon system with matching dimensions, stroke weight and rendering quality.
 
-serious
+## Motion
 
-highly polished
+Navigation state should move fluidly.
 
-The product should NOT feel like:
+- **Example:** The active glass highlight can glide between destinations rather than abruptly disappear and reappear.
 
-a therapy worksheet
+## Brown adaptation
 
-a government gambling website
+Do not reproduce the reference’s exact green palette.
 
-a generic recovery app
+- **Spin Out example:** Smoked espresso glass + bronze highlights + warm cream typography + oxblood accent state.
 
-an AI assistant
+---
 
-a financial questionnaire
+# 4. REFERENCE B — CHINESE CASINO VISUAL RICHNESS
 
-a SaaS dashboard
+KEEP THE CHINESE VISUAL LANGUAGE.
 
-an educational website
+Do not strip it out.
 
-a cheap fake casino
+Do not respond to originality concerns by flattening the design.
 
-The surrounding product should feel closer to premium fintech.
+Do not turn rich cultural/casino artwork into minimal line icons.
 
-The Reality Run itself can visually resemble a sophisticated fictional gambling product.
+Reference B is useful precisely because it is:
 
-==================================================
-4. THE LANDING PAGE
-==================================================
+- rich
+- dramatic
+- ornamental
+- dimensional
+- layered
+- visually dense
+- premium
 
-Do not build a long marketing homepage before the product.
+Spin Out should retain that level of visual ambition.
 
-The homepage should immediately present the action.
+The artwork itself must become original Spin Out artwork.
 
-Primary view:
+---
 
-SPIN OUT
+# 5. CHINESE SYMBOL ACCURACY
 
-About to gamble?
+Every Chinese character or culturally specific element used in Spin Out must be accurate.
 
-[ START ]
+Before implementing one:
 
-Small secondary option:
+1. Identify exactly what it is.
+2. Identify its meaning.
+3. Verify the actual character/object.
+4. Verify orientation.
+5. Verify the component has not been distorted into another character.
+6. Create the original Spin Out artwork.
+7. Check it again at final rendered size.
 
-Sign in
+### Never create fake pseudo-Chinese writing
 
-That is enough.
+- **Bad example:** Drawing random strokes that “look Chinese.”
+- **Bad example:** Generating an ornamental glyph and assuming it means luck.
+- **Correct example:** Identify a legitimate character found in the reference or selected deliberately, verify its meaning, then redraw it faithfully.
 
-No feature grid.
+### Character redesign
 
-No wall of science.
+The underlying character must remain correct.
 
-No testimonials above the experience.
+Its presentation may change.
 
-No long sales page before Start.
+- **Example:** A correctly drawn fortune-related character could receive:
+  - an oxblood lacquer surface
+  - raised bronze framing
+  - carved internal texture
+  - warm edge illumination
+  - different ornamental geometry
+  - original Spin Out animation
 
-The visitor should be able to begin within seconds.
+The character remains linguistically correct.
 
-==================================================
-5. FIRST-RUN REALITY SETUP
-==================================================
+The artwork becomes visually original.
 
-The first Reality Run needs enough personal information to make the consequences hit.
+### Cultural objects
 
-Do not reduce this to only four questions.
+Verify objects too.
 
-However, the setup must NOT feel like filling out a form.
+- **Example:** If using a traditional Chinese cash coin, preserve its defining structural characteristics rather than drawing a generic gold circle with random writing.
+- **Example:** If using an ingot-inspired object, understand what it actually looks like before stylizing it.
 
-There are approximately seven core pieces of information plus two optional personalizers.
+Accuracy applies to:
 
-Present ONE interaction at a time.
+- characters
+- coins
+- ingots
+- ornamental patterns
+- culturally specific luck/fortune imagery
+- any other identifiable cultural symbol introduced into the interface.
 
-Most answers should require a single tap.
+---
 
-Avoid Continue buttons whenever a choice can advance automatically.
+# 6. ORIGINALITY DOES NOT MEAN LOWER QUALITY
 
-The rhythm should feel like:
+The references should be followed closely for:
 
-TAP
+- composition
+- visual density
+- level of polish
+- layering
+- lighting
+- material treatment
+- interaction quality
+- navigation structure
+- card richness
 
-SNAP
+Do not literally reproduce proprietary artwork asset-for-asset.
 
-TRANSFORM
+Instead:
 
-NEXT
+**REFERENCE QUALITY → ORIGINAL SPIN OUT ART AT THE SAME QUALITY LEVEL.**
 
-The entire setup should feel more like configuring a game than completing intake paperwork.
+### Example
 
-==================================================
-6. SETUP QUESTION 1
-==================================================
+Reference:
+
+rich red-and-gold fortune emblem.
+
+Wrong adaptation:
+
+small flat red SVG.
+
+Correct adaptation:
+
+- same general visual importance
+- equally detailed
+- equally dimensional
+- equally polished
+- different silhouette
+- different frame
+- different ornament
+- different material combination
+- Spin Out brown/oxblood palette
+- correctly represented underlying symbol
+
+Originality should come from the art direction.
+
+It should not come from making things worse.
+
+---
+
+# 7. EVERY CASINO SYMBOL GETS THIS TREATMENT
+
+This requirement applies to **every symbol**, not only Chinese imagery.
+
+Create a full symbol inventory from:
+
+- supplied references
+- current homepage
+- current game cards
+- active games
+- backgrounds
+- decorative assets
+- reel sets
+- win animations
+- intervention environments
+
+Potential symbols include, where appropriate:
+
+- 7
+- 77
+- 777
+- BAR
+- double BAR
+- triple BAR
+- cherries
+- lemons
+- oranges
+- grapes
+- watermelon
+- bell
+- diamond
+- ruby
+- other gems
+- star
+- horseshoe
+- crown
+- coins
+- stacked coins
+- card suits
+- cards
+- dice
+- jackpot marks
+- reel frames
+- roulette-related imagery where applicable
+- traditional Chinese coin imagery
+- ingot-inspired imagery
+- verified Chinese fortune/luck imagery
+- lantern-inspired decorative forms where appropriate
+- any additional symbol visible in our chosen references
+- any additional symbol already used by a current Spin Out game
+
+Do not force every symbol into every game.
+
+Create the inventory first, then use symbols intentionally.
+
+---
+
+# 8. SYMBOL VISUAL QUALITY
+
+Every primary symbol should survive being enlarged.
 
 Ask:
 
-“How much were you about to put in?”
+**Would this still look professionally illustrated at 300% scale?**
 
-Show large amount options:
+If enlargement reveals:
 
-$20
+- emoji
+- text pretending to be artwork
+- generic icon
+- primitive gradient
+- low-effort SVG
+- blurry source image
+- obvious generated artifact
+- flat silhouette with no intended styling
 
-$50
+then replace it.
 
-$100
+## 7
 
-$200
+- **Bad example:** Red text saying `7`.
+- **Correct example:** A ruby-enamel dimensional 7 with a bronze backing, bevel, highlight and controlled shadow.
 
-Other
+## BAR
 
-Allow custom numeric input.
+- **Bad example:** Plain text in a rectangle.
+- **Correct example:** Black lacquer plate, raised warm typography, metallic edge and small material reflections.
 
-When an amount is selected:
+## Cherry
 
-the card physically responds
+- **Bad example:** 🍒
+- **Correct example:** Original illustrated fruit with dimensional skin, individual stems, highlight and controlled shadow.
 
-the value becomes visually locked
+## Diamond
 
-the other options recede
+- **Bad example:** Generic outline icon.
+- **Correct example:** Faceted jewel with deliberate facet geometry, internal reflections and restrained light movement.
 
-the next question arrives immediately
+## Bell
 
-Store:
+- **Bad example:** Navigation bell icon reused as reel artwork.
+- **Correct example:** Custom slot-style bell with proper material, depth, clapper, rim and reflection.
 
-intended_wager_amount
+## Coin
 
-==================================================
-7. SETUP QUESTION 2
-==================================================
+- **Bad example:** Gold circle.
+- **Correct example:** Physical thickness, engraved face, edge detail, varying perspective and believable stacking.
 
-Ask:
+## Chinese symbol
 
-“What were you about to play?”
+- **Bad example:** Fake red glyph.
+- **Correct example:** Verified underlying character surrounded by original dimensional Spin Out framing.
 
-Use visual cards:
+---
 
-Slots
+# 9. SYMBOL STATES
 
-Sports
+Important symbols should not behave like static stickers.
 
-Casino
+Where applicable provide states such as:
 
-Poker
+### Normal
 
-Lottery / scratch cards
+- **Example:** Diamond shows restrained reflections.
 
-Other
+### Anticipation
 
-Each card should have subtle original imagery.
+- **Example:** Subtle internal light becomes slightly stronger when the final reel could create a matching result.
 
-Do not copy a real casino or sportsbook interface.
+### Win
 
-Tap automatically advances.
+- **Example:** A brief controlled specular sweep crosses the matching symbols.
 
-Store:
+### Disabled/inactive
 
-gambling_type
+- **Example:** Reduce luminance and emphasis without making the symbol unreadable.
 
-==================================================
-8. SETUP QUESTION 3
-==================================================
+Do not make everything pulse permanently.
 
-Ask:
+Constant glowing destroys hierarchy.
 
-“What’s pulling you in?”
+---
 
-Choices:
+# 10. SPIN OUT COLOR SYSTEM
 
-Win money
+The brown identity stays.
 
-Win it back
+## Main colors
 
-Bored
+Use variations of:
 
-Want the rush
+- espresso
+- dark chocolate
+- charcoal brown
+- oxblood
+- warm cream
+- muted bronze
+- aged gold
+- dark lacquer
+- near-black warm brown
 
-Want to switch off
+## Red
 
-Habit
+Use red deliberately.
 
-Something else
+Main uses:
 
-If Something else is selected, allow short optional text.
+- intervention prompts
+- psychological interruption
+- important warnings
+- destructive action
+- selected game accents where composition requires it
+- **Example:** A Reality Prompt can use a deep red glass surface that intentionally breaks the otherwise warm-brown casino environment.
 
-Do not force typing.
+Do not make the whole application red.
 
-Store:
+## Gold/bronze
 
-trigger_type
+Use for:
 
-==================================================
-9. SETUP QUESTION 4
-==================================================
+- frame edges
+- premium detail
+- illuminated boundaries
+- symbol materials
+- select highlights
+- **Example:** A reel frame may use dark bronze with slight aged variation rather than bright yellow gold.
 
-Ask:
+## Cream
 
-“How much have you actually got until more money comes in?”
+Use for primary readable text.
 
-Currency input.
+- **Example:** Major heading typography should feel warmer than pure `#FFFFFF`.
 
-Allow:
+---
 
-Not sure
+# 11. HOMEPAGE = MAIN GAME HUB
 
-This value is extremely important for the Reality Engine.
+The homepage must show the games.
 
-Store:
+Do not hide them behind another page.
 
-available_until_income
+## All games visible
 
-==================================================
-10. SETUP QUESTION 5
-==================================================
+Every intended playable game should appear on the homepage.
 
-Ask:
+- **Example:** A user should be able to move from homepage → selected game with one clear selection.
 
-“When’s more money coming in?”
+## Cards communicate the game visually
 
-Quick options:
+A user should understand the type of game before reading its title.
 
-Today
+- **Example:** A slot card visibly contains reel machinery/symbols rather than only the word “Slots.”
 
-Tomorrow
+## Card hierarchy
 
-This week
+Do not force every game into the exact same rectangle.
 
-Next week
+- **Example:** A primary/featured game may receive a larger composition while secondary games form a supporting grid.
 
-Choose date
+## Card depth
 
-This should take one tap in most cases.
+Use:
 
-Store:
+- environment
+- foreground
+- midground
+- lighting
+- framing
+- masking
+- typography
+- motion
+- **Example:** A foreground coin may extend slightly past the reel artwork while the background fades naturally into the card frame.
 
-next_income_date
+## Hover state
 
-==================================================
-11. SETUP QUESTION 6
-==================================================
+- **Example:** On desktop, artwork can move several pixels toward the viewer, lighting can rise slightly and PLAY can become more prominent.
 
-Ask:
+## Pressed state
 
-“What’s the next thing that has to get paid?”
+- **Example:** Tapping a game card should provide immediate tactile feedback before route transition.
 
-Use visually distinct choices:
+## Mobile
 
-Rent / mortgage
+- **Example:** Game cards reorganize into an intentionally designed mobile library instead of shrinking desktop cards until text becomes tiny.
 
-Car
+---
 
-Groceries
+# 12. HOMEPAGE BACKGROUND
 
-Credit card
+The homepage should feel like a designed environment.
 
-Utilities
+Do not use a plain brown gradient.
 
-Childcare
+The background must include:
 
-Loan
+## QUIT
 
-Insurance
+Use `QUIT` repeatedly throughout the environmental composition.
 
-Phone
+Do not create simple wallpaper.
 
-Other
+### Far depth example
 
-Nothing urgent
+One oversized partially cropped:
 
-Tap automatically advances.
+**QUIT**
 
-Store:
+sitting behind a major section at very low contrast.
 
-primary_obligation_type
+### Mid-depth example
 
-==================================================
-12. SETUP QUESTION 7
-==================================================
+A smaller angled `QUIT` partially disappearing behind a game-card grouping.
 
-Turn the selected obligation card into the next interaction.
+### Texture example
 
-Example:
+Fragments of the word can become part of larger environmental typography.
 
-CAR
+Vary:
 
-“How much?”
+- scale
+- rotation
+- cropping
+- opacity
+- depth
+- position
 
-User enters:
+---
 
-$430
+# 13. CASINO SYMBOLS IN THE BACKGROUND
 
-Then, inside the SAME visual card:
+Use the full visual vocabulary.
 
-“When?”
+Possible background elements include:
 
-Today
+- 7
+- BAR
+- bell
+- cherry
+- diamond
+- coins
+- cards
+- reel fragments
+- Chinese symbols
+- Chinese-style coin
+- ingot-inspired forms
+- decorative fortune/casino motifs
+- game-specific iconography
 
-Tomorrow
+### Far layer
 
-This week
+- **Example:** Giant blurred 7 almost disappearing into the environment.
 
-Next week
+### Mid layer
 
-Choose date
+- **Example:** Dimensional coin behind the game-library section.
 
-Do not create two boring form screens if one animated card can handle both.
+### Near decorative layer
 
-Store:
+- **Example:** Partial bronze reel housing cropped by the viewport edge.
 
-primary_obligation_amount
+### Important
 
-primary_obligation_due_date
+Do not use emoji.
 
-==================================================
-13. OPTIONAL PERSONALIZER 1
-==================================================
+Do not create repeating rows like:
 
-Ask:
+`7 🍒 💎 7 🍒 💎`
 
-“If you came up short, who would you call?”
+It should look art-directed.
 
-This must clearly be optional.
+---
 
-Choices:
+# 14. RED HOMEPAGE PROMPTS
 
-Type a first name
+Keep the red prompt concept.
 
-Skip
+They should appear in different areas around the homepage.
 
-Only collect first name.
+They should feel slightly disruptive on purpose.
 
-Example:
+## Distribution
 
-Brian
+- **Example:** One beside a featured game.
+- **Example:** Another between game sections.
+- **Example:** Another near the right edge of a later homepage area.
 
-If the user enters a name, optionally ask in a quick follow-up:
+Do not stack them all inside one notification tray.
 
-“Have they helped you recently?”
+## Do not cover games
 
-Yes
+- **Example:** A prompt cannot cover PLAY, a game title or another interaction because an absolute coordinate happened to place it there.
 
-No
+## Do not appear over active gameplay
 
-If Yes:
+Once a game opens:
 
-“How much?”
+remove the homepage scattered prompt layer.
 
-Optional.
+## Individually dismissible
 
-Do not force this.
+Each prompt gets its own dismissal.
 
-Store:
+- **Example:** Clicking X animates only that prompt out.
 
-recent_lender_name
+## Exit motion
 
-recent_lender_amount
+Do not immediately use `display:none`.
 
-==================================================
-14. OPTIONAL PERSONALIZER 2
-==================================================
+- **Example:** Short opacity + scale + translation motion.
 
-Ask:
+## Style
 
-“What would you rather keep this money for?”
+They must belong to Spin Out.
 
-Use quick options:
+- **Example:** Deep-red translucent panel, warm red border, controlled internal glow, premium typography and an integrated close control.
 
-Savings
+Do not use browser-alert styling.
 
-Mom / Dad / family
+## Responsive behavior
 
-Birthday
+Recompose them on smaller screens.
 
-Kids
+- **Example:** A floating desktop prompt may become an intentional inline interruption between two mobile game cards.
 
-Groceries
+---
 
-Trip
+# 15. REMOVE SPORTS BETTING
 
-Debt
+Sports betting no longer belongs in Spin Out.
 
-Car
+Remove it everywhere.
 
-Something I want
+Audit:
 
-Other
+- homepage
+- game cards
+- navigation
+- sidebar
+- routes
+- metadata
+- onboarding
+- descriptions
+- search copy
+- images
+- assets
+- seed data
+- API endpoints
+- tests
+- internal links
+- abandoned components
 
-Skip
+### Route example
 
-Allow a short custom label where useful.
+If `/sports` still renders a functional abandoned sportsbook after its navigation link was removed:
 
-Examples:
+the removal is incomplete.
 
-Mom’s birthday
+### Layout example
 
-Baby food
+If deleting Sports leaves a blank hole in the homepage grid:
 
-Vacation
+recompose the section.
 
-New tires
+Do not leave evidence of deleted functionality.
 
-Store:
+---
 
-personal_money_goal
+# 16. EVERY GAME MUST LOOK LIKE A FINISHED CASINO GAME
 
-==================================================
-15. FINAL SETUP INTERACTION
-==================================================
+Do not accept “functional web mini-game” visuals.
 
-Ask:
+Every game needs:
 
-“How bad do you want to play right now?”
+- authored environment
+- dimensional controls
+- real symbols/artwork
+- lighting
+- game-specific composition
+- animation
+- result choreography
+- sound
+- responsive layout
+- polished entry/exit states
 
-Use a tactile 1 to 10 intensity control.
+## Game frame
 
-Do not use boring radio buttons.
+- **Bad example:** `<div>` with three columns and SPIN.
+- **Correct example:** Designed reel housing, inset display region, deliberate material hierarchy and integrated controls.
 
-Use a smooth rail, slider, or segmented intensity control.
+## Lighting
 
-The visual intensity can increase subtly as the number rises.
+- **Example:** Primary interaction area receives warmer focused lighting while secondary information recedes.
 
-Mobile may use restrained haptic feedback where supported.
+## Materials
 
-Store:
+Use believable visual material families such as:
 
-starting_urge
+- dark lacquer
+- glass
+- bronze
+- enamel
+- polished gem
+- illuminated plastic
+- textured metal
 
-Once selected:
+## Background
 
-DO NOT SHOW AN EXPLANATION SCREEN.
+- **Example:** Slots may use a deep-brown chamber with blurred reel imagery and warm machine illumination.
 
-Immediately transition into the Reality Run.
+## Result state
 
-==================================================
-16. MAKE SETUP FEEL FAST
-==================================================
+- **Example:** Winning symbols illuminate in synchronization with the actual determined result.
 
-The number of questions is less important than how each question feels.
+## Loss state
 
-Avoid:
+- **Example:** Lighting settles, balance changes correctly and the experience transitions naturally into the next state/intervention.
 
-large forms
+---
 
-multiple visible fields
+# 17. GAME LOGIC MUST CONTROL THE VISUALS
 
-scrolling questionnaires
+Never let the animation invent the outcome.
 
-long descriptions
+Correct flow:
 
-Continue buttons after every answer
+**calculate/receive result → animation resolves to that result → balance updates consistently.**
 
-progress bars that make setup feel long
+### Example
 
-“Question 6 of 10”
+If result engine returns:
 
-Most screens should contain:
+Cherry / BAR / 7
 
-one sentence
+the rendered reels must stop on:
 
-one decision
+Cherry / BAR / 7.
 
-one tap
+Not:
 
-The system should feel responsive enough that someone can move through the setup quickly without feeling interrogated.
+7 / 7 / 7
 
-==================================================
-17. MOTION SYSTEM
-==================================================
+because the animation randomly stopped somewhere else.
 
-Motion is important.
+---
 
-It should make data collection feel like gameplay.
+# 18. INDIVIDUAL GAME AUDIT
 
-Use motion to:
+For EVERY current game, create a dedicated checklist.
 
-confirm selections
+Do not say “games tested” collectively.
 
-move between questions
+Test each separately.
 
-transform entered information into game elements
+For each game verify:
 
-introduce Reality Pings
+### Loads
 
-show money movement
+- **Example:** Opens from the actual homepage card without missing assets or console exceptions.
 
-bring real-world obligations into the game
+### Initial state
 
-Most interface motion:
+- **Example:** Displayed starting balance matches authoritative session state.
 
-180 to 320 milliseconds.
+### Primary action
 
-Larger transitions:
+- **Example:** One click generates one game action.
 
-300 to 600 milliseconds.
+### Rapid clicking
 
-Never make the user wait for an animation before they can interact.
+- **Example:** Ten rapid clicks cannot create ten simultaneous wagers/actions.
 
-==================================================
-18. QUESTION ANIMATION
-==================================================
+### Outcome
 
-When someone selects an answer:
+- **Example:** Logic resolves deterministically according to the game rules.
 
-1. selected option compresses slightly
+### Balance
 
-2. short tactile response
+- **Example:** Starting at 300 credits, spending 20 and receiving 0 correctly results in 280.
 
-3. selection locks
+### Animation
 
-4. surrounding choices fade or move away
+- **Example:** Visible result matches logic result.
 
-5. selected item moves toward visual focus
+### Audio
 
-6. next question replaces it
+- **Example:** Win sound cannot play for a loss.
 
-The sequence should feel:
+### Refresh
 
-quick
+- **Example:** Refresh cannot magically restore spent credits.
 
-physical
+### Navigation away
 
-intentional
+- **Example:** Leaving during animation cannot leave unresolved contradictory state.
 
-Do not create exaggerated bouncing animations.
+### Return
 
-==================================================
-19. TRANSITION INTO THE REALITY RUN
-==================================================
+- **Example:** Re-entering correctly restores whatever state is designed to persist.
 
-Use the user's answers as part of the transition.
+### Mobile
 
-Example:
+- **Example:** Primary control remains comfortably tappable at narrow viewport sizes.
 
-User entered:
+### Failure
 
-$100
+- **Example:** Server failure produces a recoverable state rather than a frozen game.
 
-The $100 amount remains on screen.
+---
 
-Other setup UI falls away.
+# 19. SOUND DESIGN
 
-The $100 physically moves into:
+Games need excellent sound.
 
-BALANCE
-$100
+The objective is a convincing, tactile and immersive simulated casino environment that makes interactions feel physical and polished.
 
-The gambling environment builds around it.
+Because Spin Out is a gambling-intervention product, use this realism to support the intervention experience. Do not optimize audio around keeping users gambling indefinitely.
 
-If a car payment was entered:
+Create a reusable audio system.
 
-CAR
-$430
+## Button
 
-may briefly appear in the environment before receding.
+- **Example:** Short premium tactile click.
 
-The user should feel like the information they entered has been absorbed into the world.
+## Game start
 
-==================================================
-20. REALITY RUN
-==================================================
+- **Example:** Subtle mechanical activation cue.
 
-Each session is called a:
+## Reel movement
 
-REALITY RUN
+- **Example:** Movement sound synchronized to animation rather than unrelated looping audio.
 
-A Reality Run can last for a maximum of:
+## Reel stop
 
-15 minutes
+- **Example:** Each reel receives a short physical stop sound.
 
-900 seconds
+## Anticipation
 
-The player may voluntarily leave at ANY time.
+- **Example:** If the final reel could complete a match, introduce a restrained rising cue.
 
-The desired behavioral direction is:
+## Small win
 
-shorter sessions over time.
+- **Example:** Short satisfying confirmation.
 
-Do not encourage the player to stay until 15 minutes.
+## Larger simulated win
 
-Do not show a visible 15-minute countdown.
+- **Example:** Richer layered sound matched with a stronger visual result.
 
-Do not celebrate reaching 15 minutes.
+## Loss
 
-Do not reward duration.
+- **Example:** Shorter lower-energy resolution sound.
 
-==================================================
-21. LEAVING THE RUN
-==================================================
+## Balance movement
 
-The player always has a natural exit appropriate to the game.
+- **Example:** Controlled count sound without playing 200 overlapping coin samples.
 
-Examples:
+## Intervention / Reality Ping
 
-Slots:
+This needs a clearly different sonic identity.
 
-Cash Out
+- **Example:** Casino sound abruptly gives way to a distinct restrained Reality Ping cue.
 
-Sports:
+That contrast matters.
 
-Leave
+## Dismissal
 
-Poker:
+- **Example:** Soft short exit sound.
 
-Leave Table
+## Transition
 
-Casino:
+- **Example:** Entering a game gets a subtle environmental transition rather than silence followed by sudden audio.
 
-Leave Table
+---
 
-The option should always be available.
+# 20. AUDIO ENGINE REQUIREMENTS
 
-It should not dominate the interface.
+Do not scatter individual audio tags through random components.
 
-Do not flash it.
+Build a reusable system.
 
-Do not continuously point at it.
+It must include:
 
-The Reality Engine should create the reason the player chooses it.
+- master mute
+- master volume
+- persistent preference
+- audio category handling where useful
+- overlap control
+- asset preloading where appropriate
+- mobile/browser gesture compliance
+- graceful asset failure
 
-When the user leaves:
+### Persistence example
 
-end the simulation immediately.
+User mutes audio → refreshes → audio remains muted.
 
-Do not ask:
+### Overlap example
 
-“Are you sure?”
+Rapid SPIN clicks cannot trigger ten copies of the same sound.
 
-Record:
+### Browser example
 
-time_to_exit_seconds
+Do not attempt loud autoplay before the browser has received a valid user gesture.
 
-==================================================
-22. PRIMARY BEHAVIORAL METRIC
-==================================================
+### Failure example
 
-Track:
+Missing one optional sound file does not crash gameplay.
 
-TIME TO VOLUNTARY EXIT
+Use original or properly licensed audio.
 
-Example:
+Do not rip sounds from existing casino games.
 
-First Reality Run:
+---
 
-8:42
+# 21. NEW USER 2-DAY TRIAL
 
-Later:
+Every eligible new account receives a real:
 
-5:11
+**48-HOUR TRIAL**
 
-Later:
+Do not interpret “2 days” as “until midnight two days later.”
 
-2:03
+Use an exact server-side timestamp.
 
-The ideal long-term pattern is decreasing time.
+### Example
 
-Do not make this competitive between users.
+Account created:
 
-No public leaderboard.
+September 18 at 1:15 PM
 
-No ranking.
+Trial expires:
 
-The comparison is only against the same user's previous behavior.
+September 20 at 1:15 PM.
 
-==================================================
-23. ADDITIONAL ANALYTICS
-==================================================
+---
 
-Track internally:
+# 22. TRIAL SOURCE OF TRUTH
+Do not put trial authority in:
 
-session start
+- localStorage
+- sessionStorage
+- frontend cookie alone
+- client clock
 
-session end
+Store trial information server-side.
 
-time to exit
+A clean architecture is:
 
-actions before exit
+`trial_started_at`
+`trial_ends_at`
 
-starting wager
+associated with the authenticated user.
 
-simulated losses
+Access resolver:
 
-simulated recoveries
+`trialActive OR paidEntitlementActive`
 
-largest loss
-
-number of Reality Pings
-
-Ping type
-
-Ping dismissal time
-
-decision immediately after Ping
-
-time between Ping and next action
-
-time between Ping and voluntary exit
-
-stake increases after Ping
-
-stake decreases after Ping
-
-exit after break-even
-
-exit after recovery
-
-starting urge
-
-ending urge
-
-intended real wager
-
-actual real wager
-
-money kept
-
-Do not expose all of these metrics to the user.
-
-==================================================
-24. GAME ENVIRONMENTS
-==================================================
-
-The game should visually adapt to gambling_type.
-
-SLOTS
-
-Create an original realistic slot-style interface.
-
-SPORTS
-
-Create an original sportsbook-style environment.
-
-CASINO
-
-Create original casino-style gameplay.
-
-POKER
-
-Create an original poker environment.
-
-LOTTERY
-
-Create an original scratch / lottery-inspired environment.
-
-Do not reproduce proprietary interfaces.
-
-Do not copy:
-
-FanDuel
-
-DraftKings
-
-BetMGM
-
-Stake
-
-Bet365
-
-Caesars
-
-or another real operator.
-
-==================================================
-25. IMPORTANT GAMEPLAY RULE
-==================================================
-
-The purpose is NOT to create a free casino that users enjoy gambling in for hours.
-
-Do not implement:
-
-endless gambling
-
-infinite spins
-
-jackpots designed to excite continued play
-
-loot boxes
-
-retention mechanics
-
-daily casino rewards
-
-fake monetary prizes
-
-near-miss manipulation designed to keep them playing
-
-The simulation may contain realistic wins and losses because those are required to create meaningful gambling decisions.
-
-The experience remains finite.
-
-==================================================
-26. TRIGGER PERSONALIZATION
-==================================================
-
-The Reality Run should behave differently depending on why the user wanted to gamble.
-
-WIN IT BACK
-
-Focus on:
-
-loss chasing
-
-partial recovery
-
-stake escalation
-
-moving break-even targets
-
-reaching break-even
-
-temptation to continue after recovering
-
-WIN MONEY
-
-Focus on:
-
-early winnings
-
-increasing targets
-
-treating winnings as disposable
-
-risking the amount again
-
-BORED
-
-Focus on:
-
-automatic repetition
-
-mindless clicking
-
-repeated decisions
-
-RUSH
-
-Focus on:
-
-speed
-
-temptation
-
-pressure
-
-stake escalation
-
-SWITCH OFF
-
-Focus on:
-
-temporary distraction
-
-real obligations slowly returning into focus
-
-HABIT
-
-Focus on:
-
-automatic actions
-
-repeated patterns
-
-“one more”
-
-==================================================
-27. REALITY ENGINE
-==================================================
-
-The Reality Engine is one of the defining features of Spin Out.
-
-As the user continues gambling in the simulation, their actual financial situation begins appearing inside the experience.
-
-It should feel like reality gradually breaking through.
-
-The system uses:
-
-confirmed user facts
-
-accurate financial calculations
-
-clearly hypothetical comparisons
-
-Never confuse these categories.
-
-==================================================
-28. REALITY PINGS
-==================================================
-
-Personal consequence messages appear as:
-
-REALITY PINGS
-
-A Reality Ping should feel like a serious message breaking through the game.
-
-It should NOT look like an ordinary toast notification.
-
-When triggered:
-
-1. play one short recognizable Ping sound
-
-2. message appears around 80 to 85 percent scale
-
-3. message grows rapidly toward the user's visual focus
-
-4. briefly reaches approximately 103 percent
-
-5. settles at 100 percent
-
-6. game behind it drops slightly in prominence
-
-7. user can immediately tap or click the Ping to remove it
-
-Total emphasis animation:
-
-approximately 220 to 320 milliseconds.
-
-==================================================
-29. PING DISMISSAL
-==================================================
-
-The entire Reality Ping is clickable / tappable.
-
-One tap removes it instantly.
-
-Do not require:
-
-OK
-
-Continue
-
-I understand
-
-a tiny X
-
-confirmation
-
-If the user taps before the entrance animation finishes:
-
-dismiss it immediately.
-
-==================================================
-30. PING SOUND
-==================================================
-
-Create one short distinctive Spin Out Reality Ping sound.
-
-It should sound like:
-
-an important message arriving
-
-It should be:
-
-clean
-
-serious
-
-short
-
-recognizable
-
-Avoid:
-
-casino bells
-
-jackpots
-
-sirens
-
-horror sounds
-
-buzzers
-
-cartoon effects
-
-Approximate length:
-
-150 to 400 milliseconds.
-
-Respect browser audio rules.
-
-Allow mute.
-
-==================================================
-31. REALITY PING VOICE
-==================================================
-
-Every Reality Ping must sound like a serious, responsible best friend.
-
-Someone who knows the user.
-
-Someone who cares.
-
-Someone willing to call them out.
-
-The tone should be:
-
-human
-
-direct
-
-familiar
-
-serious
-
-occasionally incredulous
-
-It should NEVER sound like:
-
-therapy
-
-software
-
-a bank
-
-a PSA
-
-AI
-
-corporate copy
-
-financial education
-
-Do not write paragraphs.
-
-Most messages:
-
-5 to 18 words.
-
-Use contractions.
-
-Use natural American speech.
-
-Examples of natural wording:
-
-gonna
-
-you're
-
-that's
-
-wasn't
-
-can't
-
-didn't
-
-what's
-
-where's
-
-Do not constantly force slang.
-
-Do not make every sentence say:
-
-bro
-
-fr
-
-ngl
-
-lowkey
-
-literally
-
-A serious friend becomes more serious when the situation becomes more serious.
-
-==================================================
-32. MESSAGE STRUCTURE
-==================================================
-
-Preferred structure:
-
-FACT.
-
-CONSEQUENCE.
-
-QUESTION.
-
-The question is important.
-
-Do not wrap everything up with a conclusion.
-
-Make the user mentally answer.
-
-GOOD:
-
-“That was $300 of the car payment. How are you gonna get that back?”
-
-BAD:
-
-“You have now lost $300 which may impact your ability to meet your automobile payment.”
-
-==================================================
-33. CAR EXAMPLES
-==================================================
-
-“That was $300 of the car payment. How are you gonna get that back?”
-
-“You just used half the car payment. What's covering the other half now?”
-
-“You're back at $430. That's the whole car payment. Why are you still here?”
-
-==================================================
-34. RENT EXAMPLES
-==================================================
-
-“That's $250 of rent gone. Rent's in four days. How are you making that back?”
-
-“Rent's Friday. You're $180 short now. What's the plan?”
-
-“You had enough for rent when you started. What happened?”
-
-“You got the rent money back. What exactly are you trying to win now?”
-
-==================================================
-35. CHILD / FAMILY EXAMPLES
-==================================================
-
-“That $40 was for the baby food. You can't pick up more shifts right now. So what now?”
-
-“That could've handled diapers for the week. What did this get you?”
-
-“That $100 could've handled Mom's birthday. What did this get you instead?”
-
-==================================================
-36. BORROWING EXAMPLES
-==================================================
-
-Only use names actually supplied by the user.
-
-“Brian helped you last month. You really wanna call him again?”
-
-“You borrowed from Brian last time. Who are you asking now?”
-
-“You're turning another bad bet into Brian's problem. What are you telling him?”
-
-==================================================
-37. PAYDAY EXAMPLES
-==================================================
-
-“Six days till payday and you just dropped another $120. How's that supposed to work?”
-
-“You've still got five days. Where's the next $100 coming from?”
-
-==================================================
-38. GROCERIES
-==================================================
-
-“Another $60? That's groceries. What are you cutting this week?”
-
-“That could've been food for the week. You really wanna run it again?”
-
-==================================================
-39. WORK
-==================================================
-
-Only use working-hours comparisons when the system has enough information to calculate them correctly.
-
-“That took you six hours to earn. Took two minutes to lose. Another one?”
-
-==================================================
-40. CHASING
-==================================================
-
-“You said you were just trying to get $200 back. You have it. So what's the next bet for?”
-
-“You keep saying you'll make it back. With what money?”
-
-“You said last one three plays ago. So when's the last one?”
-
-==================================================
-41. RECOVERY MOMENTS
-==================================================
-
-Recovery moments are extremely important.
-
-If the user gets simulated money back:
-
-DO NOT celebrate like a casino.
-
-Use the recovered amount against the reason they said they were gambling.
-
-Examples:
-
-“You're back at $430. That's the whole car payment. Why are you still here?”
-
-“You got the rent money back. What exactly are you trying to win now?”
-
-“You're almost back where you started. Isn't that what you wanted?”
-
-“You said you just wanted your $200 back. You have it. So what's the next bet for?”
-
-“You got lucky enough to fix it. You really wanna need that luck twice?”
-
-==================================================
-42. ESCALATION
-==================================================
-
-Reality Pings escalate progressively.
-
-Do not begin at maximum emotional intensity.
-
-LEVEL 1
-
-Observation.
-
-“Down $40. You doing another one?”
-
-LEVEL 2
-
-Pattern.
-
-“You said last one already. So what's this one?”
-
-LEVEL 3
-
-Real obligation.
-
-“That was part of the car payment. How are you replacing it?”
-
-LEVEL 4
-
-Actual shortfall.
-
-“You're $120 short on rent now. Where's that coming from?”
-
-LEVEL 5
-
-Personal consequence.
-
-“Brian already helped you last month. You really wanna make that call again?”
-
-==================================================
-43. REALITY PING FREQUENCY
-==================================================
-
-Do not show a Ping after every bet.
-
-That would become annoying.
-
-Trigger them when something meaningful happens.
-
-Examples:
-
-significant accumulated loss
-
-stake increase after losses
-
-repeated chasing
-
-crossing an obligation threshold
-
-recovering enough to cover an obligation
-
-reaching break-even
-
-continuing after break-even
-
-approaching money required before payday
-
-repeating “last one” behavior
-
-putting a personal goal at risk
-
-==================================================
-44. FINANCIAL ACCURACY
-==================================================
-
-Never exaggerate.
-
-Example:
+### Example
 
 User has:
 
-$1,650 available
+trial\_ends\_at = future
+RevenueCat premium = false
 
-Rent:
+Result:
 
-$1,200
+premium access during trial.
 
-They lose:
+### Example
 
-$200
+User has:
 
-Remaining:
+trial\_ends\_at = past
+RevenueCat premium = true
 
-$1,450
+Result:
 
-Spin Out cannot say:
+premium access continues because they paid.
 
-“You can't pay rent.”
+### Example
 
-They still can.
+User has:
 
-Later another $300 is lost.
+trial\_ends\_at = past
+RevenueCat premium = false
 
-Remaining:
+Result:
 
-$1,150
+premium access denied.
 
-Now the user is:
+---
 
-$50 short.
+# 23. TRIAL SECURITY
 
-A valid Ping:
+Clearing browser data cannot reset trial.
 
-“Rent's $1,200. You're $50 short now. Where's that coming from?”
+Logging out cannot reset trial.
 
-Every financial statement must be mathematically correct.
+Changing browsers cannot reset trial.
 
-==================================================
-45. HYPOTHETICAL COMPARISONS
-==================================================
+Changing computer clock cannot reset trial.
 
-Spin Out may create plausible comparisons.
+### Example
 
-Use language that makes clear they are comparisons.
+User starts trial on Chrome.
 
-Allowed:
+They log into the same account from Safari.
 
-“That $80 could've been groceries.”
+The server returns the same expiration.
 
-“That could've handled Mom's birthday.”
+Do not automatically give another 48 hours.
 
-“That could've filled the tank.”
+---
 
-“That could've gone toward your trip.”
+# 24. REVENUECAT IS REQUIRED
 
-Do not pretend Spin Out knows a fact the user never supplied.
+RevenueCat should become the canonical paid-subscription entitlement layer.
 
-==================================================
-46. REALITY BACKGROUND
-==================================================
+Use the currently supported RevenueCat web integration.
 
-The player's real life should gradually appear beyond the Reality Pings.
+Current RevenueCat Web uses:
 
-Example:
+`@revenuecat/purchases-js`
 
-CAR PAYMENT
-$430
+Do not merely install it.
 
-can begin faintly appearing in the environment.
+Actually integrate it.
 
-As losses grow:
+Use one canonical entitlement name, such as:
 
-CAR PAYMENT
-$430
+`premium`
 
-becomes visually more noticeable.
+Do not create competing names such as:
 
-If the user becomes $100 short:
+- Plus
+- Pro
+- subscriber
+- paid
+- member
+- premiumUser
 
-$100 SHORT
+throughout unrelated code.
 
-may appear.
+Map everything through one entitlement abstraction.
 
-Other examples:
+---
 
-RENT
-FRIDAY
+# 25. AUTHENTICATED REVENUECAT IDENTITY
 
-6 DAYS UNTIL PAYDAY
+RevenueCat identity must correspond to the authenticated Spin Out user.
 
-GROCERIES
+### Example
 
-MOM'S BIRTHDAY
+Supabase/auth user ID:
 
-BRIAN
+`abc123`
 
-Do not fake messages from real people.
+RevenueCat App User ID:
 
-Do not impersonate them.
+`abc123`
 
-==================================================
-47. BACKGROUND MOTION
-==================================================
+or another stable server-controlled mapping.
 
-Reality should creep into the environment.
+The mapping must remain consistent across sessions.
 
-Do not abruptly replace the game.
+### Example
 
-Possible effects:
+User pays on desktop.
 
-casino lighting becomes less dominant
+They log into Spin Out on another browser.
 
-real financial amount becomes sharper
+RevenueCat resolves the same account and returns the same active entitlement.
 
-game balance physically aligns beside a bill amount
+Do not identify subscriptions by an easily changed email alone if a stable authenticated ID exists.
 
-due date becomes more visible
+---
 
-background financial context moves closer to the foreground
+# 26. REVENUECAT IS NOT THE CARD PROCESSOR
 
-The visual distinction between:
+RevenueCat manages subscription information and entitlements.
 
-GAME MONEY
+A billing engine actually charges the customer.
 
-and:
+For Spin Out, implement/test:
 
-REAL MONEY
+**RevenueCat + Paddle Billing**
 
-should progressively collapse.
+first, subject to merchant approval for the product.
 
-==================================================
-48. PROGRESSIVE PERSONALIZATION
-==================================================
+Architecture:
 
-The first setup gives enough information for impact.
-
-Do not make the user answer everything imaginable.
-
-Collect additional information later through very short contextual interactions.
-
-Examples:
-
-another obligation
-
-whether they still owe Brian
-
-income amount
-
-another savings goal
-
-work schedule
-
-another person they commonly borrow from
-
-Do this only when useful.
-
-One question at a time.
-
-Do not interrupt intense game moments unnecessarily.
-
-==================================================
-49. RETURNING USERS
-==================================================
-
-Do not repeat the full Reality Setup every time.
-
-Remember existing context.
-
-A returning flow might only ask:
-
-“How much?”
-
-“What’s pulling you in?”
-
-“How bad do you want to play?”
-
-Then:
-
-REALITY RUN
-
-If an old obligation is no longer relevant, ask for an update later.
-
-==================================================
-50. ENDING A REALITY RUN
-==================================================
-
-If the user voluntarily leaves:
-
-stop immediately.
-
-Record:
-
-time_to_exit_seconds
-
-Then ask:
-
-“How bad do you want to play now?”
-
-Use the exact same 1 to 10 control as before.
-
-Store:
-
-ending_urge
-
-Briefly show:
-
-8 → 5
-
-Do not interpret it with a paragraph.
-
-==================================================
-51. REAL-WORLD OUTCOME
-==================================================
-
-Ask:
-
-“Did you end up gambling?”
-
-Choices:
-
-No
-
-Yes
-
-Less than I planned
-
-If No:
-
-actual_wager = $0
-
-If Yes:
-
-ask:
-
-“How much?”
-
-If Less:
-
-ask:
-
-“How much?”
-
-Do not shame the answer.
-
-Record what happened accurately.
-
-==================================================
-52. MONEY KEPT
-==================================================
-
-Calculate:
-
-intended wager
-
-minus
-
-actual wager
-
-equals
-
-Money Kept
-
-Example:
-
-Intended:
-
-$100
-
-Actual:
-
-$0
-
-Money Kept:
-
-$100
-
-Display:
-
-$100 KEPT
-
-This month:
-
-$420
-
-All time:
-
-$1,380
-
-No casino confetti.
-
-No jackpot sound.
-
-No spinning coins.
-
-Use premium financial styling.
-
-==================================================
-53. CONNECT MONEY KEPT TO REAL LIFE
-==================================================
-
-When mathematically relevant:
-
-CAR PAYMENT
-
-$430 / $430
-
-COVERED
-
-or:
-
-RENT
-
-$900 / $1,200
-
-PROTECTED
-
-or:
-
-MOM'S BIRTHDAY
-
-$100 KEPT
-
-This makes the successful exit feel concrete too.
-
-==================================================
-54. TIME-TO-EXIT PROGRESS
-==================================================
-
-Time to exit should become an important long-term metric.
-
-Example:
-
-FIRST 5 RUNS
-
-7:18 average
-
-RECENT 5 RUNS
-
-2:41 average
-
-Keep presentation simple.
-
-No leaderboard.
-
-No percentile.
-
-No competitive ranking.
-
-No reward for staying longer.
-
-Shorter is better.
-
-==================================================
-55. RETURNING HOMEPAGE
-==================================================
-
-Returning users see:
-
-SPIN OUT
-
-$1,240 kept
-
-[ I FEEL LIKE GAMBLING ]
-
-Optionally show one useful metric:
-
-Recent exit average:
-
-2:14
-
-or:
-
-Car payment:
-
-$430 protected
-
-Do not turn the homepage into a dashboard.
-
-==================================================
-56. NO DAILY STREAK SYSTEM
-==================================================
-
-Do not create pressure to use Spin Out daily.
-
-Do not create:
-
-daily streaks
-
-daily login rewards
-
-loss-of-streak punishment
-
-The ideal long-term outcome may be that someone needs Spin Out less often.
-
-The product should support that.
-
-==================================================
-57. PERSONALIZATION ENGINE
-==================================================
-
-Store:
-
-intended wager
-
-actual wager
-
-gambling type
-
-trigger
-
-starting urge
-
-ending urge
-
-available money
-
-income date
-
-obligations
-
-due dates
-
-borrowing context
-
-goals
-
-Reality Run scenario
-
-decisions inside run
-
-Reality Pings shown
-
-Ping dismissal behavior
-
-behavior after Ping
-
-exit timing
-
-money kept
-
-Use this data to improve future Reality Runs.
-
-Do not claim that correlation proves a particular Ping caused behavior.
-
-==================================================
-58. PING LEARNING
-==================================================
-
-The system should learn what types of Reality Pings appear most relevant to each person.
-
-Example:
-
-Generic loss messages:
-
-user keeps playing.
-
-Rent messages:
-
-user frequently lowers stakes or leaves soon afterward.
-
-Future Reality Runs may prioritize accurate rent-related messaging when relevant.
-
-Maintain variety.
-
-Do not repeat the exact same lines constantly.
-
-Create message families around:
-
-rent
-
-car
-
-groceries
-
-children
-
-payday
-
-borrowing
-
-debt
-
-savings
-
-family
-
-birthdays
-
-work hours
-
-break-even
-
-chasing
-
-==================================================
-59. MONETIZATION
-==================================================
-
-Do not paywall someone before helping them with the immediate urge.
-
-Core Spin Out remains usable for free.
-
-Create:
-
-SPIN OUT+
-
-Initial pricing:
-
-$4.99 per month
-
-$29.99 per year
-
-Premium can include:
-
-full Reality Run scenario library
-
-advanced personalization
-
-full session history
-
-long-term Money Kept analytics
-
-multiple obligations
-
-multiple financial goals
-
-advanced trigger patterns
-
-weekly summaries
-
-cross-device sync
-
-advanced Reality Ping personalization
-
-long-term Time-to-Exit trends
-
-Never interrupt an active Reality Run with a paywall.
-
-==================================================
-60. PAYWALL PLACEMENT
-==================================================
-
-Appropriate times:
-
-after a completed session
-
-when opening advanced history
-
-when opening deeper personalization
-
-when viewing long-term analytics
-
-when selecting premium scenario libraries
-
-Never during:
-
-high urge
-
-active gambling simulation
-
-Reality Ping
-
-severe simulated loss
-
-==================================================
-61. PRIVACY
-==================================================
-
-Treat these as private:
-
-gambling behavior
-
-available money
-
-bills
-
-due dates
-
-names
-
-borrowing information
-
-goals
-
-session outcomes
-
-Do not expose them publicly.
-
-Do not create public sharing by default.
-
-Do not sell this information.
-
-Collect only information the product actually uses.
-
-==================================================
-62. MOBILE EXPERIENCE
-==================================================
-
-Mobile is critical.
-
-Reality Run should dominate the viewport.
-
-Buttons must be thumb-friendly.
-
-Questions should usually fit without scrolling.
-
-Reality Pings should grow into the visual focus.
-
-Tap anywhere on a Ping to dismiss.
-
-Motion must remain smooth on normal mobile hardware.
-
-==================================================
-63. DESKTOP EXPERIENCE
-==================================================
-
-Keep the Reality Run centered and dominant.
-
-Supporting context can exist around it without competing.
-
-Reality Pings appear over the simulation.
-
-Click anywhere on the Ping to dismiss.
-
-==================================================
-64. ACCESSIBILITY
-==================================================
-
-Support:
-
-keyboard controls
-
-screen reader labels
-
-high contrast
-
-mute
-
-reduced motion
-
-responsive text
-
-If reduced motion is enabled:
-
-replace dramatic scale animation with restrained fade and size emphasis.
-
-The experience must remain understandable without sound.
-
-==================================================
-65. REQUIRED PRODUCT STATES
-==================================================
-
-Explicitly implement:
-
-first visit
-
-returning visit
-
-signed out
-
-signed in
-
-setup
-
-optional question skipped
-
-no obligation
-
-unknown payday
-
-active Reality Run
-
-Reality Ping active
-
-Reality Ping dismissed
-
-muted audio
-
-reduced motion
-
-voluntary exit
-
-15-minute automatic ending
-
-urge lower
-
-urge unchanged
-
-urge higher
-
-user did not gamble
-
-user gambled less
-
-user gambled full amount
-
-user gambled more than intended
-
-first Money Kept event
-
-returning Money Kept event
-
-expired obligation
-
-premium
-
-free
-
-payment failed
-
-subscription canceled
-
-mobile
-
-tablet
-
-desktop
-
-Do not leave these flows undefined.
-
-==================================================
-66. FAILURE / RELAPSE UX
-==================================================
-
-If someone still gambles:
-
-do not erase their progress.
-
-do not reset a streak.
-
-do not display FAILURE.
-
-do not punish them.
-
-Simply show what happened.
-
-Example:
-
-You planned:
-
-$100
-
-You spent:
-
-$180
-
-Keep it factual.
-
-The next session can use the information.
-
-==================================================
-67. FINAL REALITY PING CHECK
-==================================================
-
-Before displaying any generated Ping, verify:
-
-Is every factual statement true?
-
-Is every calculation correct?
-
-Is a hypothetical clearly hypothetical?
-
-Does it sound spoken?
-
-Is it short?
-
-Would a serious friend actually say this?
-
-Would a question make it hit harder?
-
-Has this wording been overused?
-
-Is this moment important enough to deserve a Ping?
-
-If any answer fails:
-
-rewrite or do not show the Ping.
-
-==================================================
-68. FINAL EXPERIENCE TEST
-==================================================
-
-The finished product should feel approximately like this:
-
-OPEN
-
+**User**
 ↓
-
-“How much were you about to put in?”
-
-$300
-
-tap
-
+**Spin Out**
 ↓
-
-“What were you about to play?”
-
-Slots
-
-tap
-
+**RevenueCat Web**
 ↓
-
-“What’s pulling you in?”
-
-Win it back
-
-tap
-
+**Paddle Billing**
 ↓
-
-“How much have you actually got till more money comes in?”
-
-$850
-
+**Payment**
 ↓
-
-“When’s more money coming in?”
-
-Next Friday
-
+**RevenueCat entitlement**
 ↓
+**Spin Out access**
 
-“What has to get paid next?”
+Paddle acts as the billing engine/merchant of record in this configuration.
 
-Car
+Do not implement unsupported combinations because another provider happens to be installed.
 
-↓
+---
 
-“How much?”
+# 27. WHY THIS PAYMENT STACK IS BEING USED
 
-$430
+The launch requirement is:
 
-“When?”
+- no monthly payment-platform bill before revenue
+- real card payments
+- subscription management
+- revenue tracking
+- customer tracking
+- entitlement tracking
+- proper payment lifecycle
+- international-friendly merchant setup where approved
 
-Tuesday
+Paddle currently uses pay-as-you-go transaction pricing rather than a monthly platform fee.
 
-↓
+RevenueCat can be started without a monthly charge at the initial revenue level.
 
-“If you came up short, who would you call?”
+The exact current pricing is not hardcoded into customer-facing application logic.
 
-Brian
+Verify current provider terms during setup.
 
-↓
+---
 
-“What would you rather keep this money for?”
+# 28. PADDLE APPROVAL CONDITION
 
-Mom's birthday
+Spin Out is NOT a real-money casino.
 
-↓
+Represent it accurately.
 
-“How bad do you want to play?”
+Product characteristics:
 
-8
+- simulated casino-style interactions
+- no real-money wagering
+- no deposits for gambling
+- no withdrawal of simulated credits
+- no cash prizes from the games
+- no redeemable credits
+- subscription payment purchases access to software
+- intervention/behavior-awareness purpose
 
-↓
+Do not falsely describe Spin Out as something else to obtain approval.
 
-THE $300 BECOMES THE GAME BALANCE
+Do not falsely describe it as real-money gambling either.
 
-↓
+Before production activation:
 
-REALITY RUN
+submit/confirm the actual product with Paddle under its real use case.
 
-↓
+If Paddle rejects the product:
 
-LOSS
+do not circumvent the rejection.
 
-PING
+Keep the billing abstraction clean enough that another legitimate provider can replace it.
 
-“That was $100 of the car payment.
+---
 
-How are you gonna get that back?”
+# 29. PADDLE SANDBOX FIRST
 
-tap
+Before production credentials exist:
 
-gone
+fully integrate Paddle sandbox with RevenueCat.
 
-↓
+Configure:
 
-PLAYER KEEPS GOING
+1. Paddle sandbox merchant.
+2. Subscription product.
+3. Price.
+4. RevenueCat Paddle configuration.
+5. Product import.
+6. RevenueCat entitlement.
+7. RevenueCat offering/package.
+8. RevenueCat Web SDK.
+9. Authenticated user identity.
+10. Checkout.
+11. Result/entitlement synchronization.
 
-↓
+Do not fake successful purchase state.
 
-LOSS
+---
 
-CAR PAYMENT
-$430
+# 30. PAYMENT SUCCESS TEST
 
-begins appearing behind the game
+Test the real sandbox journey:
 
-↓
+new account
+→ trial starts
+→ subscribe
+→ checkout
+→ successful sandbox payment
+→ RevenueCat customer updates
+→ `premium` entitlement active
+→ premium access remains
+→ refresh
+→ access remains
+→ sign out
+→ sign back in
+→ access remains.
 
-PING
+Document the observed result.
 
-“You've got $450 left and payday's next Friday.
+---
 
-What's the plan if this one goes?”
+# 31. CANCELLED PAYMENT TEST
 
-tap
+Test:
 
-gone
+checkout
+→ cancel
+→ return.
 
-↓
+Expected:
 
-PLAYER RECOVERS
+- no false paid entitlement
+- account stays trial/free as appropriate
+- application remains usable
+- user can retry
 
-BALANCE
-$435
+---
 
-PING
+# 32. FAILED PAYMENT TEST
 
-“You've got the whole car payment back.
+Use legitimate Paddle sandbox/test failure behavior.
 
-Why are you still playing?”
+Expected:
 
-↓
+- transaction fails
+- RevenueCat does not incorrectly grant premium
+- user receives clear recoverable feedback
+- no broken loading state
+- retry remains available
 
-PLAYER CHOOSES CASH OUT
+---
 
-↓
+# 33. REVENUECAT / PADDLE LIFECYCLE TESTING
 
-TIME TO EXIT:
+Test actual supported sandbox subscription behavior.
 
-4:18
+Do not fake webhook events if the provider/integration does not treat simulated events as real subscription changes.
 
-stored silently
+Test real sandbox flows where required.
 
-↓
+Verify:
 
-“How bad do you want to play now?”
+- purchase
+- entitlement activation
+- customer mapping
+- cancellation behavior
+- expiration behavior where testable
+- payment failure
+- persistent entitlement
 
-5
+---
 
-↓
+# 34. PAYMENT TRACKING
 
-8 → 5
+I need to be able to track money.
 
-↓
+At minimum make sure the stack exposes:
 
-“Did you actually gamble?”
+- customer
+- subscription
+- plan/product
+- status
+- start date
+- trial state
+- renewal status
+- cancellations
+- successful payment
+- failed payment
+- refunds where applicable
+- gross revenue
+- transaction history
 
-No
+Paddle/RevenueCat dashboards remain the initial operational dashboards.
 
-↓
+Structure the integration so selected metrics can later be surfaced inside a Spin Out admin dashboard.
 
-$300 KEPT
+### Example
 
-CAR PAYMENT
-$300 / $430
+Do not hardwire the homepage UI directly to Paddle API calls.
 
-PROTECTED
+Use a proper server-side billing service/module that could later power:
 
-↓
+`/admin/revenue`
 
-DONE
+without exposing private credentials.
 
-No lecture.
+---
 
-No cooldown.
+# 35. NEVER PUT SECRET PAYMENT CREDENTIALS IN THE CLIENT
 
-No Shield.
+Public keys may go where officially intended.
 
-No giant Stop button.
+Secret keys must remain server-side/environment-controlled.
 
-No wall of text.
+Never commit:
 
-The interaction itself should communicate the product.
+- Paddle secrets
+- webhook secrets
+- Supabase service-role secret
+- private RevenueCat keys
+- production tokens
 
-==================================================
-69. FINAL STANDARD
-==================================================
+to GitHub.
 
-Before calling Spin Out finished, ask:
+### Example
 
-Does setup feel quick even though it gathers meaningful information?
+Correct:
 
-Does every input have a reason to exist?
+host environment secret.
 
-Can unnecessary taps be removed?
+Incorrect:
 
-Does motion make setup feel better rather than slower?
+`const PADDLE_SECRET = "live_secret..."`
 
-Does the Reality Run look convincing?
+inside the repository.
 
-Can somebody leave instantly?
+---
 
-Are Reality Pings impossible to mistake for generic software notifications?
+# 36. SERVER-SIDE ACCESS PROTECTION
 
-Does the dialogue sound human?
+Do not rely on frontend hiding.
 
-Are questions being used instead of overly conclusive statements?
+### Bad
 
-Does the financial math work?
+`if (!premium) hide button`
 
-Do real obligations progressively invade the game?
+while premium API route remains public.
 
-Does the system avoid rewarding longer simulation time?
+### Correct
 
-Is time-to-exit measured correctly?
+Both:
 
-Does a returning user get back into the experience quickly?
+- UI reflects access
+- backend/protected route verifies access.
 
-Does any part look like generic AI-generated UI?
+Protected functionality should resolve:
 
-Does any part accidentally encourage endless fake gambling?
+`trialActive || RevenueCatPremiumActive`
 
-Fix anything that fails these tests.
+from trusted sources.
 
-Spin Out should ultimately feel like somebody entered a gambling game, except their real life slowly began showing up inside it.
+---
+
+# 37. HOMEPAGE TRIAL UI
+
+Trial information should exist without dominating the product.
+
+### Example
+
+Account area:
+
+`Trial • 37 hours left`
+
+or an appropriately human-readable equivalent.
+
+Do not place a giant countdown on every screen.
+
+Near expiration:
+
+increase clarity.
+
+- **Example:** “Your trial ends tomorrow” may appear in the account/paywall area.
+
+Do not use deceptive urgency.
+
+---
+
+# 38. SUBSCRIPTION UX
+
+The upgrade experience should look like Spin Out.
+
+Do not dump a default unstyled billing widget into the middle of a premium interface if customization is possible.
+
+Paywall should clearly explain:
+
+- what the subscription unlocks
+- price
+- billing frequency
+- trial/current entitlement
+- cancellation expectations
+- primary action
+
+### Example
+
+The checkout button should use the same premium material/typographic system as the rest of Spin Out while still remaining clearly identifiable.
+
+Do not obscure the actual price.
+
+---
+
+# 39. GITHUB IS THE DEPLOYMENT SOURCE OF TRUTH
+
+The previous deployment limitation was caused by attempting a file-based deployment path that could not atomically ingest the complete repository tree.
+
+Do not repeat that architecture.
+
+Production deployment must connect directly to GitHub.
+
+Correct:
+
+GitHub repository
+→ hosting provider’s native Git integration
+→ full clone
+→ install
+→ build
+→ deploy.
+
+Incorrect:
+
+GitHub
+→ manually collect some files
+→ send them through a limited action
+→ deploy incomplete approximation.
+
+The full repository must be built.
+
+---
+
+# 40. DO NOT MERGE TO MAIN YET
+
+Do not merge the release branch into `main` simply to test production.
+
+Use the release candidate first.
+
+Flow:
+
+release branch
+→ GitHub
+→ preview/staging deployment
+→ visual tests
+→ functional tests
+→ payment sandbox tests
+→ auth tests
+→ mobile tests
+→ console/network checks
+→ PASS
+→ merge exact verified commit to `main`.
+
+The commit tested should be the commit promoted.
+
+Do not test one implementation and deploy a materially different one.
+
+---
+
+# 41. HOSTING PLATFORM
+
+The host does NOT have to be Vercel.
+
+The requirement is:
+
+- direct GitHub integration
+- complete repository checkout
+- framework compatibility
+- environment variables
+- server-side application support
+- custom domains
+- HTTPS
+- preview/staging deployment
+- production deployment
+
+Evaluate:
+
+### First: Netlify
+
+Netlify can connect directly to GitHub and supports custom domains.
+
+Use it if the repository’s actual architecture is compatible.
+
+### Second: existing Vercel project using native GitHub integration
+
+This is different from the failed file-based deployment path.
+
+If native Git integration solves the complete-repository issue cleanly, Vercel remains valid.
+
+### Other legitimate options
+
+Where technical compatibility requires it, evaluate:
+
+- Cloudflare's current full-stack deployment path
+- Render
+- another appropriate Git-connected production platform
+
+Do not choose based on brand preference.
+
+Choose based on the actual repository.
+
+---
+
+# 42. DO NOT USE GITHUB PAGES FOR THE APP
+
+GitHub should remain source control.
+
+Do not force the dynamic Spin Out application onto static GitHub Pages just because the source code is stored on GitHub.
+
+Spin Out needs dynamic behavior including:
+
+- authentication
+- database access
+- trial resolution
+- RevenueCat
+- payment lifecycle
+- protected access
+- server-side actions/API behavior
+
+Use an appropriate full-stack host.
+
+---
+
+# 43. CUSTOM DOMAIN PATH
+
+I will purchase the final domain soon.
+
+Prepare everything now.
+
+Possible flow:
+
+GitHub
+→ Netlify/Vercel/compatible host
+→ temporary host URL
+→ final custom domain.
+
+If using Netlify, its domain management can connect an existing domain or purchase one.
+
+I may also buy the domain through a registrar and connect DNS later.
+
+Do not couple the code to one registrar.
+
+---
+
+# 44. CENTRALIZE SITE URL CONFIGURATION
+
+Do not hardcode the current preview URL across the repository.
+
+Centralize domain-sensitive configuration.
+
+Audit:
+
+- canonical URL
+- auth callback URL
+- Supabase redirect URLs
+- payment success/cancel URL
+- RevenueCat/Paddle URLs where applicable
+- email links
+- OpenGraph URLs
+- CORS origins
+- metadata
+- CSP where applicable
+
+### Example
+
+Preview:
+
+`https://spin-out-example.netlify.app`
+
+Later:
+
+`https://spinitout.com`
+
+That change should primarily be an environment/configuration update.
+
+---
+
+# 45. DEPLOYED SITE TESTING
+
+Do not test only localhost.
+
+Once the full release candidate is deployed from GitHub, test the actual URL.
+
+Test:
+
+## Homepage
+
+- renders
+- game artwork loads
+- background loads
+- prompts behave
+- sidebar works
+
+## Auth
+
+- signup
+- sign-in
+- sign-out
+- session persistence
+
+## Trial
+
+- creation
+- access
+- server-side state
+
+## Games
+
+EVERY game individually.
+
+## Audio
+
+- user-gesture startup
+- sounds
+- mute
+- persistence
+
+## Payments
+
+- sandbox checkout
+- cancellation
+- successful purchase
+- failed purchase
+- entitlement update
+
+## Access
+
+- trial
+- free/expired
+- paid
+
+## Mobile
+
+- actual narrow viewport
+
+## Console
+
+- meaningful errors resolved.
+
+## Network
+
+- broken requests resolved.
+- duplicate critical requests resolved.
+
+---
+
+# 46. RESPONSIVE DESIGN
+
+Do not treat mobile as a smaller desktop.
+
+## Desktop
+
+- floating glass sidebar
+- broad game compositions
+- environmental prompts
+- deep background
+
+## Tablet
+
+- restructure before cards become cramped.
+
+## Mobile
+
+- navigation changes form appropriately
+- prompts become intentional inline/floating mobile elements
+- games remain visually rich
+- controls remain large enough
+- artwork is cropped intentionally
+- no horizontal overflow
+
+### Example
+
+A giant background `QUIT` can extend beyond the viewport through controlled clipping.
+
+It must not create a horizontal scrollbar.
+
+---
+
+# 47. MOTION SYSTEM
+
+Use one coherent motion language.
+
+## Navigation
+
+Subtle.
+
+- **Example:** 160–250ms style interaction class where appropriate.
+
+## Game artwork
+
+More expressive.
+
+- **Example:** layered reel/card movement or cinematic transitions.
+
+## Intervention
+
+Distinct.
+
+- **Example:** Reality Prompt grows in quickly enough to interrupt attention but remains readable.
+
+## Dismissal
+
+Fast and controlled.
+
+## Background
+
+Do not animate everything constantly.
+
+- **Bad example:** Every symbol endlessly floating independently.
+
+Use motion where it provides hierarchy or feedback.
+
+Respect reduced-motion preferences.
+
+---
+
+# 48. TYPOGRAPHY
+
+Typography must feel intentional.
+
+Define:
+
+- display typography
+- game typography
+- body typography
+- numerical typography
+- labels
+- intervention typography
+
+## Numbers
+
+Where balances update repeatedly, use stable-width/tabular numerals if appropriate.
+
+- **Example:** `$300` changing to `$280` should not cause neighboring controls to jump.
+
+## Hierarchy
+
+If color were removed, hierarchy should still be understandable.
+
+- **Example:** Game name > balance > secondary metadata.
+
+---
+
+# 49. LOADING STATES
+
+Do not allow premium pages to become crude during loading.
+
+## Homepage
+
+- **Example:** Game-card skeletons resemble the actual card shapes.
+
+## Entitlement
+
+Prevent incorrect plan flashing.
+
+- **Example:** Do not briefly show FREE while paid status is still loading.
+
+## Game
+
+Preload essential visual/audio assets where reasonable.
+
+## Checkout
+
+Disable repeated purchase action while initializing.
+
+---
+
+# 50. ERROR STATES
+
+Design critical failures.
+
+## Auth
+
+Plain useful message.
+
+## Game
+
+Recoverable retry without duplicated transaction.
+
+## Payment
+
+Clear failure + retry.
+
+## Audio
+
+Fallback without breaking gameplay.
+
+## Network
+
+Avoid infinite spinner.
+
+### Example
+
+If a spin request fails after the click:
+
+do not deduct twice when the player retries.
+
+---
+
+# 51. ACCESSIBILITY
+
+Premium visuals still need to work.
+
+Check:
+
+- color contrast
+- keyboard navigation
+- focus states
+- semantic buttons/links
+- touch targets
+- reduced motion
+- audio-independent information
+
+### Example
+
+A red prompt cannot communicate something important only by playing a sound.
+
+### Example
+
+A clickable game card should not be a non-semantic `<div>` with no keyboard access.
+
+---
+
+# 52. PERFORMANCE
+
+Do not trade functional performance for visual richness.
+
+Optimize:
+
+- game thumbnails
+- SVG/vector assets
+- image formats
+- responsive images
+- lazy loading
+- asset caching
+- background decorations
+- audio loading
+- animation performance
+
+### Bad example
+
+Eight 6MB PNG game cards loaded immediately on mobile.
+
+### Correct example
+
+Appropriately compressed responsive artwork with essential above-the-fold assets prioritized.
+
+---
+
+# 53. REMOVE “GENERATED APP” VISUAL TELLS
+
+Audit for:
+
+- generic Tailwind gradient cards
+- every section using identical radius
+- every component using same card shell
+- excessive pills
+- random glows
+- mixed icon libraries
+- huge empty hero space
+- generic centered heading + grid
+- default shadcn appearance left untouched
+- icons replacing real game artwork
+- form controls being used as game controls
+- arbitrary purple/blue SaaS gradients
+- repeated spacing values regardless of composition
+- identical game-card layouts
+- placeholder art
+
+### Example
+
+Bad:
+
+dark rectangle
+
+- Lucide cherry
+- “Slots”
+- generic button.
+
+Correct:
+
+illustrated reel composition
+
+- custom symbols
+- depth
+- environmental lighting
+- premium title treatment
+- integrated PLAY interaction.
+
+---
+
+# 54. VISUAL REFERENCE LOOP
+
+For each major page, use:
+
+**reference → screenshot of ours → comparison → largest gap → fix → new screenshot.**
+
+Specifically compare:
+
+## Sidebar
+
+Does it actually have liquid-glass depth?
+
+## Homepage
+
+Does it feel like a game destination?
+
+## Cards
+
+Do they resemble entertainment artwork rather than SaaS cards?
+
+## Background
+
+Does negative space contribute to atmosphere?
+
+## Symbols
+
+Are they all proper artwork?
+
+## Chinese elements
+
+Are they accurate AND polished?
+
+## Brown adaptation
+
+Did we preserve the richness of the reference instead of making everything dull?
+
+## Mobile
+
+Was it art-directed separately?
+
+Repeat.
+
+Do not stop because one screenshot “looks pretty good.”
+
+---
+
+# 55. FUNCTIONAL TEST JOURNEY
+
+Test this complete journey:
+new visitor
+→ homepage
+→ inspect games
+→ signup
+→ 48-hour trial created
+→ choose game
+→ play game
+→ hear audio
+→ receive applicable intervention
+→ dismiss intervention
+→ return home
+→ choose another game
+→ verify state
+→ open subscription flow
+→ Paddle sandbox checkout
+→ successful payment
+→ RevenueCat entitlement changes
+→ refresh
+→ access remains
+→ sign out
+→ sign in
+→ paid access remains.
+
+Do this against the deployed release candidate.
+
+---
+
+# 56. FAILURE TEST JOURNEY
+
+Also test:
+
+## Trial expired
+
+- **Expected:** premium denied unless paid.
+
+## Clear local storage
+
+- **Expected:** trial/payment state remains authoritative.
+
+## Change browser
+
+- **Expected:** same authenticated entitlement.
+
+## Checkout cancelled
+
+- **Expected:** no paid access.
+
+## Payment failed
+
+- **Expected:** no paid access.
+
+## Rapid game click
+
+- **Expected:** no duplicate transaction.
+
+## Network failure
+
+- **Expected:** controlled recovery.
+
+## Auth expires
+
+- **Expected:** protected action denied safely.
+
+## Missing audio asset
+
+- **Expected:** gameplay continues.
+
+---
+
+# 57. PRODUCTION SECRETS
+
+Never fabricate production success.
+
+If production Paddle credentials are not available:
+
+say:
+
+**Sandbox verified. Production Paddle activation requires real approved production merchant credentials.**
+
+If the final domain is not purchased:
+
+say:
+
+**Domain-ready. Final custom-domain activation remains pending user purchase/connection.**
+
+Do not insert fake credentials merely to make a checklist green.
+
+---
+
+# 58. FINAL IMPLEMENTATION ORDER
+
+Work in this order unless repository dependencies make a different local order clearly necessary.
+
+## Stage 1 — Audit
+
+Identify exact files/routes/components for:
+
+- homepage
+- sidebar
+- prompts
+- games
+- game art
+- game logic
+- sound
+- auth
+- trial
+- subscription
+- payment
+- RevenueCat
+- Paddle
+- deployment
+- responsive shell
+
+Do not repeatedly scan the entire repository for every small change.
+
+## Stage 2 — Functional problems
+
+Fix broken game/auth/payment architecture first.
+
+## Stage 3 — Core visual system
+
+Establish:
+
+- palette
+- glass
+- materials
+- typography
+- card system
+- motion
+- symbol system
+
+## Stage 4 — Homepage
+
+Finish:
+
+- sidebar
+- game hub
+- background
+- QUIT
+- symbols
+- prompts
+- responsiveness
+
+## Stage 5 — Games
+
+Finish and test EACH game separately.
+
+## Stage 6 — Sound
+
+Implement reusable audio system + game cues.
+
+## Stage 7 — Trial
+
+Implement server-authoritative 48 hours.
+
+## Stage 8 — RevenueCat/Paddle
+
+Integrate sandbox completely.
+
+## Stage 9 — GitHub-native preview deployment
+
+Deploy the entire repository.
+
+## Stage 10 — Screenshot/reference comparison
+
+Desktop + mobile.
+
+## Stage 11 — Real user journeys
+
+Happy + failure paths.
+
+## Stage 12 — Fix defects
+
+Do not merely document fixable defects.
+
+## Stage 13 — Release verification
+
+Only after verification should the release candidate be considered ready for `main`.
+
+---
+
+# 59. HOMEPAGE ACCEPTANCE CRITERIA
+
+Homepage is not complete until:
+
+[ ] All games are visible.
+
+[ ] Every card visually communicates its game.
+
+[ ] Cards use real artwork.
+
+[ ] Homepage reflects the reference-level gaming density.
+
+[ ] Sidebar reflects Reference A closely in quality.
+
+[ ] Reference B richness survives the brown adaptation.
+
+[ ] Chinese symbols remain where intended.
+
+[ ] Every Chinese element has been verified.
+
+[ ] Other casino symbols are also premium artwork.
+
+[ ] `QUIT` is integrated into the background.
+
+[ ] Background has multiple depths.
+
+[ ] Red prompts appear in varied positions.
+
+[ ] Red prompts are individually dismissible.
+
+[ ] Prompts do not obstruct game controls.
+
+[ ] Prompts disappear from active gameplay.
+
+[ ] Sports betting is gone.
+
+[ ] Desktop is polished.
+
+[ ] Tablet is polished.
+
+[ ] Mobile is polished.
+
+---
+
+# 60. PER-GAME ACCEPTANCE CRITERIA
+
+Repeat this separately for each game by name.
+
+[ ] Loads from homepage.
+
+[ ] Instructions/primary interaction are clear.
+
+[ ] Complete gameplay loop works.
+
+[ ] Logic is correct.
+
+[ ] Balance/state math is correct.
+
+[ ] Animation matches logic.
+
+[ ] Rapid input cannot break state.
+
+[ ] Visuals meet casino-quality target.
+
+[ ] Symbols use finished artwork.
+
+[ ] Environment is finished.
+
+[ ] Controls are finished.
+
+[ ] Result presentation is finished.
+
+[ ] Sounds are correct.
+
+[ ] Sounds synchronize with events.
+
+[ ] Mute works.
+
+[ ] Mobile works.
+
+[ ] Keyboard/basic accessibility works.
+
+[ ] Refresh behaves safely.
+
+[ ] Navigation away behaves safely.
+
+[ ] Return behaves correctly.
+
+[ ] Errors recover safely.
+
+[ ] No placeholder art.
+
+[ ] No dead interactions.
+
+---
+
+# 61. TRIAL ACCEPTANCE CRITERIA
+
+[ ] Eligible new user receives exactly 48 hours.
+
+[ ] Start/end stored server-side.
+
+[ ] Client clock cannot manipulate trial.
+
+[ ] Local storage cannot reset trial.
+
+[ ] Sign-out cannot reset trial.
+
+[ ] Different browser cannot reset trial.
+
+[ ] Expired trial loses premium access.
+
+[ ] Paid entitlement overrides expired trial.
+
+[ ] UI communicates trial accurately.
+
+[ ] Trial has been manually tested.
+
+[ ] Trial resolver has automated coverage where practical.
+
+---
+
+# 62. REVENUECAT ACCEPTANCE CRITERIA
+
+[ ] RevenueCat Web SDK properly integrated.
+
+[ ] Stable authenticated App User ID.
+
+[ ] One canonical premium entitlement.
+
+[ ] Paid access resolves from RevenueCat.
+
+[ ] Frontend cannot grant itself paid access.
+
+[ ] Protected backend routes/actions verify access.
+
+[ ] Customer status survives another session.
+
+[ ] Trial and paid logic do not conflict.
+
+---
+
+# 63. PADDLE ACCEPTANCE CRITERIA
+
+[ ] Paddle sandbox configured.
+
+[ ] Subscription product created.
+
+[ ] Price configured.
+
+[ ] RevenueCat Paddle integration configured.
+
+[ ] Product imported.
+
+[ ] Offering/package configured.
+
+[ ] Checkout launches.
+
+[ ] Successful sandbox payment completed.
+
+[ ] RevenueCat entitlement activates.
+
+[ ] Cancelled checkout tested.
+
+[ ] Failed payment tested.
+
+[ ] Account remains correct after refresh.
+
+[ ] Account remains correct after sign-in again.
+
+[ ] Production secrets not committed.
+
+[ ] Production activation not falsely claimed without merchant approval/credentials.
+
+---
+
+# 64. PAYMENT TRACKING ACCEPTANCE CRITERIA
+
+Confirm the operational systems can show:
+
+[ ] customer
+
+[ ] active subscription
+
+[ ] expired subscription
+
+[ ] trial
+
+[ ] payment
+
+[ ] failed payment
+
+[ ] cancellation
+
+[ ] transaction history
+
+[ ] revenue reporting
+
+[ ] refunds where applicable
+
+[ ] renewal state
+
+[ ] product/plan
+
+Do not build a second homemade billing database unless needed for application-specific state.
+
+Use provider data intelligently.
+
+---
+
+# 65. AUDIO ACCEPTANCE CRITERIA
+
+[ ] Shared audio system.
+
+[ ] Game interaction sounds.
+
+[ ] Reel/action sounds.
+
+[ ] Result sounds.
+
+[ ] Intervention sounds.
+
+[ ] Transition sounds where useful.
+
+[ ] Volume balanced.
+
+[ ] Master mute.
+
+[ ] Mute persists.
+
+[ ] Rapid actions do not create uncontrolled overlap.
+
+[ ] Browser autoplay rules respected.
+
+[ ] Mobile works.
+
+[ ] Missing optional sound does not crash application.
+
+[ ] Assets are original or properly licensed.
+
+---
+
+# 66. DEPLOYMENT ACCEPTANCE CRITERIA
+
+[ ] Entire repository remains on GitHub.
+
+[ ] Release commit identified.
+
+[ ] Host connected directly to GitHub.
+
+[ ] Complete repo checked out by host.
+
+[ ] No 79-file manual transfer workaround.
+
+[ ] Build passes.
+
+[ ] Preview/staging works.
+
+[ ] Environment variables configured.
+
+[ ] Supabase works.
+
+[ ] RevenueCat works.
+
+[ ] Paddle sandbox works.
+
+[ ] Games work on deployed URL.
+
+[ ] Audio works on deployed URL.
+
+[ ] Mobile works.
+
+[ ] Console inspected.
+
+[ ] Network inspected.
+
+[ ] Domain configuration ready.
+
+[ ] `main` not merged prematurely.
+
+---
+
+# 67. DOMAIN ACCEPTANCE CRITERIA
+
+Until purchased:
+
+[ ] Temporary deployed URL works.
+
+[ ] No important production URL is hardcoded.
+
+[ ] Auth redirect configuration can accept final domain.
+
+[ ] Payment return URLs can accept final domain.
+
+[ ] Canonical URL is configurable.
+
+[ ] HTTPS will be available through chosen host/domain configuration.
+
+[ ] Final domain can be connected without repository redesign.
+
+Once I purchase the domain, connecting it should be an infrastructure/configuration task rather than a development project.
+
+---
+
+# 68. FINAL VISUAL QUESTIONS
+
+Before completion ask:
+
+### Sidebar
+
+Does it genuinely look like premium liquid glass?
+
+If it looks like:
+
+brown rectangle + blur
+
+continue.
+
+### Homepage
+
+Does it genuinely feel like a premium gaming destination?
+
+If it looks like:
+
+heading + four Tailwind cards
+
+continue.
+
+### Chinese artwork
+
+Is it accurate?
+
+If uncertain:
+
+verify it.
+
+### Symbols
+
+Would they still look intentional at 300%?
+
+If not:
+
+redesign them.
+
+### Brown palette
+
+Did the adaptation preserve the reference’s richness?
+
+If it became dull/minimal:
+
+continue.
+
+### Game visuals
+
+Could these plausibly sit beside commercially produced casino-style web-game visuals without immediately looking like a prototype?
+
+If not:
+
+continue.
+
+### Mobile
+
+Does it look deliberately designed?
+
+If it looks like desktop simply stacked vertically:
+
+continue.
+
+---
+
+# 69. FINAL COMPLETION REPORT
+
+Do not finish with:
+
+“Everything is done.”
+
+Create a verification matrix:
+
+| AreaWork completedHow testedResultRemaining issue |
+| ------------------------------------------------- |
+
+Include individually:
+
+- Homepage
+- Liquid-glass sidebar
+- Background
+- QUIT system
+- Chinese symbols
+- Other casino symbols
+- Game cards
+- Red prompts
+- Sports removal
+- EACH GAME BY NAME
+- Audio
+- Authentication
+- 48-hour trial
+- RevenueCat
+- Paddle
+- Successful sandbox payment
+- Cancelled payment
+- Failed payment
+- Entitlements
+- Payment tracking
+- Desktop
+- Tablet
+- Mobile
+- GitHub deployment
+- Production-preview URL
+- Console
+- Network
+- Domain readiness
+
+### Example
+
+`Slots | Rebuilt reel housing, symbol set, result choreography and audio | 20 manual rounds + responsive check + production-preview test | PASS | None`
+
+Evidence matters.
+
+Code existence does not equal PASS.
+
+---
+
+# 70. FINAL DEFINITION OF DONE
+
+This work is finished only when all of the following are true:
+
+### VISUALS
+
+[ ] Spin Out keeps its premium brown identity.
+
+[ ] The supplied references have been studied closely.
+
+[ ] The visual gap has been reduced through multiple comparison passes.
+
+[ ] The sidebar reaches the intended liquid-glass quality.
+
+[ ] Homepage reaches premium casino-site richness.
+
+[ ] All games are visible from the homepage.
+
+[ ] Every game card has authored visual artwork.
+
+[ ] `QUIT` exists throughout the environmental background.
+
+[ ] Casino symbols exist throughout the environmental composition.
+
+[ ] Chinese symbols remain part of the visual language where intended.
+
+[ ] Chinese characters/objects have been verified for accuracy.
+
+[ ] All other casino symbols receive the same quality treatment.
+
+[ ] Originality did not cause flattening or visual downgrading.
+
+[ ] Red prompts appear throughout the homepage.
+
+[ ] Prompts can be individually dismissed.
+
+[ ] Prompts do not cover active gameplay.
+
+[ ] Mobile looks intentionally designed.
+
+### GAMES
+
+[ ] Sports betting is completely removed.
+
+[ ] Every remaining game loads.
+
+[ ] Every game works.
+
+[ ] Every game resolves correctly.
+
+[ ] Every game has premium artwork.
+
+[ ] Every game has real symbol art.
+
+[ ] Every game has finished animation.
+
+[ ] Every game has synchronized audio.
+
+[ ] Every game has safe state handling.
+
+[ ] No dead controls remain.
+
+[ ] No placeholder art remains.
+
+### TRIAL
+
+[ ] New users receive 48 hours.
+
+[ ] Trial is server-controlled.
+
+[ ] Trial cannot be reset through browser tricks.
+
+[ ] Expired trial is enforced.
+
+[ ] Paid subscription correctly overrides expiration.
+
+### PAYMENTS
+
+[ ] RevenueCat integrated.
+
+[ ] RevenueCat identifies authenticated customers.
+
+[ ] One canonical premium entitlement exists.
+
+[ ] Paddle sandbox integrated.
+
+[ ] Successful sandbox purchase tested.
+
+[ ] Cancelled checkout tested.
+
+[ ] Failed payment tested.
+
+[ ] Paid access survives refresh.
+
+[ ] Paid access survives a new authenticated session.
+
+[ ] Revenue/subscription information is trackable.
+
+[ ] No secret credentials committed.
+
+[ ] Production payment is not falsely claimed before Paddle approval/live credentials.
+
+### DEPLOYMENT
+
+[ ] GitHub remains source of truth.
+
+[ ] Host pulls full repository directly from GitHub.
+
+[ ] No incomplete 79-file handoff is used.
+
+[ ] Release candidate is tested before merge.
+
+[ ] Deployed URL has been manually exercised.
+
+[ ] Desktop has been inspected.
+
+[ ] Mobile has been inspected.
+
+[ ] Console has been inspected.
+
+[ ] Network has been inspected.
+
+[ ] Critical defects are fixed.
+
+### DOMAIN
+
+[ ] Current temporary production/preview host works.
+
+[ ] Final domain is configurable.
+
+[ ] Domain-sensitive URLs are centralized.
+
+[ ] No architecture depends on Vercel specifically unless Vercel proves to be the best compatible GitHub-native host.
+
+[ ] The remaining domain action, if any, is simply me purchasing/connecting the final domain.
+
+Do not declare completion because the build compiles.
+
+Do not declare completion because automated tests are green.
+
+Do not declare completion because one desktop screenshot looks good.
+
+Continue until the actual deployed product, its games, payment flow, trial behavior, visual quality and critical user journeys satisfy this specification.
