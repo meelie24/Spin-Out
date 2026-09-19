@@ -1,69 +1,73 @@
-# Research Decision — CTA / Brand Language
+# Research Decision — CTA / Action Language
 
 **Date:** 2026-09-19  
-**Category:** CTA / conversion / in-product action language
+**Category:** CTA / brand copy
 
 ## Problem
-Account, purchase, navigation, gameplay, stopping, explanation, personalization and post-run actions have different goals and ethical constraints. They should not share one persuasion rule.
+Spin Out contains several generic software actions. The clearest remaining example is the post-run **Done** button, which does not tell the user where it goes.
 
 ## Current brands inspected
-Apple: Buy, Learn more, Get started.  
-Monzo: Open a free Monzo account, Explore.  
-Notion: Get Notion free, Request a demo, Get started.  
-Nike: Sign Up, Shop, Explore.  
-Spotify: Tell us more / Send message.  
-Strava: Set Focus, Customize.  
-YouTube: Not interested, Tell us why.  
-Pinterest: See more / See less.  
-Airbnb: search/filter/save.  
-Uber: Where to? / Save this destination.  
-Netflix: rating controls / Get Started patterns.
+Current CTA language from:
+- Spotify
+- Netflix
+- Strava
+- WHOOP
+- Monzo
+- Airbnb
+- Nike
+- Cash App
+- Headspace
+- Pinterest
+- Revolut
+- Notion
+- Linear
+- Apple
+- Duolingo
 
-## Evidence
-2026 Psychology & Marketing research across seven studies found that second-person singular recommendations can provoke more reactance than first-person phrasing in persuasive contexts. Recent CTA research also finds imperative advertising can backfire through reactance. Psychological-ownership effects exist but depend on context/customer type.
+## Repeating patterns
+- strong consumer CTAs are usually short and literal
+- first-person language is useful when the user is genuinely requesting/claiming something
+- ordinary navigation commonly uses a direct verb or destination
+- successful brands do not add pronouns everywhere
+- action clarity matters more than cleverness
+- first-person possessive CTA lifts are context-dependent, not universal
 
-The historical “Start my free trial” test is useful evidence, not a universal law.
+## Spin Out language rules
+Navigation:
+- literal destination/action
 
-## Spin Out decision
+Account request:
+- first-person may be natural: **Send me the link**
 
-### Navigation
-Short and literal: Back home, Open Plus, Close.
+Gameplay:
+- neutral: **Start Reality Run**, **Continue run**
 
-### Account request
-First person is natural where the user is asking the system to act: **Send me the link**.
+Stopping:
+- user voice is appropriate: **I'm done**
 
-### Purchase
-Clarity first. Do not force “my”: Keep Plus / Subscribe / Manage subscription.
+Explanation:
+- plain question: **Why did I do that?**, **Why did that feel different?**
 
-### Gameplay
-Neutral, descriptive. Never use conversion psychology to extend simulated gambling.
+Personalization:
+- benefit-led: **Make it more immersive**
 
-### Stopping
-User voice: **I’m done**.
+Post-run navigation:
+- use **Back home** instead of **Done**
 
-### Strong-intervention continuation
-Neutral: **Continue**.
-
-### Explanation
-Plain questions: Why did I do that? / Why did that feel different?
-
-### Personalization
-Sell payoff: **Make it more immersive** / **Not now**.
-
-### Post-run
-Destination-predictive: replace ambiguous **Done** with **Back home**.
-
-## Anti-patterns
-No blanket your→my changes, fake ownership for payment, urgency tactics on gameplay, clever brand lines where literal actions are clearer, or generic SaaS words such as unlock/seamless/tailored/empower.
+## What not to copy
+- no mechanical your→my replacements
+- no conversion optimization that encourages longer simulated gambling
+- no growth-copy tricks on **Continue run**
+- no clever branded language where a literal action is clearer
 
 ## Success criteria
-- users can predict destination/result of primary CTA
-- no CTA encourages extended simulated gambling
-- sign-in remains Send me the link
-- post-run exit names destination
-- stopping stays user-voice
-- no inconsistent synonyms for the same action
-- mobile labels fit without truncation
+- user can predict the result of every primary CTA
+- no ambiguous **Done** for navigation
+- sign-in retains **Send me the link**
+- gameplay/stopping CTAs remain neutral/user-controlled
+- action labels remain short on mobile
+- accessibility names match visible actions
+- no CTA change creates additional simulated-gambling pressure
 
 ## Sources
-Current official brand pages/help for Apple, Monzo, Notion, Nike, Spotify, Strava, YouTube, Pinterest, Airbnb, Uber, Netflix; Yin (2026) personal pronouns/persuasion; 2026 imperative CTA reactance research; psychological ownership studies; historical ContentVerve/Unbounce CTA test.
+Current official 2026 CTA examples from Spotify Premium, Netflix signup/help, Strava Join, WHOOP membership, Monzo account opening, Airbnb hosting/signup, Cash App, Headspace subscriptions, Pinterest signup, and other current leading consumer products, plus Baymard/Nielsen Norman action-clarity guidance and first-person/psychological-ownership research.
