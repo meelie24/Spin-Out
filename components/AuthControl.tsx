@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { User } from '@supabase/supabase-js';
 import { createBrowserSupabase, supabaseConfigured } from '@/lib/supabase/client';
 
@@ -71,20 +72,22 @@ export function AuthControl() {
     return <button className="bare-link" type="button" onClick={signOut}>Sign out</button>;
   }
 
+  const modal = open ? <div className="modal-backdrop auth-backdrop" role="presentation" onMouseDown={closeDialog}>
+    <section ref={dialog} className="glass-dialog auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title" onMouseDown={e => e.stopPropagation()}>
+      <p className="kicker">Account</p>
+      <h2 id="auth-title">Sign in</h2>
+      <p>We’ll email you a secure sign-in link.</p>
+      <label>Email<input value={email} onChange={e => setEmail(e.target.value)} type="email" autoComplete="email" placeholder="you@example.com"/></label>
+      {status ? <p role="status" className="provider-note">{status}</p> : null}
+      <div className="modal-actions">
+        <button className="soft-button" type="button" onClick={closeDialog}>Cancel</button>
+        <button className="primary-button" type="button" disabled={!email.includes('@')} onClick={signIn}>Send me the link</button>
+      </div>
+    </section>
+  </div> : null;
+
   return <>
     <button ref={trigger} className="bare-link" type="button" onClick={() => { setStatus(null); setOpen(true); }}>Sign in</button>
-    {open ? <div className="modal-backdrop" role="presentation" onMouseDown={closeDialog}>
-      <section ref={dialog} className="glass-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title" onMouseDown={e => e.stopPropagation()}>
-        <p className="kicker">Account</p>
-        <h2 id="auth-title">Sign in</h2>
-        <p>We’ll email you a secure sign-in link.</p>
-        <label>Email<input value={email} onChange={e => setEmail(e.target.value)} type="email" autoComplete="email" placeholder="you@example.com"/></label>
-        {status ? <p role="status" className="provider-note">{status}</p> : null}
-        <div className="modal-actions">
-          <button className="soft-button" type="button" onClick={closeDialog}>Cancel</button>
-          <button className="primary-button" type="button" disabled={!email.includes('@')} onClick={signIn}>Send me the link</button>
-        </div>
-      </section>
-    </div> : null}
+    {modal && typeof document !== 'undefined' ? createPortal(modal, document.body) : null}
   </>;
 }
