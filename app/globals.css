@@ -7285,3 +7285,30 @@ body:has(.plain-page[data-editorial="ledger"]){
     transform:translate(-50%,-47%)!important;
   }
 }
+
+
+/* Font variables live on <html>; active-run controls must resolve the reference type system. */
+.run-shell[data-environment="layered-casino"]{
+  font-family:var(--so-ui);
+}
+.run-shell[data-environment="layered-casino"] .run-hud span{
+  font-family:var(--so-ui)!important;
+}
+.run-shell[data-environment="layered-casino"] .run-hud strong{
+  font-family:var(--so-display)!important;
+}
+.run-shell[data-environment="layered-casino"] .sound-button{
+  min-width:44px!important;
+  width:auto;
+  min-height:44px!important;
+  height:44px!important;
+  font-family:var(--so-ui)!important;
+}
+@media(max-width:430px){
+  .run-shell[data-environment="layered-casino"] .sound-button{
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+  }
+}

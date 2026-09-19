@@ -43,8 +43,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${uiFont.variable} ${displayFont.variable}`}>
+    <html lang="en" className={`${uiFont.variable} ${displayFont.variable}`}>
+      <body>
         <AccountSync />
         <header className="site-header">
           <Link href="/" className="brand" aria-label="Spin Out home"><span className="brand-mark" aria-hidden="true">S</span><span>Spin Out</span></Link>
