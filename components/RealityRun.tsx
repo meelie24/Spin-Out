@@ -696,7 +696,7 @@ export function RealityRun({
   const sportsPotentialReturn = Math.round(run.stakeCents * selectedSports.odds);
 
   return (
-    <main className={`run-shell ambient-${ambientMode}`} data-intervention-surface={interventionSurface ?? 'none'} style={{ '--reality': intensity } as React.CSSProperties}>
+    <main className={`run-shell ambient-${ambientMode}`} data-environment="layered-casino" data-intervention-surface={interventionSurface ?? 'none'} style={{ '--reality': intensity } as React.CSSProperties}>
       <div className="reality-background" aria-hidden="true">
         {financeFresh && obligation && profile.obligationAmountCents ? <div className="context-ghost ghost-a"><span>{obligation}</span><strong>{formatMoney(profile.obligationAmountCents)}</strong></div> : null}
         {days != null ? <div className="context-ghost ghost-b"><strong>{days}</strong><span>DAYS UNTIL MONEY</span></div> : null}
