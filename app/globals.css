@@ -5177,3 +5177,110 @@ body:has(.plain-page):after{
   .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card>span:last-child{font-size:20px}
   .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="slots"])>span:last-child{font-size:28px}
 }
+
+
+/* =========================================================
+   REFERENCE TYPOGRAPHY CONVERGENCE
+   Clean liquid-glass UI + bold gaming display. No editorial-serif drift.
+   ========================================================= */
+:root{
+  --so-ui:var(--font-ui),-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --so-display:var(--font-display),"Arial Narrow","Avenir Next Condensed","Segoe UI",Arial,sans-serif;
+  --so-game:var(--font-display),"Arial Narrow","Avenir Next Condensed","Segoe UI",Arial,sans-serif;
+}
+body{font-family:var(--so-ui)}
+.reference-locked [data-type-role="display"],
+.reference-locked .games-heading h2,
+.reference-locked .hero-copy h1,
+.setup-shell[data-material="casino-setup"] .setup-panel h1,
+.run-intro-dialog[data-material="smoked-lacquer"] h1,
+.reality-ping[data-material="oxblood-glass"] .ping-message,
+.xray-moment[data-material="lacquer-cut"]>strong,
+.longrun-panel[data-material="long-run-stage"] .longrun-head strong,
+.longrun-panel[data-material="long-run-stage"] .longrun-net-pair strong,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .reality-context-head h2,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-title>span,
+.post-shell[data-material="quiet-lacquer"] .post-card h1,
+.post-shell[data-material="quiet-lacquer"] .receipt-left,
+.post-shell[data-material="quiet-lacquer"] .money-kept,
+.post-shell[data-material="quiet-lacquer"] .summary-topline strong,
+.post-shell[data-material="quiet-lacquer"] .money-kept-grid strong,
+.post-shell[data-material="quiet-lacquer"] .exit-metric strong,
+body:has(.plus-page) .plus-gate h1,
+body:has(.plus-page) .plus-head h1,
+body:has(.plus-page) .plus-score-grid strong,
+body:has(.plus-page) .plus-section h2,
+.plus-dialog h2,
+body:has(.plain-page) .plain-page h1,
+body:has(.plain-page) .plain-page section h2,
+.reference-locked .hub-brand strong,
+body:has(.setup-shell[data-material="casino-setup"])>.site-header .brand,
+body:has(.run-shell)>.site-header .brand,
+body:has(.plus-page)>.site-header .brand,
+body:has(.plain-page)>.site-header .brand{
+  font-family:var(--so-display)!important;
+  font-style:normal!important;
+}
+.reference-locked [data-type-role="display"],
+.reference-locked .hero-copy h1,
+.setup-shell[data-material="casino-setup"] .setup-panel h1{
+  font-weight:700!important;
+  letter-spacing:-.045em!important;
+}
+.reference-locked .hero-copy h1{
+  font-size:clamp(62px,8.2vw,122px);
+  line-height:.78;
+  max-width:7.5ch;
+  text-transform:uppercase;
+}
+.reference-locked .games-heading h2{
+  font-weight:700!important;
+  letter-spacing:-.04em!important;
+  text-transform:uppercase;
+}
+.reference-locked [data-type-role="game-title"],
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card>span:last-child{
+  font-family:var(--so-game)!important;
+  font-weight:800!important;
+  letter-spacing:-.035em!important;
+  text-transform:uppercase;
+}
+.reality-ping[data-material="oxblood-glass"] .ping-message,
+.xray-moment[data-material="lacquer-cut"]>strong,
+.run-intro-dialog[data-material="smoked-lacquer"] h1,
+.longrun-panel[data-material="long-run-stage"] .longrun-head strong,
+.post-shell[data-material="quiet-lacquer"] .post-card h1,
+body:has(.plain-page) .plain-page h1{
+  font-weight:700!important;
+  letter-spacing:-.035em!important;
+}
+.reference-locked .hub-brand strong,
+body:has(.setup-shell[data-material="casino-setup"])>.site-header .brand,
+body:has(.run-shell)>.site-header .brand,
+body:has(.plus-page)>.site-header .brand,
+body:has(.plain-page)>.site-header .brand{
+  font-weight:700!important;
+  letter-spacing:-.025em!important;
+}
+.reference-locked .hub-brand-mark,
+body:has(.setup-shell[data-material="casino-setup"])>.site-header .brand-mark,
+body:has(.run-shell)>.site-header .brand-mark,
+body:has(.plus-page)>.site-header .brand-mark,
+body:has(.plain-page)>.site-header .brand-mark{
+  font-family:var(--so-display)!important;
+  font-style:normal!important;
+  font-weight:800!important;
+}
+.reference-locked .game-tile p,
+.reference-locked .game-tile small,
+.setup-shell[data-material="casino-setup"] .choice-card,
+.run-intro-dialog[data-material="smoked-lacquer"] p,
+.reality-ping[data-material="oxblood-glass"] .ping-detail,
+.xray-moment[data-material="lacquer-cut"]>p,
+.longrun-panel[data-material="long-run-stage"] .longrun-readout,
+.post-shell[data-material="quiet-lacquer"] .exit-observation,
+.post-shell[data-material="quiet-lacquer"] .exit-translation,
+body:has(.plus-page),
+body:has(.plain-page){
+  font-family:var(--so-ui)!important;
+}

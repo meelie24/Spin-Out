@@ -1,9 +1,13 @@
 import type { Metadata, Viewport } from 'next';
+import { Barlow_Condensed, Manrope } from 'next/font/google';
 import Link from 'next/link';
 import './globals.css';
 import { AccountSync } from '@/components/AccountSync';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://spinitout.com';
+
+const uiFont = Manrope({ subsets:['latin'], variable:'--font-ui', display:'swap' });
+const displayFont = Barlow_Condensed({ subsets:['latin'], weight:['500','600','700','800'], variable:'--font-display', display:'swap' });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -40,7 +44,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={`${uiFont.variable} ${displayFont.variable}`}>
         <AccountSync />
         <header className="site-header">
           <Link href="/" className="brand" aria-label="Spin Out home"><span className="brand-mark" aria-hidden="true">S</span><span>Spin Out</span></Link>
