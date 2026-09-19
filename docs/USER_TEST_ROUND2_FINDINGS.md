@@ -1,48 +1,106 @@
-# Spin Out — User Test Round 2 Findings
+# Spin Out — Same-Persona Onboarding Retest
 
-**Baseline under test:** `release/final-production-pass` after the first user-test/permanent-fix pass.
+**Verified application-code SHA:** `9c15fab317276fb3368a06f0db3538f4e0cb1e24`  
+**Branch:** `release/final-production-pass`  
+**GitHub CI run:** `35412505503`
 
-**Purpose of this pass:** challenge the corrected build rather than repeat the first test. This round focuses on repeat exposure, skeptical-user trust, keyboard behavior, intervention fatigue, returning-user friction, and whether any educational surface accidentally nudges the person to remain in simulated gambling.
+This retest uses the same product perspectives requested for comparison: genuinely trying to stop, skeptical, low patience, returning, and mobile. These are **simulated browser/persona journeys**, not recruited-human interviews. The functional observations below come from the browser suite; the reaction notes are reasoned persona reads based on those observed journeys.
 
-## What stayed strong from round 1
+## What changed
 
-- The shorter first-run flow still gets to the useful part much faster.
-- Every game keeps a distinct interaction loop.
-- Reality Pings and X-Ray remain tied to behavior that just happened.
-- The Intervention Director still prevents stacked foreground interruptions.
-- The chosen-limit intervention still references the user's actual limit.
-- Run 10,000 now separates a finite sample from the calibrated model expectation.
-- My Reality keeps secondary context collapsed and its Save action visible on mobile.
-- Payday Shield remains outside active gameplay.
-- The exit receipt stays compact.
-- Rapid input and active-run restore protections remain in the main QA suite.
+The previous first-run flow still asked too much before the useful part of Spin Out. It has been replaced with:
 
-## New findings before fixes
+**Five high-value answers → actual game visible → “That’s enough to start” explanation → Start Reality Run → optional one-question setup beside/under the live game.**
 
-| Finding | What happened | Likely user reaction | Severity | Root cause | Required fix |
-|---|---|---|---|---|---|
-| Run 10,000 tells the user "Keep going." during its build animation | The second animation phase uses a direct gambling-continuation phrase before revealing the long-run lesson | "Why is the quit-gambling app telling me to keep going?" | **HIGH** | Animation copy was written for momentum rather than the product's behavioral goal | Replace directive language with neutral progression copy. Add browser regression that rejects "keep going" inside Run 10,000. |
-| Strong Reality Ping action says "Keep going" | A strong limit intervention offers "Keep going" beside "I'm done" | "Why is the intervention itself telling me to keep gambling?" | **HIGH** | The control describes continuation with motivational wording instead of a neutral action label | Keep the user's choice, but rename the action to **Continue run** and regression-test the wording. |
-| Intervention dialogs do not explicitly take keyboard focus | Reality Ping, X-Ray and Run 10,000 appear visually, but focus can remain on the underlying game control | Keyboard/switch user may continue interacting with the wrong layer or not know an interruption appeared | **MEDIUM** | These surfaces have dialog semantics but no focus-on-open behavior | Move focus into each dialog on mount, make the container programmatically focusable and retain the existing single-foreground behavior. |
-| My Reality does not explicitly take focus | The modal opens visually while keyboard focus can stay on the underlying homepage control | "The panel opened, but Tab starts somewhere weird." | **MEDIUM** | Modal semantics were added without matching focus management | Focus the My Reality dialog when it opens. |
-| Dismissed homepage Reality Pings immediately return after refresh/navigation | Dismissal only lives in component state | "I just cleared that. Why is it back already?" | **MEDIUM** | No same-visit dismissal memory | Remember dismissed home prompts for the browser-tab session only. Do not turn this into permanent suppression. |
-| Post-run obligation card says money is "PROTECTED" after a self-reported no-gambling outcome | The product knows the person reports that they did not spend the money, but it cannot know the money is protected from later gambling | "You don't actually know it's protected." | **MEDIUM** | Copy overstates what the stored outcome proves | Keep Money Kept, but label the obligation amount as **AVAILABLE** rather than protected. |
-| Core intervention frequency still looks disciplined | Director cooldowns and family suppression remain in place; overloaded states still select one foreground message | "It noticed something without hammering me." | **POSITIVE** | Shared intervention director | Preserve. |
-| Progress language remains based on stopping behavior | Shorter exits, within-limit runs and leaving after chase cues are the tracked improvements | "It's measuring whether I leave, not how much I play." | **POSITIVE** | Recovery metrics are exit/control based | Preserve and continue regression coverage. |
+There is no deposit/load confirmation between the five questions and the game.
 
-## Round 2 regression cases
+When the homepage already tells Spin Out which game the person chose, the five required interactions are:
 
-The following cases are being added to CI before fixes are applied:
+1. How much were you about to put in?
+2. What were you hoping would happen?
+3. What do you still need this money for?
+4. How bad do you want to play right now?
+5. Before you start, where do you want to stop?
 
-1. A dismissed homepage prompt remains dismissed after a same-tab refresh.
-2. Run 10,000 never displays directive "Keep going" copy.
-3. Run 10,000 takes keyboard focus when opened.
-4. Reality Ping takes keyboard focus when shown.
-5. X-Ray takes keyboard focus when shown.
-6. My Reality takes keyboard focus when opened.
-7. A self-reported "No" outcome may show Money Kept but must not call the money "PROTECTED"; it should use truthful availability language.
-8. Strong Reality Ping choices must use neutral **Continue run** language, never "Keep going".
+The visible game then appears behind the explanation. The remaining questions start only after the user chooses **Start Reality Run**.
 
-## Release rule
+## Browser-observed results
 
-Do not close this round from code inspection alone. The new regression suite must first fail against the baseline for the intended reason, then pass after the smallest production fixes, followed by the existing full CI/browser suite.
+| Area | Observed result |
+|---|---|
+| Mandatory entry | Five-question known-game journey reaches the game preview with no deposit gate. |
+| Intro | Actual game is visible before start; mobile and desktop each show the appropriate “more immersive” explanation. |
+| Optional setup | Exactly one continuation question is visible at a time. |
+| Desktop | Compact glass setup card stays beside the game instead of overlapping it. |
+| Mobile | Open dock stays within 140px; collapsed rail stays within 46px; 320px viewport has no horizontal page overflow. |
+| Choice overflow | Horizontal chips use an edge fade so another option reads as scrollable rather than clipped. |
+| Gameplay priority | First meaningful game action collapses the optional dock. Reality Ping/X-Ray/other foreground moments collapse it too. |
+| Persistence | Answers are stored before the transition and completed questions do not return on active-run restore. |
+| Same-run immersion | Adding the car-payment amount and due timing during gameplay updates the active Reality Run immediately; the current run begins rendering that context without waiting for the next session. |
+| Returning users | Existing completed context is inferred and respected; a complete returning profile is not forced through the optional continuation questions again. |
+| Motion | Completion uses the one-second consume sequence with exactly three droplet elements; reduced-motion removes the black-hole/droplet motion and still advances correctly. |
+| Existing trust regressions | Neutral **Continue run** wording, focus management, truthful AVAILABLE language, prompt dismissal memory and Run 10,000 copy all remain green. |
+
+## Same-persona read
+
+### Genuinely trying to stop
+
+The required five now capture the immediate session: money at risk, what the person wants from the session, what the money still needs to cover, current urge, and a stopping intention. That is enough for behavioral interventions to have useful anchors before the optional setup is complete.
+
+The biggest improvement is that deeper context is no longer the price of admission. The person can start, then add bill amount, due date, personal reason, difficult times or other context between actions.
+
+**Likely reaction:** the run gets useful faster, while the optional questions still feel relevant because newly added context visibly changes the current experience.
+
+### Skeptical
+
+The “more immersive” line now has a product behavior behind it. The browser test proves that additional context is inserted into the active run immediately instead of being stored for some vague future personalization.
+
+Reality Pings remain behavior-triggered and the Intervention Director can stay silent, so extra personal context is not repeated in every message.
+
+**Likely reaction:** the claim feels more credible once the game starts reflecting information the person just supplied.
+
+### Low patience
+
+The old sequence required multiple financial/detail screens plus a separate load/deposit transition. The new known-game route requires five answers and one explicit **Start Reality Run** action. The optional dock then gets itself out of the way on the first meaningful game action.
+
+**Likely reaction:** five questions are still noticeable, but the “just let me try it” complaint is materially reduced because there is no second setup/deposit gate after them.
+
+### Returning
+
+A returning user does not repeat the first-run questionnaire. Known context is retained, and continuation questions appear only when context is missing or genuinely stale.
+
+**Likely reaction:** Spin Out feels like it remembers the person rather than restarting an intake form.
+
+### Mobile
+
+The mobile design is not a shrunk desktop sidebar. It is a glass dock attached to the bottom edge, capped at 110–140px for normal questions and 42–46px when collapsed. Text uses the system-first, Apple-like scale specified in the design, and the game remains the dominant surface.
+
+**Likely reaction:** the optional setup remains visible enough to remember, but it does not feel like a bottom sheet taking over the phone.
+
+## Findings that were fixed during this retest
+
+1. The original fourth core question, **“What does this money need to make it past?”**, still sounded authored. It is now **“What do you still need this money for?”**
+2. Mobile horizontal choices originally ended on a raw partial chip. A deliberate right-edge fade now makes horizontal continuation obvious.
+3. Desktop acceptance originally reused a mobile-only intro assertion. The test now validates whichever responsive explanation is actually visible.
+4. The RevenueCat release path had a documentation/code naming mismatch. The server entitlement lookup now prefers `REVENUECAT_SECRET_API_KEY`, with tested fallbacks for existing non-production environments.
+
+## Verification result
+
+The implementation passed:
+- 66 core tests after release-key hardening
+- TypeScript
+- ESLint
+- production Next.js build
+- responsive/browser smoke suite
+- five-question entry
+- 390px and 320px mobile dock checks
+- reduced motion
+- persistence/restore
+- first-action and intervention collapse
+- same-run personalization
+- desktop beside-game placement
+- returning-profile behavior
+- lender conditional path
+- all existing intervention/truthfulness regressions
+
+The onboarding/product code is therefore closed at the CI release-candidate level. Netlify deployed verification and real Paddle/RevenueCat sandbox lifecycle testing remain separate external release gates.

@@ -47,30 +47,30 @@ Status meanings:
 | 32 | FAILED PAYMENT TEST | **PENDING EXTERNAL** | Recoverable error UI exists; real Paddle sandbox failure flow still must be exercised. |
 | 33 | REVENUECAT / PADDLE LIFECYCLE TESTING | **PENDING EXTERNAL** | Purchase/cancel/failure/persistence require configured sandbox provider accounts. |
 | 34 | PAYMENT TRACKING | **PENDING EXTERNAL** | RevenueCat/Paddle dashboards are the intended operational source; real customer/subscription/revenue records begin only after sandbox/provider setup. |
-| 35 | NEVER PUT SECRET PAYMENT CREDENTIALS IN THE CLIENT | **PASS** | Only NEXT_PUBLIC_REVENUECAT_WEB_API_KEY is client-visible; RevenueCat REST and Supabase service-role keys remain server env vars. |
+| 35 | NEVER PUT SECRET PAYMENT CREDENTIALS IN THE CLIENT | **PASS** | Web SDK uses the intentionally public NEXT_PUBLIC_REVENUECAT_WEB_API_KEY; server REST lookup prefers REVENUECAT_SECRET_API_KEY. Secret selection is unit-tested and no secret is committed/client-exposed. |
 | 36 | SERVER-SIDE ACCESS PROTECTION | **PASS** | Protected Plus and sync routes resolve server access; run sync requires paid premium or the exact claimed trial run ID. |
 | 37 | HOMEPAGE TRIAL UI | **PASS — OVERRIDE MODEL** | Account/sidebar states show first run includes Plus, active trial minutes, paid Plus, or Core without deceptive urgency. |
 | 38 | SUBSCRIPTION UX | **PASS IN CODE / PROVIDER CONFIG PENDING** | Branded modal states price/frequency/features/trial state and RevenueCat-Paddle checkout action. |
 | 39 | GITHUB IS THE DEPLOYMENT SOURCE OF TRUTH | **PASS IN REPO / DEPLOY PENDING** | Release branch is canonical. No incomplete file-transfer deployment will be accepted. |
 | 40 | DO NOT MERGE TO MAIN YET | **PASS** | main remains unmerged; release/final-production-pass is still the verification branch. |
-| 41 | HOSTING PLATFORM | **PENDING CONNECTION** | GitHub-native host path is required. Netlify plugin is not connected; current Vercel connector cannot access the account scope needed for native Git project inspection. |
+| 41 | HOSTING PLATFORM | **PENDING EXTERNAL CONNECTION** | Owner-selected path is Netlify native GitHub integration. No Netlify account action is connected in this environment, so the release branch cannot be legitimately linked/deployed here and no Vercel path is considered. |
 | 42 | DO NOT USE GITHUB PAGES FOR THE APP | **PASS** | No GitHub Pages deployment path is being used. |
 | 43 | CUSTOM DOMAIN PATH | **READY / PURCHASE PENDING** | Code remains domain-configurable; final domain purchase/connection is intentionally not claimed. |
 | 44 | CENTRALIZE SITE URL CONFIGURATION | **PASS** | NEXT_PUBLIC_SITE_URL and origin-derived return/callback paths are used instead of binding code to a preview hostname. |
 | 45 | DEPLOYED SITE TESTING | **PENDING** | Local/CI browser matrix passes; full GitHub-native deployed URL testing, console and network inspection remain. |
-| 46 | RESPONSIVE DESIGN | **PASS — CI** | 320/375/390/430/768/1024/1440 matrix with overflow/a11y checks and separate mobile/desktop composition. |
-| 47 | MOTION SYSTEM | **PASS** | Navigation/game/intervention/dismissal motion is differentiated and reduced-motion is supported. |
-| 48 | TYPOGRAPHY | **PASS** | Display, game labels, numeric/tabular values, interventions and hierarchy are intentionally separated. |
+| 46 | RESPONSIVE DESIGN | **PASS — CI** | 320/375/390/430/768/1024/1440 matrix plus the in-run mobile dock: <=140px open, <=46px collapsed, no 320px overflow, and desktop setup verified beside the game. |
+| 47 | MOTION SYSTEM | **PASS** | Navigation/game/intervention/dismissal motion is differentiated; continuation setup uses the ~1s black-hole/three-droplet transition and reduced-motion substitutes a functional fade/scale path. |
+| 48 | TYPOGRAPHY | **PASS** | Display, game labels, numeric/tabular values and interventions are separated; the compact setup dock uses a clean system-first stack with restrained 16–17px question / 14–15px answer / 11–12px secondary hierarchy. |
 | 49 | LOADING STATES | **PASS** | Game loading, entitlement checking, checkout loading and premium access resolution avoid false paid/free flashes. |
 | 50 | ERROR STATES | **PASS IN CODE / PAYMENT EXTERNAL PENDING** | Auth/game/network/payment fallbacks are recoverable; real Paddle sandbox errors still need provider verification. |
 | 51 | ACCESSIBILITY | **PASS — CI** | Keyboard/focus, semantic controls, forced colors, responsive text, reduced motion and audio-independent messaging are tested. |
 | 52 | PERFORMANCE | **PASS — CURRENT ASSET SET** | SVG game art, lazy Phaser import, lightweight generated audio and responsive rendering avoid heavy image bundles. |
 | 53 | REMOVE “GENERATED APP” VISUAL TELLS | **PASS — SCREENSHOT REVIEW** | Homepage moved away from SaaS grid language; game cards use authored imagery/materials and varied desktop proportions. |
 | 54 | VISUAL REFERENCE LOOP | **PASS — MULTIPLE ITERATIONS** | CI screenshots were inspected, compared, corrected, rerendered and inspected again for home and every game. |
-| 55 | FUNCTIONAL TEST JOURNEY | **PARTIAL** | Core journey is automated. Authenticated one-run Plus + real Paddle sandbox purchase portion waits on provider configuration. |
-| 56 | FAILURE TEST JOURNEY | **PARTIAL** | LocalStorage bypass, stale context, multi-tab lock, timeout, exhausted balance, reduced motion, presence failure and rapid input are covered; provider payment failures await sandbox. |
+| 55 | FUNCTIONAL TEST JOURNEY | **PARTIAL — EXTERNAL TAIL ONLY** | Core journey is automated including five-question entry, game-visible intro, one-question continuation, same-run personalization, every game and post-run flow. Authenticated deployed one-run Plus + real Paddle sandbox purchase still require external configuration. |
+| 56 | FAILURE TEST JOURNEY | **PARTIAL — EXTERNAL TAIL ONLY** | LocalStorage bypass, stale/returning context, continuation persistence, intervention collapse, 320px dock, reduced motion, multi-tab lock, timeout, exhausted balance, presence failure and rapid input are covered; provider payment failures await sandbox. |
 | 57 | PRODUCTION SECRETS | **PASS** | No production payment secrets are fabricated or committed. |
-| 58 | FINAL IMPLEMENTATION ORDER | **IN PROGRESS** | Architecture/core visuals/game calibration/trial/RevenueCat code and CI are done; provider sandbox and Git-native deployment are the remaining stages. |
+| 58 | FINAL IMPLEMENTATION ORDER | **IN PROGRESS — EXTERNAL STAGES** | Application code, onboarding rebuild, game calibration, trial/RevenueCat architecture and CI are green. Netlify native deployment, deployed auth, and provider sandbox lifecycle are the remaining stages. |
 | 59 | HOMEPAGE ACCEPTANCE CRITERIA | **PASS — OWNER OVERRIDE APPLIED** | All games visible, Sports retained by override, premium symbols/background/prompts/sidebar and responsive views are implemented. |
 | 60 | PER-GAME ACCEPTANCE CRITERIA | **PASS — CI RC** | Each current named game loads, resolves, animates, handles rapid input, mobile, sound, state and screenshots without console exceptions in latest green candidate. |
 | 61 | TRIAL ACCEPTANCE CRITERIA | **PASS — OVERRIDE MODEL / AUTH LIVE TEST PENDING** | Schema and server resolver enforce one 15-minute first-run trial. A real authenticated test account still needs deployed end-to-end verification. |
@@ -80,17 +80,18 @@ Status meanings:
 | 65 | AUDIO ACCEPTANCE CRITERIA | **PASS — CI** | Shared game-specific Web Audio, Reality Ping cue, master mute and persistent mute are implemented; persistence is in browser QA. |
 | 66 | DEPLOYMENT ACCEPTANCE CRITERIA | **PENDING HOST CONNECTION** | GitHub branch/build is green. Native Git checkout, deployment env, real URL games/audio/mobile/console/network are outstanding. |
 | 67 | DOMAIN ACCEPTANCE CRITERIA | **READY / CONNECTION PENDING** | Domain-sensitive code is configurable; temporary Git-native deployed URL and final DNS connection remain. |
-| 68 | FINAL VISUAL QUESTIONS | **PASS — RELEASE CANDIDATE** | Latest inspected renders show liquid-glass hub, visible game art, verified cultural symbols and differentiated game surfaces; latest atmosphere/prompt correction is under CI. |
-| 69 | FINAL COMPLETION REPORT | **NOT FINAL YET** | Evidence matrix is maintained here; final report waits for provider sandbox and deployed URL testing. |
+| 68 | FINAL VISUAL QUESTIONS | **PASS — RELEASE CANDIDATE** | Latest inspected renders show the liquid-glass hub, differentiated games and compact in-run onboarding; mobile dock footprint and desktop beside-game placement are browser-verified in the green candidate. |
+| 69 | FINAL COMPLETION REPORT | **CI REPORT CURRENT / PRODUCTION REPORT PENDING** | USER_TEST_FINAL_REPORT.md reflects the verified application-code SHA and CI results. Production completion still waits for Netlify deployed URL/auth and provider sandbox evidence. |
 | 70 | FINAL DEFINITION OF DONE | **NOT YET** | Automated/local green is insufficient by design. Paddle sandbox + RevenueCat lifecycle + GitHub-native deployed verification remain mandatory. |
 
 ## Current release blockers
 
-1. Configure a real Paddle **sandbox** merchant/product/prices and connect it to a RevenueCat Paddle web config.
-2. Create/import the monthly and annual products, attach them to the single `premium` entitlement, and expose them through the current offering.
-3. Run successful, cancelled and failed sandbox checkout journeys against a real authenticated Spin Out account.
-4. Connect a full-stack host directly to the GitHub repository/branch and deploy the exact verified commit through native Git integration.
-5. Exercise the deployed URL on desktop/mobile and inspect production console/network behavior.
-6. Only then promote that exact verified commit to `main`.
+1. Connect the GitHub repository to Netlify through native Git integration and enable a branch deploy for `release/final-production-pass`.
+2. Configure the Netlify candidate environment, including the public RevenueCat Web key and server-only `REVENUECAT_SECRET_API_KEY`.
+3. Configure a real Paddle **sandbox** merchant/product/prices and connect it to a RevenueCat Paddle web config.
+4. Create/import the monthly and annual products, attach them to the single `premium` entitlement, and expose them through the current offering.
+5. Run successful, cancelled and failed sandbox checkout journeys against a real authenticated Spin Out account.
+6. Exercise the deployed URL on desktop/mobile, verify the one-run Plus account flow, and inspect production console/network behavior.
+7. Only then promote that exact verified commit to `main`.
 
 No provider credential, merchant approval, deployed URL, or payment result is treated as successful until observed.

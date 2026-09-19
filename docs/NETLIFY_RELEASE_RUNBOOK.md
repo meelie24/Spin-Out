@@ -48,6 +48,7 @@ Before using the candidate:
    `release/final-production-pass`
 3. Use the resulting Netlify branch-deploy URL as the release-candidate URL.
 4. Record the deployed Git SHA from the Netlify deploy details.
+5. Record the Netlify deploy ID and immutable deploy permalink as evidence. The branch URL can move on later pushes; the deploy permalink is the immutable copy of that deployment.
 
 The candidate is only valid if the deployed SHA matches the release branch SHA being verified.
 
@@ -63,6 +64,7 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 SUPABASE_SERVICE_ROLE_KEY
 NEXT_PUBLIC_REVENUECAT_WEB_API_KEY
+REVENUECAT_SECRET_API_KEY
 ```
 
 For the release-branch deploy:
@@ -70,9 +72,11 @@ For the release-branch deploy:
 - `NEXT_PUBLIC_SITE_URL` must equal the actual HTTPS branch-deploy origin being tested.
 - Supabase public URL/publishable key may be exposed to the browser by design.
 - `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never use a `NEXT_PUBLIC_` prefix.
-- `NEXT_PUBLIC_REVENUECAT_WEB_API_KEY` is the RevenueCat Web SDK public key.
+- `NEXT_PUBLIC_REVENUECAT_WEB_API_KEY` is the RevenueCat Web SDK public key and is intentionally browser-visible.
+- `REVENUECAT_SECRET_API_KEY` is server-only. The server entitlement lookup prefers this key for RevenueCat REST customer status and it must never use a `NEXT_PUBLIC_` prefix.
+- Existing local/non-production environments retain a tested fallback to the older public key names, but the release candidate should use the server secret for the server lookup.
 
-The repository README also reserves `REVENUECAT_SECRET_API_KEY` for server-only RevenueCat configuration. Do not invent or expose a secret key. Only add it when the corresponding production/provider flow actually uses it.
+Do not invent or expose the secret key. Add the real value only through Netlify's server-side environment settings.
 
 If an environment variable changes, create a new deploy before treating the change as tested.
 

@@ -28,3 +28,14 @@ These instructions were explicitly given after the current master prompt and the
    - Do not merge `main` merely to obtain a deployment.
    - After the release candidate passes deployed browser/auth/payment verification, promote that exact verified candidate and then connect the final custom domain through Netlify/the registrar.
    - Any older Vercel references in planning or implementation documents are stale and must not control release decisions.
+
+5. **Mandatory onboarding is capped at five high-value interactions, then continues during gameplay.**
+   - The required sequence is: five essential questions → actual game visible → liquid-glass explanation → **Start Reality Run** → live game with one continuation question at a time.
+   - If the game is already known from the homepage, do not ask for it again; use the freed interaction for current urge.
+   - There is no deposit/load screen after the five questions.
+   - Desktop continuation setup is a compact liquid-glass card beside the game. It never expands into a full form.
+   - Mobile continuation setup is a compact bottom dock: ordinary open state 110–140px maximum, collapsed rail 42–46px, sleek system typography, and gameplay remains visually dominant.
+   - A completed continuation question is saved first, then consumed by the one-second 2D black-hole interaction with exactly three glass droplets bouncing on an invisible baseline.
+   - The first meaningful game action and foreground interventions collapse the optional setup. It only reopens when the user chooses to reopen it.
+   - Context added during the run must affect that same active Reality Run.
+   - The primary user comparison remains the same five perspectives: genuinely trying to stop, skeptical, low patience, returning, and mobile. Deliberately harsher edge cases remain regression tests rather than the primary source of product-reaction conclusions.
