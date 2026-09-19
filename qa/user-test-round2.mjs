@@ -105,7 +105,9 @@ async function finishKnownGameCoreSetup(page, game = 'slots') {
   await page.getByRole('heading', { name: 'What were you hoping would happen?' }).waitFor();
   await page.getByRole('button', { name: 'Win back what I lost', exact: true }).click();
 
-  await page.getByRole('heading', { name: "Realistically, what is this money for? If it's not for anything, what could it be put towards to make the next 1-3 months easier for you?" }).waitFor({ timeout: 5_000 });
+  await page.getByRole('heading', { name: 'Realistically, what is this money for?' }).waitFor({ timeout: 5_000 });
+  assert(await page.getByText("If it's not for anything, what could it be put towards to make the next 1-3 months easier for you?", { exact: true }).count() === 1,
+    'money-context question did not separate the supporting thought from the headline');
   await page.getByRole('button', { name: 'Car payment', exact: true }).click();
 
   await page.getByRole('heading', { name: 'How bad do you want to play right now?' }).waitFor();
@@ -159,21 +161,43 @@ try {
     assert(await page.locator('.in-run-setup .setup-question').count() === 1,
       'continuation setup rendered more than one question at once');
 
-    const scrollRow = page.locator('.in-run-setup .setup-choice-row.is-scroll');
-    const maskImage = await scrollRow.evaluate(el => {
-      const style = getComputedStyle(el);
-      return style.maskImage || style.webkitMaskImage || 'none';
-    });
-    assert(maskImage && maskImage !== 'none',
-      'horizontal setup choices ended in a raw clipped chip instead of a deliberate edge fade');
+    assert(await page.getByText(/Finish your setup/i).count() === 0,
+      'in-run setup still used task-list language');
+    assert(await page.getByText(/\d+ left/i).count() === 0,
+      'in-run setup still exposed a remaining-question count');
+
+    const firstPageLabels = await page.locator('.in-run-setup .setup-choice-row button').allTextContents();
+    assert(JSON.stringify(firstPageLabels) === JSON.stringify(['Today','Tomorrow','This week','More']),
+      `first choice page was not the explicit compact set: ${JSON.stringify(firstPageLabels)}`);
+    assert(await page.getByRole('button', { name: 'Next week', exact: true }).count() === 0,
+      'later choices were still rendered off-screen instead of behind More');
+
+    await page.getByRole('button', { name: 'More', exact: true }).click();
+    const secondPageLabels = await page.locator('.in-run-setup .setup-choice-row button').allTextContents();
+    assert(JSON.stringify(secondPageLabels) === JSON.stringify(['Back','Next week','Pick a date','Not sure']),
+      `More did not reveal every remaining date choice: ${JSON.stringify(secondPageLabels)}`);
+    const rowOverflow = await page.locator('.in-run-setup .setup-choice-row').evaluate(el => el.scrollWidth - el.clientWidth);
+    assert(rowOverflow <= 1, `paged setup choices still required ${rowOverflow}px of horizontal scrolling`);
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
 
     const openBox = await setup.boundingBox();
     assert(Boolean(openBox), 'mobile continuation setup had no measurable bounding box');
     assert(openBox.height <= 140,
       `mobile continuation setup was ${openBox.height}px tall; expected <= 140px`);
 
-    await page.getByRole('button', { name: /Collapse finish your setup/i }).click();
+    const questionBefore = (await page.locator('.setup-question-title').innerText()).trim();
+    await page.getByRole('button', { name: 'Not now', exact: true }).click();
     await page.locator('.in-run-setup[data-state="collapsed"]').waitFor();
+    assert(await page.getByRole('button', { name: 'Make it more immersive', exact: true }).count() === 1,
+      'collapsed dock did not sell the user-facing payoff');
+    const storedAfterNotNow = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2') || 'null'));
+    assert(!(storedAfterNotNow?.profile?.onboardingCompleted || []).includes('income-date'),
+      'Not now incorrectly marked the current question complete');
+    await page.getByRole('button', { name: 'Make it more immersive', exact: true }).click();
+    assert((await page.locator('.setup-question-title').innerText()).trim() === questionBefore,
+      'reopening the dock did not restore the same unanswered question');
+    await page.getByRole('button', { name: 'Not now', exact: true }).click();
+
     const collapsedBox = await setup.boundingBox();
     assert(Boolean(collapsedBox), 'collapsed setup rail had no measurable bounding box');
     assert(collapsedBox.height <= 46,
@@ -354,6 +378,39 @@ try {
     assert(setupBox.width >= 220 && setupBox.width <= 280,
       `desktop setup card width was ${setupBox.width}px; expected a compact side card`);
     await page.screenshot({ path: 'qa-artifacts/in-run-setup-desktop-1280.png', fullPage: true });
+  });
+
+
+  await check('final optional answer leaves no fake completion task', async context => {
+    const page = await context.newPage();
+    const allExceptIncome = [
+      'available-money','obligation-amount','obligation-date','quit-reason','money-goal',
+      'difficult-times','lender-name','lender-helped','lender-amount','payday-plan'
+    ];
+    const p = profile('slots', { onboardingCompleted: allExceptIncome });
+    await seedActive(context, p, runFor(p));
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.in-run-setup').waitFor();
+    await page.getByRole('button', { name: 'This week', exact: true }).click();
+    await page.waitForTimeout(1_100);
+    assert(await page.locator('.in-run-setup').count() === 0,
+      'finished optional context still showed a completion rail/card');
+    assert(await page.getByText(/Setup finished|You’re all set|That’s plenty/i).count() === 0,
+      'finished optional context announced software-style completion copy');
+  });
+
+  await check('sign-in CTA sounds like the user asking for the action', async context => {
+    const page = await context.newPage();
+    await page.goto(base, { waitUntil: 'domcontentloaded' });
+    const signIn = page.getByRole('button', { name: 'Sign in', exact: true });
+    if (await signIn.count()) {
+      await signIn.click();
+      await page.getByRole('dialog').waitFor();
+      assert(await page.getByRole('button', { name: 'Send me the link', exact: true }).count() === 1,
+        'sign-in CTA did not use the approved first-person action language');
+      assert(await page.getByRole('button', { name: 'Email sign-in link', exact: true }).count() === 0,
+        'old product-centric sign-in CTA remained visible');
+    }
   });
 
   await check('returning profile keeps known continuation context', async context => {
