@@ -211,6 +211,61 @@ async function completeOneObservedPlay(page) {
 }
 
 
+async function observeIdleMachineLights(page) {
+  await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+  await page.evaluate(() => document.fonts.ready);
+  const canvas = page.locator('.phaser-stage canvas');
+  await canvas.scrollIntoViewIfNeeded();
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+
+  const frames = [];
+  for (let index = 0; index < 3; index++) {
+    if (index) await page.waitForTimeout(350);
+    const png = await canvas.screenshot({ animations: 'disabled' });
+    frames.push('data:image/png;base64,' + png.toString('base64'));
+  }
+
+  return page.evaluate(async sources => {
+    const frames = [];
+    for (const source of sources) {
+      const image = new Image();
+      image.src = source;
+      await image.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0);
+      frames.push(context.getImageData(0, 0, image.width, image.height));
+    }
+    const first = frames[0];
+    if (frames.some(frame => frame.width !== first.width || frame.height !== first.height)) return { sameSize: false };
+    const { width, height } = first;
+    const rows = [104, 536];
+    let sampled = 0;
+    let lit = 0;
+    const changed = [0, 0];
+    for (const sceneY of rows) {
+      for (let y = Math.floor((sceneY - 6) / 640 * height); y < Math.ceil((sceneY + 6) / 640 * height); y++) {
+        for (let x = Math.floor(85 / 1000 * width); x < Math.ceil(917 / 1000 * width); x++) {
+          const offset = (y * width + x) * 4;
+          sampled++;
+          // Ensure a rendered bronze/gold strip was sampled, not an empty image.
+          if (first.data[offset] > 75 && first.data[offset + 1] > 40 && first.data[offset + 3] > 240) lit++;
+          for (let index = 1; index < frames.length; index++) {
+            const difference = Math.abs(first.data[offset] - frames[index].data[offset])
+              + Math.abs(first.data[offset + 1] - frames[index].data[offset + 1])
+              + Math.abs(first.data[offset + 2] - frames[index].data[offset + 2]);
+            if (difference > 12) changed[index - 1]++;
+          }
+        }
+      }
+    }
+    return { sameSize: true, width, height, sampled, lit, changed };
+  }, frames);
+}
+
+
 const browser = await chromium.launch({ headless: true });
 
 try {
@@ -1130,6 +1185,92 @@ await check('slot symbols stay inside the same reel windows after a spin', async
   assert(observed.anchorFound, 'could not locate the initial empty top edge of the reel windows');
   assert(observed.changedRatio < .2,
     'symbols clipped into the previously empty top reel border after a spin: ' + JSON.stringify(observed));
+});
+
+
+// The normal-motion control prevents a blank/wrong crop from making reduced motion pass.
+await check('idle machine light observation detects ordinary animation', async context => {
+  const p = profile('slots');
+  await seedActive(context, p, runFor(p));
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 1280, height: 1100 });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  const observed = await observeIdleMachineLights(page);
+  assert(observed.sameSize && observed.sampled > 100 && observed.lit > 10,
+    'could not obtain stable, nonempty machine-light frames: ' + JSON.stringify(observed));
+  assert(observed.changed.some(count => count > 20),
+    'normal-motion sensitivity control saw no decorative light changes: ' + JSON.stringify(observed));
+});
+
+await check('reduced motion keeps idle machine lights visually still', async context => {
+  const p = profile('slots');
+  await seedActive(context, p, runFor(p));
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 1280, height: 1100 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  assert(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches),
+    'browser did not apply the requested reduced-motion preference');
+  const observed = await observeIdleMachineLights(page);
+  assert(observed.sameSize && observed.sampled > 100 && observed.lit > 10,
+    'could not obtain stable, nonempty machine-light frames: ' + JSON.stringify(observed));
+  assert(observed.changed.every(count => count <= 2),
+    'idle Phaser lights kept animating under reduced motion: ' + JSON.stringify(observed));
+});
+
+await check('Scratch reveals nine readable and accessible prize amounts on small phones', async context => {
+  const p = profile('lottery');
+  await seedActive(context, p, runFor(p));
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+  await completeOneObservedPlay(page);
+  const amounts = page.getByRole('group', { name: 'Revealed scratch amounts', exact: true });
+  assert(await amounts.count() === 1,
+    'the revealed scratch amounts have no readable, accessible text equivalent');
+  const cells = await amounts.locator('span').evaluateAll(nodes => nodes.map(node => ({
+    text: node.textContent,
+    fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
+    width: node.clientWidth,
+    contentWidth: node.scrollWidth,
+  })));
+  assert(cells.length === 9 && cells.every(cell => /^\$[\d,.]+$/.test(cell.text || '')),
+    'the revealed prize grid did not retain all nine amounts');
+  assert(cells.every(cell => cell.fontSize >= 14 && cell.contentWidth <= cell.width + 1),
+    'revealed scratch amounts are too small or clipped: ' + JSON.stringify(cells));
+});
+
+await check('home and optional questions reflow when text is enlarged to 200 percent', async context => {
+  const page = await context.newPage();
+  const enlargeText = async () => page.evaluate(() => {
+    const styles = [...document.querySelectorAll('body *')]
+      .filter(node => node instanceof HTMLElement && node.children.length === 0 && node.textContent?.trim())
+      .map(node => ({ node, font: parseFloat(getComputedStyle(node).fontSize) }));
+    for (const { node, font } of styles) node.style.setProperty('font-size', `${font * 2}px`, 'important');
+  });
+  const clippedText = async () => page.evaluate(() => [...document.querySelectorAll('h1,h2,h3,button,a')]
+    .filter(node => {
+      const r = node.getBoundingClientRect();
+      const s = getComputedStyle(node);
+      return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && node.textContent?.trim()
+        && node.scrollWidth > node.clientWidth + 2;
+    }).map(node => ({ text: node.textContent?.trim().slice(0,80), width: node.clientWidth, contentWidth: node.scrollWidth })));
+  await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await page.evaluate(() => document.fonts.ready);
+  await enlargeText();
+  const home = await clippedText();
+  const homeOverflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  await page.screenshot({ path: 'qa-artifacts/home-text-200-390.png', fullPage: true, animations: 'disabled' });
+  await startKnownGameRealityRun(page, 'slots');
+  await enlargeText();
+  const setup = await clippedText();
+  const setupOverflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  await page.screenshot({ path: 'qa-artifacts/optional-text-200-390.png', fullPage: true, animations: 'disabled' });
+  assert(homeOverflow <= 1 && setupOverflow <= 1 && home.length === 0 && setup.length === 0,
+    '200% text is clipped: ' + JSON.stringify({ homeOverflow, setupOverflow, home, setup }));
 });
 
   if (failures.length) {

@@ -15,7 +15,7 @@ try {
         const page = await context.newPage();
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
-        await page.goto(`${base}/qa-plus-fixture?state=${state}`, { waitUntil: 'domcontentloaded' });
+        await page.goto(`${base}/qa-plus-fixture?state=${state}&clock=${Date.now()}`, { waitUntil: 'domcontentloaded' });
         await page.getByRole('heading', { name: 'Your history.', exact: true }).waitFor();
         await page.evaluate(() => document.fonts.ready);
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
