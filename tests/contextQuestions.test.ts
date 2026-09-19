@@ -39,6 +39,21 @@ function profile(patch: Partial<RealityProfile> = {}): RealityProfile {
   };
 }
 
+type PostRunContext = {
+  runCount: number;
+  moneyKeptCents: number;
+  exitedAfterPing: boolean;
+  limitExceeded: boolean;
+  financialPressure: boolean;
+  paydaySoon: boolean;
+};
+
+const routePostRunContextQuestion = nextPostRunContextQuestion as unknown as (
+  profile: RealityProfile,
+  context: PostRunContext,
+) => string | null;
+
+
 test('automatic in-run context is limited to immediately useful financial facts', () => {
   assert.deepEqual(getAutomaticInRunContextKeys(profile()), [
     'income-date',
@@ -90,20 +105,20 @@ test('post-run earns one deeper question from the moment that gives it a job', (
     paydaySoon: false,
   };
 
-  assert.equal(nextPostRunContextQuestion(profile(), base), 'money-goal');
+  assert.equal(routePostRunContextQuestion(profile(), base), 'money-goal');
 
   const goalAnswered = profile({
     personalMoneyGoal: 'Savings',
     onboardingCompleted: ['money-goal'],
   });
-  assert.equal(nextPostRunContextQuestion(goalAnswered, { ...base, runCount: 2 }), 'difficult-times');
+  assert.equal(routePostRunContextQuestion(goalAnswered, { ...base, runCount: 2 }), 'difficult-times');
 
   const patternAnswered = profile({
     personalMoneyGoal: 'Savings',
     difficultTimes: ['late-night'],
     onboardingCompleted: ['money-goal','difficult-times'],
   });
-  assert.equal(nextPostRunContextQuestion(patternAnswered, {
+  assert.equal(routePostRunContextQuestion(patternAnswered, {
     ...base,
     runCount: 3,
     exitedAfterPing: true,
@@ -115,7 +130,7 @@ test('post-run earns one deeper question from the moment that gives it a job', (
     quitReason: 'Stop taking bill money',
     onboardingCompleted: ['money-goal','difficult-times','quit-reason'],
   });
-  assert.equal(nextPostRunContextQuestion(reasonAnswered, {
+  assert.equal(routePostRunContextQuestion(reasonAnswered, {
     ...base,
     runCount: 3,
     paydaySoon: true,
@@ -131,7 +146,7 @@ test('post-run sensitive lender questions only appear when financially relevant'
     onboardingCompleted: ['money-goal','difficult-times','quit-reason','payday-plan'],
   });
 
-  assert.equal(nextPostRunContextQuestion(p, {
+  assert.equal(routePostRunContextQuestion(p, {
     runCount: 4,
     moneyKeptCents: 0,
     exitedAfterPing: false,
@@ -140,7 +155,7 @@ test('post-run sensitive lender questions only appear when financially relevant'
     paydaySoon: false,
   }), null);
 
-  assert.equal(nextPostRunContextQuestion(p, {
+  assert.equal(routePostRunContextQuestion(p, {
     runCount: 4,
     moneyKeptCents: 0,
     exitedAfterPing: false,
@@ -155,7 +170,7 @@ test('an honest completed post-run answer is never asked again', () => {
     personalMoneyGoal: null,
     onboardingCompleted: ['money-goal'],
   });
-  assert.equal(nextPostRunContextQuestion(honestlyUnsure, {
+  assert.equal(routePostRunContextQuestion(honestlyUnsure, {
     runCount: 1,
     moneyKeptCents: 6_000,
     exitedAfterPing: false,
