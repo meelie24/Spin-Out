@@ -5983,7 +5983,7 @@ body:has(.plain-page){
   .run-shell[data-environment="layered-casino"]:before{
     align-items:center!important;
     justify-content:flex-end!important;
-    padding:170px -10px 0 0!important;
+    padding:170px 0 0 0!important;
     background-position:
       -16% 77%,
       110% 56%,
