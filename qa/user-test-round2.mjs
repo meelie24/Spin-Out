@@ -986,7 +986,7 @@ await check('clearing income preserves null while an explicit zero remains zero'
   await page.goto(base, { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'My reality', exact: true }).first().click();
   await page.getByRole('button', { name: 'Edit money coming in', exact: true }).click();
-  await page.getByLabel('Money until more comes in', { exact: true }).fill('0');
+  await page.getByLabel(/Money until more comes in/).fill('0');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await page.locator('.reality-context-summary').waitFor();
   const explicit = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2')).profile);
