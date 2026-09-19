@@ -172,6 +172,48 @@ try {
       `collapsed setup rail was ${collapsedBox.height}px tall; expected <= 46px`);
   });
 
+
+  await check('compact dock survives a 320px phone viewport', async context => {
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 320, height: 568 });
+    await startKnownGameRealityRun(page, 'slots');
+
+    const setup = page.locator('.in-run-setup');
+    await setup.waitFor();
+    const box = await setup.boundingBox();
+    assert(Boolean(box), '320px setup dock had no measurable bounding box');
+    assert(box.height <= 140,
+      `320px setup dock was ${box.height}px tall; expected <= 140px`);
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    assert(overflow <= 1, `320px run introduced ${overflow}px of horizontal page overflow`);
+  });
+
+  await check('reduced motion keeps setup functional without black-hole bounce', async context => {
+    const page = await context.newPage();
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await startKnownGameRealityRun(page, 'slots');
+
+    const setup = page.locator('.in-run-setup');
+    await setup.waitFor();
+    assert(await setup.getAttribute('data-reduced-motion') === 'true',
+      'continuation setup did not detect reduced-motion preference');
+
+    const firstQuestion = (await page.locator('.setup-question-title').innerText()).trim();
+    await page.getByRole('button', { name: 'This week', exact: true }).click();
+    await page.locator('.in-run-setup[data-state="consuming"]').waitFor();
+
+    const hiddenEffects = await page.locator('.setup-black-hole, .setup-droplet').evaluateAll(nodes =>
+      nodes.every(node => getComputedStyle(node).display === 'none')
+    );
+    assert(hiddenEffects, 'reduced-motion path still displayed the black-hole or bouncing droplets');
+
+    await page.waitForTimeout(220);
+    const nextQuestion = (await page.locator('.setup-question-title').innerText()).trim();
+    assert(nextQuestion !== firstQuestion,
+      'reduced-motion path did not advance to the next setup question');
+  });
+
   await check('continuation answer persists before next question', async context => {
     const page = await context.newPage();
     await startKnownGameRealityRun(page, 'slots');
@@ -194,6 +236,14 @@ try {
     assert(Array.isArray(stored?.profile?.onboardingCompleted)
       && stored.profile.onboardingCompleted.includes('income-date'),
       'continuation answer was not persisted before advancing');
+
+    await page.waitForFunction(() => {
+      const raw = localStorage.getItem('spinout.active.v2');
+      const active = raw ? JSON.parse(raw) : null;
+      return Array.isArray(active?.profile?.onboardingCompleted)
+        && active.profile.onboardingCompleted.includes('income-date')
+        && Boolean(active.profile.nextIncomeDate);
+    }, null, { timeout: 5_000 });
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
