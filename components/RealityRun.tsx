@@ -711,7 +711,7 @@ export function RealityRun({
         <InRunSetup
           profile={profile}
           foregroundOpen={Boolean(ping) || Boolean(longRun) || blockedByOtherTab}
-          gameInteractionCount={gameInteractionCount}
+          collapseSignal={gameInteractionCount + run.pings.length}
           onProfileChange={onProfileChange}
         />
       <section className="run-card" aria-label="Reality Run">

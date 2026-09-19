@@ -247,12 +247,12 @@ function cents(value: string) {
 export function InRunSetup({
   profile,
   foregroundOpen,
-  gameInteractionCount,
+  collapseSignal,
   onProfileChange,
 }: {
   profile: RealityProfile;
   foregroundOpen: boolean;
-  gameInteractionCount: number;
+  collapseSignal: number;
   onProfileChange: (next: RealityProfile) => void;
 }) {
   const questions = useMemo(() => pendingQuestions(profile), [profile]);
@@ -263,13 +263,14 @@ export function InRunSetup({
   const [inputValue, setInputValue] = useState('');
   const [reducedMotion, setReducedMotion] = useState(false);
   const [showComplete, setShowComplete] = useState(false);
-  const foregroundRef = useRef(foregroundOpen);
-  const firstInteraction = useRef(gameInteractionCount);
-  const hadQuestion = useRef(questions.length > 0);
   const timerRef = useRef<number | null>(null);
+  const completionTimerRef = useRef<number | null>(null);
+  const [openAtSignal, setOpenAtSignal] = useState(collapseSignal);
 
   const current = consumingQuestion ?? questions[0] ?? null;
   const remaining = questions.length;
+  const forcedCollapsed = foregroundOpen || collapseSignal > openAtSignal;
+  const effectiveExpanded = expanded && !forcedCollapsed;
 
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -279,34 +280,9 @@ export function InRunSetup({
     return () => media?.removeEventListener?.('change', sync);
   }, []);
 
-  useEffect(() => {
-    foregroundRef.current = foregroundOpen;
-    if (foregroundOpen) setExpanded(false);
-  }, [foregroundOpen]);
-
-  useEffect(() => {
-    if (gameInteractionCount > firstInteraction.current) {
-      firstInteraction.current = gameInteractionCount;
-      setExpanded(false);
-    }
-  }, [gameInteractionCount]);
-
-  useEffect(() => {
-    setCustomDate(false);
-    setInputValue('');
-  }, [current?.key]);
-
-  useEffect(() => {
-    if (hadQuestion.current && questions.length === 0 && !consuming) {
-      setShowComplete(true);
-      const timer = window.setTimeout(() => setShowComplete(false), reducedMotion ? 250 : 1_200);
-      return () => window.clearTimeout(timer);
-    }
-    if (questions.length > 0) hadQuestion.current = true;
-  }, [questions.length, consuming, reducedMotion]);
-
   useEffect(() => () => {
     if (timerRef.current != null) window.clearTimeout(timerRef.current);
+    if (completionTimerRef.current != null) window.clearTimeout(completionTimerRef.current);
   }, []);
 
   const complete = (question: SetupQuestion, value: string | number | boolean | null) => {
@@ -370,12 +346,19 @@ export function InRunSetup({
     onProfileChange(next);
 
     const duration = reducedMotion ? 130 : 960;
+    const finishesSetup = pendingQuestions(next).length === 0;
     timerRef.current = window.setTimeout(() => {
       setConsuming(false);
       setConsumingQuestion(null);
       setCustomDate(false);
       setInputValue('');
-      if (foregroundRef.current) setExpanded(false);
+      if (finishesSetup) {
+        setShowComplete(true);
+        completionTimerRef.current = window.setTimeout(
+          () => setShowComplete(false),
+          reducedMotion ? 250 : 1_200,
+        );
+      }
     }, duration);
   };
 
@@ -402,16 +385,19 @@ export function InRunSetup({
     );
   }
 
-  const state = consuming ? 'consuming' : expanded ? 'expanded' : 'collapsed';
+  const state = forcedCollapsed ? 'collapsed' : consuming ? 'consuming' : effectiveExpanded ? 'expanded' : 'collapsed';
 
-  if (!expanded && !consuming) {
+  if (state === 'collapsed') {
     return (
       <aside className="in-run-setup" data-state="collapsed" data-reduced-motion={reducedMotion ? 'true' : 'false'}>
         <button
           type="button"
           className="setup-rail"
           aria-label={`Finish your setup, ${remaining} left`}
-          onClick={() => setExpanded(true)}
+          onClick={() => {
+            setOpenAtSignal(collapseSignal);
+            setExpanded(true);
+          }}
         >
           <span>Finish your setup</span>
           <small>{remaining} left</small>
