@@ -18,7 +18,7 @@ When the homepage already tells Spin Out which game the person chose, the five r
 
 1. How much were you about to put in?
 2. What were you hoping would happen?
-3. What do you still need this money for?
+3. Realistically, what is this money for? If it's not for anything, what could it be put towards to make the next 1-3 months easier for you?
 4. How bad do you want to play right now?
 5. Before you start, where do you want to stop?
 
@@ -79,7 +79,7 @@ The mobile design is not a shrunk desktop sidebar. It is a glass dock attached t
 
 ## Findings that were fixed during this retest
 
-1. The original fourth core question, **“What does this money need to make it past?”**, still sounded authored. It is now **“What do you still need this money for?”**
+1. The fourth core question was refined again to the owner-approved wording: **“Realistically, what is this money for? If it's not for anything, what could it be put towards to make the next 1-3 months easier for you?”**
 2. Mobile horizontal choices originally ended on a raw partial chip. A deliberate right-edge fade now makes horizontal continuation obvious.
 3. Desktop acceptance originally reused a mobile-only intro assertion. The test now validates whichever responsive explanation is actually visible.
 4. The RevenueCat release path had a documentation/code naming mismatch. The server entitlement lookup now prefers `REVENUECAT_SECRET_API_KEY`, with tested fallbacks for existing non-production environments.

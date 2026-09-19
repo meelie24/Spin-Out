@@ -43,7 +43,7 @@ Each continuation answer is persisted before its completion motion, then the que
 
 This remains simulated persona/journey testing rather than recruited-human interviews.
 
-**Genuinely trying to stop:** the first five questions now provide enough immediate anchors for a useful run without demanding the entire financial/personal profile first. Adding more context during play changes the same run.
+**Genuinely trying to stop:** the first five questions now provide enough immediate anchors for a useful run without demanding the entire financial/personal profile first. The money-context question is now **“Realistically, what is this money for? If it's not for anything, what could it be put towards to make the next 1-3 months easier for you?”** Adding more context during play changes the same run.
 
 **Skeptical:** “more immersive” is supported by observable product behavior. Newly supplied context becomes part of the live run rather than disappearing into a profile form.
 

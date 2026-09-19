@@ -17,7 +17,7 @@ The first five interactions must be enough for a meaningful Reality Run even if 
 1. **How much were you about to put in?**
 2. Ask **What were you about to play?** only when the game is unknown. If the game is already known from the homepage card, use the freed interaction for **How bad do you want to play right now?**
 3. **What were you hoping would happen?** Natural choices: Win some money; Win back what I lost; Kill some time; Feel something; Shut my brain off for a bit; Honestly, it's just habit; Something else.
-4. **What do you still need this money for?** Natural choices map to the existing obligation types. Amount and due date are deferred.
+4. **Realistically, what is this money for? If it's not for anything, what could it be put towards to make the next 1-3 months easier for you?** Natural choices map to the existing obligation types. Amount and due date are deferred.
 5. **Before you start, where do you want to stop?** 5 rounds; 10 rounds; 5 minutes; 10 minutes; I'll decide when I'm done.
 
 When the game is unknown, the game-selection interaction replaces the starting-urge interaction so the total stays at five.

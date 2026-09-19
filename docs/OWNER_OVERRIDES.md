@@ -32,6 +32,7 @@ These instructions were explicitly given after the current master prompt and the
 5. **Mandatory onboarding is capped at five high-value interactions, then continues during gameplay.**
    - The required sequence is: five essential questions → actual game visible → liquid-glass explanation → **Start Reality Run** → live game with one continuation question at a time.
    - If the game is already known from the homepage, do not ask for it again; use the freed interaction for current urge.
+   - The fourth core question is locked as: **“Realistically, what is this money for? If it's not for anything, what could it be put towards to make the next 1-3 months easier for you?”**
    - There is no deposit/load screen after the five questions.
    - Desktop continuation setup is a compact liquid-glass card beside the game. It never expands into a full form.
    - Mobile continuation setup is a compact bottom dock: ordinary open state 110–140px maximum, collapsed rail 42–46px, sleek system typography, and gameplay remains visually dominant.
