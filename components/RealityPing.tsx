@@ -43,7 +43,7 @@ export function RealityPing({
       <div className="ping-actions">
         {ping.requiresChoice ? (
           <>
-            <button type="button" className="ping-continue" onClick={onDismiss}>Keep going</button>
+            <button type="button" className="ping-continue" onClick={onDismiss}>Continue run</button>
             <button type="button" className="ping-leave" onClick={onExit}>{"I'm done"}</button>
           </>
         ) : (

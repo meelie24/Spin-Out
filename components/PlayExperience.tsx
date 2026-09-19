@@ -90,6 +90,7 @@ export function PlayExperience({ initialGame = null }: { initialGame?: GamblingT
         profile={profile}
         restoredRun={restored}
         sessionLimit={sessionLimit}
+        onProfileChange={saveProfile}
         onEnd={data => {
           setEnd(data);
           setRestored(null);

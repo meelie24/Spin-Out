@@ -1,0 +1,540 @@
+'use client';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { isFinancialContextStale } from '@/lib/engine';
+import type {
+  DifficultTime,
+  OnboardingQuestionKey,
+  PaydayPlanAction,
+  RealityProfile,
+} from '@/lib/types';
+
+type QuestionKind = 'date' | 'money' | 'text' | 'choices' | 'yes-no';
+
+interface ChoiceOption {
+  label: string;
+  value: string;
+}
+
+interface SetupQuestion {
+  key: OnboardingQuestionKey;
+  title: string;
+  kind: QuestionKind;
+  options?: ChoiceOption[];
+  placeholder?: string;
+  skipLabel?: string;
+  scroll?: boolean;
+}
+
+const financialKeys: OnboardingQuestionKey[] = [
+  'income-date',
+  'available-money',
+  'obligation-amount',
+  'obligation-date',
+];
+
+const difficultOptions: ChoiceOption[] = [
+  { value: 'payday', label: 'Payday' },
+  { value: 'friday-night', label: 'Friday night' },
+  { value: 'late-night', label: 'Late at night' },
+  { value: 'after-drinking', label: "When I'm drinking" },
+  { value: 'after-argument', label: 'After an argument' },
+  { value: 'bored', label: "When I'm bored" },
+  { value: 'stressed', label: "When I'm stressed" },
+  { value: 'alone', label: "When I'm alone" },
+];
+
+const paydayOptions: ChoiceOption[] = [
+  { value: 'open-spinout', label: 'Open Spin Out first' },
+  { value: 'move-bill-money', label: 'Move bill money first' },
+  { value: 'move-savings', label: 'Move savings first' },
+  { value: 'message-someone', label: 'Message someone' },
+  { value: 'use-gambling-block', label: 'Use a gambling block' },
+  { value: 'skip', label: 'Not sure' },
+];
+
+function obligationName(profile: RealityProfile) {
+  const names: Record<string, string> = {
+    rent: 'rent / mortgage',
+    car: 'car payment',
+    groceries: 'groceries',
+    'credit-card': 'credit card',
+    utilities: 'utilities',
+    childcare: 'childcare',
+    loan: 'debt / loan',
+    insurance: 'insurance',
+    phone: 'phone bill',
+    other: 'bill',
+  };
+  return names[profile.obligationType] ?? 'bill';
+}
+
+function isoInDays(days: number) {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function inferredCompletion(profile: RealityProfile) {
+  const set = new Set<OnboardingQuestionKey>(profile.onboardingCompleted ?? []);
+
+  if (!profile.onboardingCompleted) {
+    if (profile.nextIncomeDate) set.add('income-date');
+    if (profile.availableUntilIncomeCents != null) set.add('available-money');
+
+    if (profile.obligationType === 'none') {
+      set.add('obligation-amount');
+      set.add('obligation-date');
+    } else {
+      if (profile.obligationAmountCents != null) set.add('obligation-amount');
+      if (profile.obligationDueDate) set.add('obligation-date');
+    }
+
+    if (profile.quitReason?.trim()) set.add('quit-reason');
+    if (profile.personalMoneyGoal?.trim()) set.add('money-goal');
+    if (profile.difficultTimes?.length) set.add('difficult-times');
+
+    if (profile.recentLenderName?.trim()) {
+      set.add('lender-name');
+      set.add('lender-helped');
+      if (!profile.recentLenderHelpedRecently || profile.recentLenderAmountCents != null) {
+        set.add('lender-amount');
+      }
+    }
+
+    if (profile.paydayPlanActions?.length) set.add('payday-plan');
+  }
+
+  if (isFinancialContextStale(profile)) {
+    financialKeys.forEach(key => set.delete(key));
+  }
+
+  return set;
+}
+
+function pendingQuestions(profile: RealityProfile): SetupQuestion[] {
+  const complete = inferredCompletion(profile);
+  const questions: SetupQuestion[] = [];
+  const push = (question: SetupQuestion) => {
+    if (!complete.has(question.key)) questions.push(question);
+  };
+
+  push({
+    key: 'income-date',
+    title: "When's more money coming in?",
+    kind: 'date',
+    options: [
+      { value: 'today', label: 'Today' },
+      { value: 'tomorrow', label: 'Tomorrow' },
+      { value: 'this-week', label: 'This week' },
+      { value: 'next-week', label: 'Next week' },
+      { value: 'pick-date', label: 'Pick a date' },
+      { value: 'not-sure', label: 'Not sure' },
+    ],
+    scroll: true,
+  });
+
+  push({
+    key: 'available-money',
+    title: 'About how much do you have to work with until then?',
+    kind: 'money',
+    placeholder: 'Amount',
+    skipLabel: 'Not sure',
+  });
+
+  if (profile.obligationType !== 'none') {
+    push({
+      key: 'obligation-amount',
+      title: `You said the ${obligationName(profile)}. How much is it?`,
+      kind: 'money',
+      placeholder: 'Amount',
+      skipLabel: 'Not sure',
+    });
+    push({
+      key: 'obligation-date',
+      title: 'When does it have to be paid?',
+      kind: 'date',
+      options: [
+        { value: 'today', label: 'Today' },
+        { value: 'tomorrow', label: 'Tomorrow' },
+        { value: 'this-week', label: 'This week' },
+        { value: 'next-week', label: 'Next week' },
+        { value: 'pick-date', label: 'Pick a date' },
+        { value: 'not-sure', label: 'Not sure' },
+      ],
+      scroll: true,
+    });
+  }
+
+  push({
+    key: 'quit-reason',
+    title: 'What are you trying to stop from happening again?',
+    kind: 'text',
+    placeholder: 'A few words is enough',
+    skipLabel: 'Skip',
+  });
+
+  push({
+    key: 'money-goal',
+    title: "Is there something you'd rather this money still be there for?",
+    kind: 'choices',
+    options: [
+      { value: 'Emergency fund', label: 'Emergency fund' },
+      { value: 'Family', label: 'Family' },
+      { value: 'Debt', label: 'Debt' },
+      { value: 'Savings', label: 'Savings' },
+      { value: 'Something else', label: 'Something else' },
+      { value: 'skip', label: 'Not sure' },
+    ],
+    scroll: true,
+  });
+
+  push({
+    key: 'difficult-times',
+    title: 'When does gambling usually get harder to ignore?',
+    kind: 'choices',
+    options: difficultOptions,
+    scroll: true,
+  });
+
+  push({
+    key: 'lender-name',
+    title: 'If you came up short, who would you probably call?',
+    kind: 'text',
+    placeholder: 'First name',
+    skipLabel: 'No one',
+  });
+
+  if (profile.recentLenderName?.trim()) {
+    push({
+      key: 'lender-helped',
+      title: `Has ${profile.recentLenderName.trim()} had to help you recently?`,
+      kind: 'yes-no',
+      options: [
+        { value: 'yes', label: 'Yeah' },
+        { value: 'no', label: 'No' },
+      ],
+    });
+
+    if (profile.recentLenderHelpedRecently) {
+      push({
+        key: 'lender-amount',
+        title: 'About how much did they have to cover?',
+        kind: 'money',
+        placeholder: 'Amount',
+        skipLabel: 'Not sure',
+      });
+    }
+  }
+
+  push({
+    key: 'payday-plan',
+    title: 'When payday hits, what would help keep the money where you want it?',
+    kind: 'choices',
+    options: paydayOptions,
+    scroll: true,
+  });
+
+  return questions;
+}
+
+function cents(value: string) {
+  const number = Number(value.replace(/[^0-9.]/g, ''));
+  return Number.isFinite(number) && number >= 0 ? Math.round(number * 100) : null;
+}
+
+export function InRunSetup({
+  profile,
+  foregroundOpen,
+  gameInteractionCount,
+  onProfileChange,
+}: {
+  profile: RealityProfile;
+  foregroundOpen: boolean;
+  gameInteractionCount: number;
+  onProfileChange: (next: RealityProfile) => void;
+}) {
+  const questions = useMemo(() => pendingQuestions(profile), [profile]);
+  const [expanded, setExpanded] = useState(true);
+  const [consuming, setConsuming] = useState(false);
+  const [consumingQuestion, setConsumingQuestion] = useState<SetupQuestion | null>(null);
+  const [customDate, setCustomDate] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [showComplete, setShowComplete] = useState(false);
+  const foregroundRef = useRef(foregroundOpen);
+  const firstInteraction = useRef(gameInteractionCount);
+  const hadQuestion = useRef(questions.length > 0);
+  const timerRef = useRef<number | null>(null);
+
+  const current = consumingQuestion ?? questions[0] ?? null;
+  const remaining = questions.length;
+
+  useEffect(() => {
+    const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    const sync = () => setReducedMotion(Boolean(media?.matches));
+    sync();
+    media?.addEventListener?.('change', sync);
+    return () => media?.removeEventListener?.('change', sync);
+  }, []);
+
+  useEffect(() => {
+    foregroundRef.current = foregroundOpen;
+    if (foregroundOpen) setExpanded(false);
+  }, [foregroundOpen]);
+
+  useEffect(() => {
+    if (gameInteractionCount > firstInteraction.current) {
+      firstInteraction.current = gameInteractionCount;
+      setExpanded(false);
+    }
+  }, [gameInteractionCount]);
+
+  useEffect(() => {
+    setCustomDate(false);
+    setInputValue('');
+  }, [current?.key]);
+
+  useEffect(() => {
+    if (hadQuestion.current && questions.length === 0 && !consuming) {
+      setShowComplete(true);
+      const timer = window.setTimeout(() => setShowComplete(false), reducedMotion ? 250 : 1_200);
+      return () => window.clearTimeout(timer);
+    }
+    if (questions.length > 0) hadQuestion.current = true;
+  }, [questions.length, consuming, reducedMotion]);
+
+  useEffect(() => () => {
+    if (timerRef.current != null) window.clearTimeout(timerRef.current);
+  }, []);
+
+  const complete = (question: SetupQuestion, value: string | number | boolean | null) => {
+    if (consuming) return;
+
+    const completed = inferredCompletion(profile);
+    completed.add(question.key);
+
+    let next: RealityProfile = {
+      ...profile,
+      onboardingCompleted: Array.from(completed),
+    };
+
+    if (question.key === 'income-date') {
+      next = { ...next, nextIncomeDate: value as string | null, financialContextUpdatedAt: new Date().toISOString() };
+    } else if (question.key === 'available-money') {
+      next = { ...next, availableUntilIncomeCents: value as number | null, financialContextUpdatedAt: new Date().toISOString() };
+    } else if (question.key === 'obligation-amount') {
+      next = { ...next, obligationAmountCents: value as number | null, financialContextUpdatedAt: new Date().toISOString() };
+    } else if (question.key === 'obligation-date') {
+      next = { ...next, obligationDueDate: value as string | null, financialContextUpdatedAt: new Date().toISOString() };
+    } else if (question.key === 'quit-reason') {
+      next = { ...next, quitReason: typeof value === 'string' && value.trim() ? value.trim().slice(0, 180) : null };
+    } else if (question.key === 'money-goal') {
+      next = { ...next, personalMoneyGoal: typeof value === 'string' && value !== 'skip' ? value : null };
+    } else if (question.key === 'difficult-times') {
+      next = { ...next, difficultTimes: value ? [value as DifficultTime] : [] };
+    } else if (question.key === 'lender-name') {
+      const name = typeof value === 'string' && value.trim() ? value.trim().slice(0, 40) : null;
+      if (!name) {
+        completed.add('lender-helped');
+        completed.add('lender-amount');
+      }
+      next = {
+        ...next,
+        recentLenderName: name,
+        recentLenderHelpedRecently: name ? next.recentLenderHelpedRecently : false,
+        recentLenderAmountCents: name ? next.recentLenderAmountCents : null,
+        onboardingCompleted: Array.from(completed),
+      };
+    } else if (question.key === 'lender-helped') {
+      const helped = value === true;
+      if (!helped) completed.add('lender-amount');
+      next = {
+        ...next,
+        recentLenderHelpedRecently: helped,
+        recentLenderAmountCents: helped ? next.recentLenderAmountCents : null,
+        onboardingCompleted: Array.from(completed),
+      };
+    } else if (question.key === 'lender-amount') {
+      next = { ...next, recentLenderAmountCents: value as number | null };
+    } else if (question.key === 'payday-plan') {
+      next = {
+        ...next,
+        paydayPlanActions: value && value !== 'skip' ? [value as PaydayPlanAction] : [],
+      };
+    }
+
+    setConsumingQuestion(question);
+    setConsuming(true);
+    onProfileChange(next);
+
+    const duration = reducedMotion ? 130 : 960;
+    timerRef.current = window.setTimeout(() => {
+      setConsuming(false);
+      setConsumingQuestion(null);
+      setCustomDate(false);
+      setInputValue('');
+      if (foregroundRef.current) setExpanded(false);
+    }, duration);
+  };
+
+  const answerDate = (value: string) => {
+    if (!current) return;
+    if (value === 'pick-date') {
+      setCustomDate(true);
+      return;
+    }
+    if (value === 'today') complete(current, isoInDays(0));
+    else if (value === 'tomorrow') complete(current, isoInDays(1));
+    else if (value === 'this-week') complete(current, isoInDays(5));
+    else if (value === 'next-week') complete(current, isoInDays(7));
+    else complete(current, null);
+  };
+
+  if (!current) {
+    if (!showComplete) return null;
+    return (
+      <aside className="in-run-setup setup-complete" data-state="collapsed" aria-live="polite">
+        <span>Setup finished</span>
+        <strong>You’re all set.</strong>
+      </aside>
+    );
+  }
+
+  const state = consuming ? 'consuming' : expanded ? 'expanded' : 'collapsed';
+
+  if (!expanded && !consuming) {
+    return (
+      <aside className="in-run-setup" data-state="collapsed" data-reduced-motion={reducedMotion ? 'true' : 'false'}>
+        <button
+          type="button"
+          className="setup-rail"
+          aria-label={`Finish your setup, ${remaining} left`}
+          onClick={() => setExpanded(true)}
+        >
+          <span>Finish your setup</span>
+          <small>{remaining} left</small>
+          <b aria-hidden="true">↑</b>
+        </button>
+      </aside>
+    );
+  }
+
+  return (
+    <aside
+      className="in-run-setup"
+      data-state={state}
+      data-reduced-motion={reducedMotion ? 'true' : 'false'}
+      aria-label="Finish your setup"
+    >
+      <div className={`setup-question ${consuming ? 'is-consuming' : ''}`}>
+        <div className="setup-question-head">
+          <span>Finish your setup</span>
+          <small>{remaining} left</small>
+          <button
+            type="button"
+            className="setup-collapse"
+            aria-label="Collapse finish your setup"
+            onClick={() => setExpanded(false)}
+            disabled={consuming}
+          >⌄</button>
+        </div>
+
+        <h2 className="setup-question-title">{current.title}</h2>
+
+        {current.kind === 'date' ? (
+          customDate ? (
+            <form
+              className="setup-input-row"
+              onSubmit={event => {
+                event.preventDefault();
+                const value = String(new FormData(event.currentTarget).get('date') ?? '');
+                if (value) complete(current, value);
+              }}
+            >
+              <input name="date" type="date" aria-label="Pick a date" required />
+              <button type="submit">Use</button>
+              <button type="button" className="setup-quiet" onClick={() => setCustomDate(false)}>Back</button>
+            </form>
+          ) : (
+            <div className="setup-choice-row is-scroll">
+              {current.options?.map(option => (
+                <button type="button" key={option.value} onClick={() => answerDate(option.value)}>{option.label}</button>
+              ))}
+            </div>
+          )
+        ) : null}
+
+        {current.kind === 'money' ? (
+          <form
+            className="setup-input-row"
+            onSubmit={event => {
+              event.preventDefault();
+              const value = cents(inputValue);
+              if (value != null) complete(current, value);
+            }}
+          >
+            <span aria-hidden="true">$</span>
+            <input
+              inputMode="decimal"
+              aria-label={current.placeholder ?? 'Amount'}
+              value={inputValue}
+              onChange={event => setInputValue(event.target.value)}
+              placeholder={current.placeholder}
+            />
+            <button type="submit">Use</button>
+            <button type="button" className="setup-quiet" onClick={() => complete(current, null)}>{current.skipLabel}</button>
+          </form>
+        ) : null}
+
+        {current.kind === 'text' ? (
+          <form
+            className="setup-input-row setup-text-row"
+            onSubmit={event => {
+              event.preventDefault();
+              complete(current, inputValue);
+            }}
+          >
+            <input
+              aria-label={current.placeholder ?? 'Answer'}
+              value={inputValue}
+              onChange={event => setInputValue(event.target.value)}
+              placeholder={current.placeholder}
+              maxLength={180}
+            />
+            <button type="submit" disabled={!inputValue.trim()}>Use</button>
+            <button type="button" className="setup-quiet" onClick={() => complete(current, null)}>{current.skipLabel}</button>
+          </form>
+        ) : null}
+
+        {current.kind === 'choices' || current.kind === 'yes-no' ? (
+          <div className={`setup-choice-row ${current.scroll ? 'is-scroll' : ''}`}>
+            {current.options?.map(option => (
+              <button
+                type="button"
+                key={option.value}
+                onClick={() => {
+                  if (current.key === 'difficult-times') complete(current, option.value as DifficultTime);
+                  else if (current.key === 'payday-plan') complete(current, option.value === 'skip' ? null : option.value);
+                  else complete(current, option.value);
+                }}
+              >{option.label}</button>
+            ))}
+          </div>
+        ) : null}
+
+        {current.kind === 'yes-no' ? null : null}
+      </div>
+
+      {consuming ? (
+        <div className="setup-consume-effect" aria-hidden="true">
+          <span className="setup-black-hole" />
+          <span className="setup-droplet setup-droplet-a" />
+          <span className="setup-droplet setup-droplet-b" />
+          <span className="setup-droplet setup-droplet-c" />
+        </div>
+      ) : null}
+    </aside>
+  );
+}

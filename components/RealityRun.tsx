@@ -5,6 +5,7 @@ import { RealityGame, type RealityGameHandle } from './RealityGame';
 import { RealityPing } from './RealityPing';
 import { XRayMoment } from './XRayMoment';
 import { LongRunExperience } from './LongRunExperience';
+import { InRunSetup } from './InRunSetup';
 import { buildPingCandidates, selectPing } from '@/lib/pings';
 import { computeReality, formatMoney, shouldAutoEnd, stakeOptionsFor, daysUntil, isFinancialContextStale } from '@/lib/engine';
 import { dealPoker, drawPoker, resolveSimpleGame, SPORTS_MARKETS, type ResolvedGameOutcome } from '@/lib/gameEngines';
@@ -115,17 +116,20 @@ export function RealityRun({
   profile,
   restoredRun,
   sessionLimit,
+  onProfileChange,
   onEnd,
 }: {
   profile: RealityProfile;
   restoredRun?: ActiveRun | null;
   sessionLimit: SessionLimit;
+  onProfileChange: (next: RealityProfile) => void;
   onEnd: (data: RunEndData) => void;
 }) {
   const game = useRef<RealityGameHandle>(null);
   const [run, setRun] = useState<ActiveRun>(() => hydrateRun(restoredRun ?? freshRun(profile, sessionLimit)));
   const runRef = useRef(run);
   const [animating, setAnimating] = useState(false);
+  const [gameInteractionCount, setGameInteractionCount] = useState(0);
   const [ping, setPing] = useState<PingCandidate | null>(null);
   const [interventionSurface, setInterventionSurface] = useState<InterventionSurface | null>(null);
   const [ambientMode, setAmbientMode] = useState<AmbientMode>(() => restoredRun?.directorState?.ambientMode ?? 'normal');
@@ -474,6 +478,7 @@ export function RealityRun({
   const act = async () => {
     if (blockedByOtherTab || animating || ping || longRun || ended.current || actionLock.current) return;
     actionLock.current = true;
+    setGameInteractionCount(count => count + 1);
 
     if (profile.gamblingType === 'poker') {
       if (!pokerRound) {
@@ -702,6 +707,13 @@ export function RealityRun({
         {profile.additionalMoneyGoal ? <div className="context-ghost ghost-g"><span>{profile.additionalMoneyGoal.toUpperCase()}</span></div> : null}
       </div>
 
+      <div className="run-experience-layout">
+        <InRunSetup
+          profile={profile}
+          foregroundOpen={Boolean(ping) || Boolean(longRun) || blockedByOtherTab}
+          gameInteractionCount={gameInteractionCount}
+          onProfileChange={onProfileChange}
+        />
       <section className="run-card" aria-label="Reality Run">
         {blockedByOtherTab ? <div className="tab-lock" role="dialog" aria-modal="true" aria-label="Reality Run open in another tab"><strong>Reality Run is open in another tab.</strong><button type="button" onClick={() => { const ok = lease.current?.claim(true) ?? true; setBlockedByOtherTab(!ok); }}>Use this tab</button></div> : null}
 
@@ -770,6 +782,7 @@ export function RealityRun({
           <p className="run-fineprint">Simulation. Leave whenever you want.</p>
         </div>
       </section>
+      </div>
     </main>
   );
 }
