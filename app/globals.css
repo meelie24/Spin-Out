@@ -6272,3 +6272,182 @@ body:has(.plain-page){
     width:68px;height:68px;
   }
 }
+
+
+/* =========================================================
+   TRANSITION + RECEIPT STAGING
+   No generic flash between the premium surfaces.
+   ========================================================= */
+body:has(.loading-page[data-material="casino-loading"]){
+  background:#0b0605;
+  color:#ecd7b9;
+}
+body:has(.loading-page[data-material="casino-loading"])>.site-header{
+  height:58px;
+  max-width:none;
+  padding:0 clamp(15px,4vw,48px);
+  border-bottom:1px solid rgba(226,184,118,.09);
+  background:linear-gradient(180deg,rgba(29,17,14,.99),rgba(14,8,7,.99));
+  color:#e9d5b8;
+}
+body:has(.loading-page[data-material="casino-loading"])>.site-header .brand{
+  color:#f0ddbf;
+  font-family:var(--so-display);
+  font-weight:700;
+}
+body:has(.loading-page[data-material="casino-loading"])>.site-header .brand-mark{
+  border-radius:50% 50% 43% 57%;
+  border-color:rgba(230,190,128,.28);
+  background:linear-gradient(145deg,#e8c487,#925c34 62%,#4f2b1c);
+  color:#21120e;
+}
+body:has(.loading-page[data-material="casino-loading"])>.site-header nav{color:#947b68}
+.loading-page[data-material="casino-loading"]{
+  min-height:calc(100vh - 58px);
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  background:
+    radial-gradient(circle at 50% 42%,rgba(124,55,38,.16),transparent 24rem),
+    linear-gradient(145deg,#0c0706,#170c0a 58%,#090504);
+  color:#bda489;
+}
+.loading-page[data-material="casino-loading"]::before{
+  content:"REALITY RUN";
+  position:absolute;
+  z-index:-1;
+  right:-5vw;
+  bottom:-5vh;
+  color:rgba(232,192,128,.026);
+  font:800 clamp(170px,31vw,480px)/.72 var(--so-display);
+  letter-spacing:-.06em;
+  transform:rotate(-7deg);
+}
+.loading-page[data-material="casino-loading"] .loading-dot{
+  width:9px;height:9px;
+  background:#d4a45f;
+  box-shadow:0 0 0 5px rgba(212,164,95,.08),0 0 30px rgba(212,164,95,.24);
+}
+.loading-page[data-material="casino-loading"] strong{
+  color:#e8cd9f;
+  font:700 24px/.95 var(--so-display);
+  letter-spacing:-.025em;
+  text-transform:uppercase;
+}
+.loading-page[data-material="casino-loading"] small{
+  color:#6f5c4f;
+  font:700 7px/1 var(--so-ui);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+}
+
+/* The first post-run state is a physical ledger slab, not a small web card above dead space. */
+.post-shell[data-material="quiet-lacquer"][data-stage="exit-receipt"]{
+  place-items:center;
+  align-content:center;
+  padding:24px 14px 34px;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt{
+  width:min(680px,100%);
+  min-height:min(620px,calc(100vh - 112px));
+  display:flex;
+  flex-direction:column;
+  padding:34px 30px 30px;
+  border-radius:4px 42px 4px 24px;
+  clip-path:polygon(
+    0 0, 94% 0, 100% 7%,
+    100% 100%, 7% 100%, 0 93%
+  );
+  background:
+    linear-gradient(90deg,rgba(255,244,220,.045),transparent 15% 82%,rgba(111,48,34,.055)),
+    radial-gradient(circle at 82% 12%,rgba(123,51,35,.16),transparent 18rem),
+    linear-gradient(150deg,#2b1713,#130b09 67%,#0c0706);
+  box-shadow:0 48px 120px rgba(0,0,0,.58),inset 1px 1px rgba(255,255,255,.055);
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt::before{
+  inset:13px;
+  border-radius:2px 30px 2px 15px;
+  border-color:rgba(229,188,122,.08);
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt::after{
+  content:"RECEIPT";
+  right:-10px;
+  top:24%;
+  font-size:96px;
+  color:rgba(229,188,122,.025);
+  transform:rotate(-5deg);
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt>.kicker{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:24px;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt>.kicker::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:linear-gradient(90deg,rgba(224,181,116,.22),transparent);
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .exit-receipt.receipt-four{
+  margin:0;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .exit-receipt>div{
+  min-height:112px;
+  align-content:end;
+  padding:18px 15px 16px;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .exit-receipt strong{
+  font-size:34px;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .exit-observation{
+  margin-top:28px;
+  max-width:40ch;
+  font:700 22px/1.05 var(--so-display);
+  letter-spacing:-.02em;
+  color:#e3c59a;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .exit-translation{
+  max-width:48ch;
+  margin-top:8px;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .exit-compare{
+  margin-top:16px;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .receipt-left{
+  margin:auto 0 18px;
+  color:#f0d6ac;
+  font:700 clamp(56px,10vw,86px)/.75 var(--so-display);
+  letter-spacing:-.045em;
+  text-transform:uppercase;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt>.primary-button{
+  align-self:flex-start;
+  min-width:160px;
+}
+
+@media(max-width:560px){
+  .post-shell[data-material="quiet-lacquer"][data-stage="exit-receipt"]{
+    padding:14px 10px 24px;
+  }
+  .post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt{
+    min-height:calc(100vh - 96px);
+    padding:27px 18px 22px;
+    border-radius:4px 30px 4px 18px;
+  }
+  .post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .exit-receipt>div{
+    min-height:96px;
+    padding:15px 10px;
+  }
+  .post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .exit-receipt strong{
+    font-size:29px;
+  }
+  .post-shell[data-material="quiet-lacquer"] .post-card.post-stage-exit-receipt .receipt-left{
+    font-size:64px;
+  }
+}

@@ -62,7 +62,7 @@ export function PlayExperience({ initialGame = null }: { initialGame?: GamblingT
   };
 
   if (stage === 'loading') {
-    return <main className="loading-page"><span className="loading-dot" />Loading</main>;
+    return <main className="loading-page" data-material="casino-loading"><span className="loading-dot" /><strong>Building the table…</strong><small>Reality Run</small></main>;
   }
 
   if (stage === 'setup') {
