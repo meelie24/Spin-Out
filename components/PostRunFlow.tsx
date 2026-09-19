@@ -5,7 +5,7 @@ import { PlusPanel } from './PlusPanel';
 import { PostRunContextQuestion } from './PostRunContextQuestion';
 import { classifyRealWorldOutcome, computeMoneyKept, formatMoney, recentExitAverageSeconds } from '@/lib/engine';
 import { currentMonthMoneyKept, loadData, totalMoneyKept, track, updateData } from '@/lib/storage';
-import type { OnboardingQuestionKey, RealityProfile, RunRecord } from '@/lib/types';
+import type { DifficultTime, OnboardingQuestionKey, PaydayPlanAction, RealityProfile, RunRecord } from '@/lib/types';
 import type { RunEndData } from './RealityRun';
 import { syncProfileIfSignedIn, syncRunIfSignedIn } from '@/lib/sync';
 import { buildRealityReceipt } from '@/lib/realityEngine/receipt';
@@ -171,7 +171,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
     if (key === 'money-goal') {
       next = { ...next, personalMoneyGoal: typeof value === 'string' ? value : null };
     } else if (key === 'difficult-times') {
-      next = { ...next, difficultTimes: typeof value === 'string' ? [value as RealityProfile['difficultTimes'][number]] : [] };
+      next = { ...next, difficultTimes: typeof value === 'string' ? [value as DifficultTime] : [] };
     } else if (key === 'quit-reason') {
       next = {
         ...next,
@@ -181,7 +181,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
       next = {
         ...next,
         paydayPlanActions: typeof value === 'string'
-          ? [value as RealityProfile['paydayPlanActions'][number]]
+          ? [value as PaydayPlanAction]
           : [],
       };
     } else if (key === 'lender-name') {
