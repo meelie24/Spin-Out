@@ -333,10 +333,13 @@ try {
   const pingPage = await pingContext.newPage();
   await pingPage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await pingPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  const runHeaderBackground = await pingPage.locator('.site-header').evaluate(el => getComputedStyle(el).backgroundImage);
+  assert(runHeaderBackground !== 'none', 'active Reality Run kept the generic light site header instead of the casino header treatment');
   await waitActionReady(pingPage);
   await pingPage.locator('.game-action').click();
   const ping = pingPage.locator('.reality-ping');
   await ping.waitFor({ timeout: 7000 });
+  assert(await ping.getAttribute('data-material') === 'oxblood-glass', 'Reality Ping is missing its reference-locked oxblood-glass material identity');
   await pingPage.screenshot({ path: `${out}/reality-ping-390.png`, fullPage: true });
   assert(await ping.getByText(/Reality Ping/i).isVisible(), 'Reality Ping label missing');
   await ping.getByRole('button', { name: 'Got it' }).click();
@@ -575,6 +578,7 @@ try {
   await stakePage.getByRole('button', { name: 'Raise practice stake' }).click();
   const stakePing = stakePage.locator('.xray-moment');
   await stakePing.waitFor({ timeout: 5000 });
+  assert(await stakePing.getAttribute('data-material') === 'lacquer-cut', 'X-Ray is missing its distinct lacquer-cut material identity');
   assert(await stakePing.getByText(/You lost, then raised it\./i).isVisible(), 'stake-escalation X-Ray did not fire immediately');
   assert(await stakePage.getByRole('button', { name: "I'm done" }).count() === 1, 'X-Ray exposed duplicate exit actions');
   await stakePage.screenshot({ path: `${out}/xray-stake-390.png`, fullPage: true });
@@ -629,7 +633,9 @@ try {
   await longPage.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await longPage.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await longPage.getByRole('button', { name: 'Run 10,000' }).click();
-  await longPage.locator('.longrun-panel').waitFor({ timeout: 5000 });
+  const longPanel = longPage.locator('.longrun-panel');
+  await longPanel.waitFor({ timeout: 5000 });
+  assert(await longPanel.getAttribute('data-material') === 'long-run-stage', 'Run 10,000 is missing its reference-locked long-run stage identity');
   await longPage.getByText(/This 10,000-run sample/i).waitFor({ timeout: 5000 });
   await longPage.getByText('Model expectation', { exact: true }).waitFor({ timeout: 5000 });
   await longPage.screenshot({ path: `${out}/longrun-10000-390.png`, fullPage: true });
