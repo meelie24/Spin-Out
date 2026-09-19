@@ -158,7 +158,7 @@ try {
     await startKnownGameRealityRun(page, 'slots');
     await page.evaluate(() => document.fonts.ready);
     const findings = [];
-    for (const width of [320, 390, 430]) {
+    for (const width of [320, 390, 430, 768]) {
       await page.setViewportSize({ width, height: 844 });
       const observed = await page.evaluate(() => {
         const title = document.querySelector('.setup-question-title');
@@ -177,6 +177,9 @@ try {
           soundFits: soundBox.left >= hud.left && soundBox.right <= hud.right + 1,
           soundTarget: soundBox.width >= 44 && soundBox.height >= 44,
           dockHeight: document.querySelector('.in-run-setup').getBoundingClientRect().height,
+          dockAtBottom: getComputedStyle(document.querySelector('.in-run-setup')).position === 'fixed'
+            && document.querySelector('.in-run-setup').getBoundingClientRect().bottom <= innerHeight
+            && document.querySelector('.in-run-setup').getBoundingClientRect().bottom >= innerHeight - 24,
         };
       });
       if (!/Manrope/i.test(observed.uiFont)) findings.push(width + ': run UI font fell back: ' + observed.uiFont);
@@ -184,6 +187,7 @@ try {
       if (observed.titleClipped || observed.questionOverlapsChoices) findings.push(width + ': optional question is clipped or overlaps answers');
       if (!observed.soundFits || !observed.soundTarget) findings.push(width + ': sound control overflows or has a small touch target');
       if (observed.dockHeight > 140) findings.push(width + ': optional dock exceeds 140px');
+      if (!observed.dockAtBottom) findings.push(width + ': optional question left its bottom dock');
     }
     assert(findings.length === 0, findings.join('; '));
   });
