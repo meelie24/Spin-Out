@@ -31,10 +31,15 @@ type RevenueCatCustomer = {
   };
 };
 
-export async function revenueCatPremiumForUser(userId: string) {
-  const apiKey = process.env.REVENUECAT_PUBLIC_API_KEY
-    ?? process.env.NEXT_PUBLIC_REVENUECAT_WEB_API_KEY
+export function revenueCatServerApiKey(env: NodeJS.ProcessEnv = process.env) {
+  return env.REVENUECAT_SECRET_API_KEY
+    ?? env.REVENUECAT_PUBLIC_API_KEY
+    ?? env.NEXT_PUBLIC_REVENUECAT_WEB_API_KEY
     ?? '';
+}
+
+export async function revenueCatPremiumForUser(userId: string) {
+  const apiKey = revenueCatServerApiKey();
 
   if (!apiKey) {
     return { configured: false, active: false, managementUrl: null, productIdentifier: null };
