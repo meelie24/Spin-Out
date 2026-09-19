@@ -6007,3 +6007,267 @@ body:has(.plain-page){
     top:38%;
   }
 }
+
+
+/* =========================================================
+   ACTIVE RUN ENVIRONMENT — layered casino scenery, never wallpaper
+   ========================================================= */
+.run-shell[data-environment="layered-casino"]{
+  min-height:calc(100vh - 58px);
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 52% 34%,rgba(101,52,36,.18),transparent 34rem),
+    radial-gradient(circle at 10% 78%,rgba(111,36,36,.12),transparent 25rem),
+    radial-gradient(circle at 94% 84%,rgba(154,93,48,.09),transparent 23rem),
+    linear-gradient(180deg,#140a08 0%,#1b0e0b 52%,#0b0605 100%);
+}
+.run-shell[data-environment="layered-casino"]::before{
+  content:"";
+  position:absolute;
+  z-index:-4;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    url('/symbols/seven.svg'),
+    url('/symbols/fu.svg'),
+    url('/symbols/cash-coin.svg'),
+    url('/symbols/bar.svg'),
+    url('/symbols/roulette.svg'),
+    linear-gradient(112deg,rgba(0,0,0,.3),transparent 24% 78%,rgba(0,0,0,.38));
+  background-repeat:no-repeat;
+  background-position:
+    -70px 18%,
+    calc(100% + 40px) 31%,
+    9% calc(100% + 80px),
+    93% 83%,
+    calc(100% - 8%) calc(100% + 150px),
+    center;
+  background-size:
+    280px auto,
+    230px auto,
+    250px auto,
+    215px auto,
+    390px auto,
+    cover;
+  opacity:.09;
+  filter:sepia(.32) saturate(.72) brightness(.82);
+}
+.run-shell[data-environment="layered-casino"]::after{
+  content:"QUIT";
+  position:absolute;
+  z-index:-3;
+  inset:0;
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+  padding:0 max(-2vw,-20px) max(-4vh,-40px) 0;
+  pointer-events:none;
+  overflow:hidden;
+  color:rgba(233,194,132,.032);
+  font:800 clamp(220px,34vw,560px)/.68 var(--so-display);
+  letter-spacing:-.075em;
+  transform:rotate(-5deg) scale(1.03);
+  transform-origin:80% 82%;
+  background:
+    radial-gradient(ellipse at 50% 42%,transparent 0 46%,rgba(5,2,2,.52) 100%),
+    linear-gradient(180deg,transparent 62%,rgba(0,0,0,.18));
+}
+.run-shell[data-environment="layered-casino"] .run-card{
+  position:relative;
+  z-index:2;
+  width:min(1080px,100%);
+}
+.run-shell[data-environment="layered-casino"] .run-card::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:340px;
+  height:340px;
+  left:-220px;
+  bottom:-210px;
+  pointer-events:none;
+  background:url('/symbols/cards.svg') center/contain no-repeat;
+  opacity:.045;
+  filter:sepia(.25) saturate(.8) drop-shadow(0 30px 30px rgba(0,0,0,.42));
+  transform:rotate(-18deg);
+}
+.run-shell[data-environment="layered-casino"] .run-card::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:310px;
+  height:310px;
+  right:-210px;
+  bottom:-150px;
+  pointer-events:none;
+  background:url('/symbols/sycee.svg') center/contain no-repeat;
+  opacity:.055;
+  filter:sepia(.32) saturate(.76) drop-shadow(0 26px 28px rgba(0,0,0,.4));
+  transform:rotate(14deg);
+}
+
+/* HUD reads like a machine ledger rather than a row of web cards. */
+.run-shell[data-environment="layered-casino"] .run-hud{
+  height:66px;
+  margin-bottom:7px;
+  padding:0 12px 9px;
+  border-bottom:1px solid rgba(229,188,123,.12);
+  color:#8e7766;
+}
+.run-shell[data-environment="layered-casino"] .run-hud>div{
+  position:relative;
+  padding-left:11px;
+}
+.run-shell[data-environment="layered-casino"] .run-hud>div::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:5px;
+  bottom:5px;
+  width:1px;
+  background:linear-gradient(#b27a45,rgba(178,122,69,0));
+  opacity:.55;
+}
+.run-shell[data-environment="layered-casino"] .run-hud span{
+  color:#806b5a;
+  font:700 7px/1 var(--so-ui);
+  letter-spacing:.15em;
+}
+.run-shell[data-environment="layered-casino"] .run-hud strong{
+  color:#e9cfaa;
+  font:700 22px/.9 var(--so-display);
+  letter-spacing:-.025em;
+}
+.run-shell[data-environment="layered-casino"] .sound-button{
+  min-width:92px;
+  height:40px;
+  border-radius:3px 11px 3px 11px;
+  border-color:rgba(226,184,120,.14);
+  background:
+    linear-gradient(130deg,rgba(255,244,220,.04),transparent),
+    rgba(28,16,14,.72);
+  color:#ac947d;
+  box-shadow:inset 1px 1px rgba(255,255,255,.025);
+}
+
+/* Controls sit on an intentional lower machine deck. */
+.run-shell[data-environment="layered-casino"] .run-controls{
+  position:relative;
+  min-height:96px;
+  height:auto;
+  margin-top:9px;
+  padding:15px 0 10px;
+  border-top:1px solid rgba(229,188,123,.08);
+}
+.run-shell[data-environment="layered-casino"] .run-controls::before{
+  content:"";
+  position:absolute;
+  left:12%;
+  right:12%;
+  top:-1px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(221,171,101,.22),transparent);
+}
+.run-shell[data-environment="layered-casino"] .stake-control{
+  border-radius:4px 14px 4px 14px;
+  border-color:rgba(222,178,111,.18);
+  background:
+    linear-gradient(145deg,rgba(255,244,220,.035),transparent),
+    rgba(26,15,13,.78);
+  box-shadow:inset 1px 1px rgba(255,255,255,.025),0 14px 30px rgba(0,0,0,.18);
+}
+.run-shell[data-environment="layered-casino"] .stake-control span{
+  color:#d6b88f;
+  font-family:var(--so-display);
+  font-size:18px;
+  font-weight:700;
+  line-height:.9;
+}
+.run-shell[data-environment="layered-casino"] .stake-control small{
+  color:#746153;
+  font-family:var(--so-ui);
+  font-size:6px;
+  letter-spacing:.14em;
+}
+.run-shell[data-environment="layered-casino"] .game-action{
+  width:86px;
+  height:86px;
+  border:2px solid #c99755;
+  background:
+    radial-gradient(circle at 34% 23%,#bb5a4d,#712a27 54%,#321312);
+  box-shadow:
+    0 0 0 6px #21120e,
+    0 0 0 7px rgba(213,168,94,.28),
+    inset 0 2px 5px rgba(255,225,192,.3),
+    inset 0 -10px 19px rgba(20,6,6,.42),
+    0 16px 34px rgba(0,0,0,.48);
+}
+
+/* The optional context rail floats above the environment instead of ending in blank wallpaper. */
+.run-shell[data-environment="layered-casino"] .in-run-setup{
+  position:relative;
+  z-index:8;
+}
+.run-shell[data-environment="layered-casino"] .run-fineprint{
+  color:#655448;
+  font-size:7px;
+  letter-spacing:.14em;
+  margin-top:3px;
+}
+
+@media(max-width:700px){
+  .run-shell[data-environment="layered-casino"]{
+    padding-bottom:18px;
+    background:
+      radial-gradient(circle at 92% 74%,rgba(130,67,40,.1),transparent 17rem),
+      radial-gradient(circle at 6% 84%,rgba(100,35,35,.1),transparent 18rem),
+      linear-gradient(180deg,#130a08 0%,#1a0d0b 55%,#0a0605 100%);
+  }
+  .run-shell[data-environment="layered-casino"]::before{
+    background-position:
+      -92px 20%,
+      calc(100% + 76px) 38%,
+      -54px calc(100% + 36px),
+      calc(100% + 55px) 84%,
+      calc(100% + 140px) calc(100% + 130px),
+      center;
+    background-size:
+      210px auto,
+      175px auto,
+      190px auto,
+      165px auto,
+      280px auto,
+      cover;
+    opacity:.075;
+  }
+  .run-shell[data-environment="layered-casino"]::after{
+    justify-content:center;
+    padding:0 0 -12px;
+    font-size:clamp(170px,48vw,250px);
+    color:rgba(233,194,132,.025);
+    transform:rotate(-7deg) scale(1.08);
+    transform-origin:50% 88%;
+  }
+  .run-shell[data-environment="layered-casino"] .run-card::before{
+    width:230px;height:230px;left:-155px;bottom:-105px;
+  }
+  .run-shell[data-environment="layered-casino"] .run-card::after{
+    width:210px;height:210px;right:-145px;bottom:-90px;
+  }
+  .run-shell[data-environment="layered-casino"] .run-hud{
+    margin-bottom:4px;
+    padding:0 3px 7px;
+  }
+  .run-shell[data-environment="layered-casino"] .run-hud>div{padding-left:7px}
+  .run-shell[data-environment="layered-casino"] .run-hud strong{font-size:16px}
+  .run-shell[data-environment="layered-casino"] .run-controls{
+    min-height:82px;
+    margin-top:6px;
+    padding-top:10px;
+  }
+  .run-shell[data-environment="layered-casino"] .game-action{
+    width:68px;height:68px;
+  }
+}
