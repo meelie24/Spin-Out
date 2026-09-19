@@ -121,8 +121,10 @@ async function startKnownGameRealityRun(page, game = 'slots') {
   await finishKnownGameCoreSetup(page, game);
   assert(await page.locator('.deposit-terminal').count() === 0,
     'old deposit gate appeared after the five core questions');
-  assert(await page.getByText(/The more context you add, the more immersive your experience will be\./i).count() === 1,
-    'pre-run explanation did not include the immersive-context hook');
+  const mobileHook = page.locator('.run-intro-dialog .intro-copy-mobile');
+  assert(await mobileHook.isVisible()
+    && /The more context you add, the more immersive your experience will be\./i.test(await mobileHook.innerText()),
+    'pre-run explanation did not include the visible immersive-context hook');
   await page.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
 }
@@ -182,6 +184,8 @@ try {
 
     await page.getByRole('button', { name: 'This week', exact: true }).click();
     await page.locator('.in-run-setup[data-state="consuming"]').waitFor();
+    assert(await page.locator('.setup-droplet').count() === 3,
+      'question completion did not render exactly three liquid droplets');
     await page.waitForTimeout(1_100);
     const nextQuestion = (await page.locator('.setup-question-title').innerText()).trim();
     assert(nextQuestion !== firstQuestion, 'next continuation question did not replace the completed one');
@@ -213,9 +217,10 @@ try {
       quitReason: null,
     });
     await seedActive(context, p, runFor(p, {
-      actionCount: 2,
+      actionCount: 4,
       chosenLimitRounds: 3,
       lastPingAction: -10,
+      limitExceededAt: Date.now() - 2_000,
     }));
 
     const page = await context.newPage();
@@ -226,6 +231,63 @@ try {
     await page.locator('.reality-ping, .xray-moment').first().waitFor({ timeout: 9_000 });
     assert(await page.locator('.in-run-setup').getAttribute('data-state') === 'collapsed',
       'continuation setup stayed open while a foreground intervention was active');
+  });
+
+
+  await check('returning profile keeps known continuation context', async context => {
+    const p = profile('slots', {
+      quitReason: 'Keep bill money where it belongs',
+      difficultTimes: ['payday'],
+      paydayPlanActions: ['move-bill-money'],
+      recentLenderName: 'Sam',
+      recentLenderHelpedRecently: false,
+      onboardingCompleted: undefined,
+    });
+    await context.addInitScript(({ profile }) => {
+      localStorage.setItem('spinout.v2', JSON.stringify({
+        version: 2,
+        profile,
+        runs: [],
+        pingLearning: {},
+        events: [],
+        account: {},
+      }));
+    }, { profile: p });
+
+    const page = await context.newPage();
+    await page.goto(`${base}/play?game=slots`, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: '$100', exact: true }).click();
+    await page.getByRole('button', { name: 'Win back what I lost', exact: true }).click();
+    await page.getByRole('button', { name: '5 rounds', exact: true }).click();
+    await page.locator('.run-intro').waitFor();
+    await page.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    assert(await page.locator('.in-run-setup').count() === 0,
+      'returning user was re-asked continuation questions already answered in the legacy profile');
+  });
+
+  await check('lender follow-up keeps a yes answer', async context => {
+    const completed = [
+      'income-date','available-money','obligation-amount','obligation-date','quit-reason',
+      'money-goal','difficult-times','lender-name','payday-plan'
+    ];
+    const p = profile('slots', {
+      recentLenderName: 'Alex',
+      recentLenderHelpedRecently: false,
+      recentLenderAmountCents: null,
+      onboardingCompleted: completed,
+    });
+    await seedActive(context, p, runFor(p));
+    const page = await context.newPage();
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.getByRole('heading', { name: /Has Alex had to help you recently/i }).waitFor();
+    await page.getByRole('button', { name: 'Yeah', exact: true }).click();
+    await page.waitForTimeout(1_100);
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2') || 'null'));
+    assert(stored?.profile?.recentLenderHelpedRecently === true,
+      'lender follow-up lost the affirmative answer');
+    await page.getByRole('heading', { name: /About how much did they have to cover/i }).waitFor();
   });
 
   await check('same-visit home prompt dismissal', async context => {
@@ -284,7 +346,7 @@ try {
     await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
     await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
     await page.locator('.game-action').click();
-    await page.locator('.reality-ping').waitFor({ timeout: 9_000 });
+    await page.locator('.reality-ping.requires-choice').waitFor({ timeout: 9_000 });
     await assertFocusInside(page, '.reality-ping', 'Reality Ping');
     assert(await page.getByRole('button', { name: 'Keep going', exact: true }).count() === 0,
       'strong Reality Ping used directive "Keep going" action copy');
