@@ -3867,3 +3867,402 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-money{font-size:32px}
   .reference-locked .reality-context-dialog[data-material="smoked-lacquer"]:after{font-size:76px;opacity:.7}
 }
+
+
+/* =========================================================
+   REFERENCE-LOCKED POST-RUN
+   Quiet lacquer decompression after the casino, not a pale wellness card.
+   ========================================================= */
+body:has(.post-shell[data-material="quiet-lacquer"]){
+  background:#0e0807;
+  color:#f2e3cc;
+}
+body:has(.post-shell[data-material="quiet-lacquer"])>.site-header{
+  height:58px;
+  max-width:none;
+  padding:0 clamp(15px,4vw,48px);
+  border-bottom:1px solid rgba(225,185,120,.09);
+  background:
+    linear-gradient(180deg,rgba(30,18,15,.98),rgba(17,10,9,.98));
+  color:#e9d6bc;
+}
+body:has(.post-shell[data-material="quiet-lacquer"])>.site-header .brand{color:#f0dfc5}
+body:has(.post-shell[data-material="quiet-lacquer"])>.site-header .brand-mark{
+  border-radius:50% 50% 44% 56%;
+  border-color:rgba(224,184,119,.25);
+  background:linear-gradient(145deg,#ebcb91,#8a5732);
+  color:#21120e;
+  box-shadow:0 7px 18px rgba(0,0,0,.28),inset 1px 1px rgba(255,255,255,.42);
+}
+body:has(.post-shell[data-material="quiet-lacquer"])>.site-header nav{color:#9e8874}
+
+.post-shell[data-material="quiet-lacquer"]{
+  min-height:calc(100vh - 58px);
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  place-items:center;
+  padding:clamp(18px,4vw,42px) 18px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 80% 8%,rgba(119,54,38,.12),transparent 27rem),
+    linear-gradient(145deg,#0d0807,#1a0e0c 52%,#0c0706);
+}
+.post-shell[data-material="quiet-lacquer"]:before{
+  content:"OUT";
+  position:fixed;
+  z-index:-2;
+  right:-4vw;
+  bottom:-7vh;
+  font-family:"Arial Narrow","Avenir Next Condensed","Segoe UI",sans-serif;
+  font-size:clamp(210px,34vw,560px);
+  font-weight:900;
+  line-height:.72;
+  letter-spacing:-.09em;
+  color:rgba(228,190,130,.026);
+  transform:rotate(-7deg);
+  pointer-events:none;
+}
+.post-shell[data-material="quiet-lacquer"]:after{
+  content:"";
+  position:fixed;
+  z-index:-1;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.25),transparent 24% 78%,rgba(0,0,0,.25)),
+    repeating-linear-gradient(0deg,transparent 0 72px,rgba(220,180,117,.018) 72px 73px);
+  pointer-events:none;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card{
+  width:min(720px,100%);
+  position:relative;
+  overflow:hidden;
+  padding:clamp(27px,5vw,46px);
+  border:1px solid rgba(229,190,128,.22);
+  border-radius:5px 38px 5px 24px;
+  background:
+    linear-gradient(120deg,rgba(255,244,222,.055),transparent 17% 71%,rgba(112,53,35,.06)),
+    linear-gradient(150deg,rgba(43,24,20,.96),rgba(17,11,9,.985) 62%,rgba(10,7,6,.99));
+  color:#f2e3cc;
+  box-shadow:
+    0 46px 115px rgba(0,0,0,.58),
+    inset 1px 1px rgba(255,255,255,.07),
+    inset -1px -1px rgba(91,44,28,.18);
+}
+.post-shell[data-material="quiet-lacquer"] .post-card:before{
+  content:"";
+  position:absolute;
+  inset:10px;
+  border:1px solid rgba(221,177,108,.07);
+  border-radius:2px 28px 2px 16px;
+  pointer-events:none;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card:after{
+  position:absolute;
+  right:-10px;
+  top:24px;
+  font-family:"Arial Narrow","Avenir Next Condensed","Segoe UI",sans-serif;
+  font-size:74px;
+  font-weight:900;
+  letter-spacing:-.075em;
+  color:rgba(228,190,130,.025);
+  pointer-events:none;
+}
+.post-shell[data-material="quiet-lacquer"][data-stage="exit-receipt"] .post-card:after{content:"RECEIPT"}
+.post-shell[data-material="quiet-lacquer"][data-stage="summary"] .post-card:after{content:"KEPT"}
+.post-shell[data-material="quiet-lacquer"] .post-card>.kicker{
+  position:relative;
+  z-index:1;
+  color:#c99a5c;
+  font-size:8px;
+  letter-spacing:.19em;
+}
+.post-shell[data-material="quiet-lacquer"] .post-card h1{
+  position:relative;
+  z-index:1;
+  max-width:14ch;
+  margin:0 0 27px;
+  color:#f5e5cd;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:clamp(34px,6vw,54px);
+  font-weight:600;
+  line-height:.94;
+  letter-spacing:-.052em;
+  text-wrap:balance;
+}
+
+/* Receipt is a ruled ledger, not four little cards. */
+.post-shell[data-material="quiet-lacquer"] .exit-receipt.receipt-four{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:0;
+  margin:16px 0 0;
+  padding:0;
+  border-top:1px solid rgba(229,189,126,.16);
+  border-bottom:1px solid rgba(229,189,126,.16);
+}
+.post-shell[data-material="quiet-lacquer"] .exit-receipt>div{
+  min-width:0;
+  padding:19px 13px 18px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  display:grid;
+  gap:5px;
+}
+.post-shell[data-material="quiet-lacquer"] .exit-receipt>div+div{border-left:1px solid rgba(229,189,126,.11)}
+.post-shell[data-material="quiet-lacquer"] .exit-receipt strong{
+  color:#f1d8b4;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:26px;
+  font-weight:600;
+  line-height:1;
+  letter-spacing:-.035em;
+  font-variant-numeric:tabular-nums;
+}
+.post-shell[data-material="quiet-lacquer"] .exit-receipt span{
+  color:#796657;
+  font-size:7px;
+  text-transform:uppercase;
+  letter-spacing:.14em;
+}
+.post-shell[data-material="quiet-lacquer"] .exit-observation,
+.post-shell[data-material="quiet-lacquer"] .exit-translation{
+  position:relative;
+  z-index:1;
+  max-width:49ch;
+  color:#aa9280;
+  font-size:12px;
+  line-height:1.6;
+}
+.post-shell[data-material="quiet-lacquer"] .exit-observation{
+  margin:22px 0 0;
+  color:#d2b99a;
+}
+.post-shell[data-material="quiet-lacquer"] .exit-translation{margin:6px 0 18px}
+.post-shell[data-material="quiet-lacquer"] .exit-compare{
+  border:0;
+  border-left:2px solid rgba(191,125,63,.45);
+  border-radius:0;
+  background:linear-gradient(90deg,rgba(107,41,36,.14),transparent);
+  color:#baa18b;
+  padding:13px 15px;
+}
+.post-shell[data-material="quiet-lacquer"] .exit-compare strong{color:#edcf9c}
+.post-shell[data-material="quiet-lacquer"] .exit-compare em{color:#c5925d}
+.post-shell[data-material="quiet-lacquer"] .receipt-left{
+  margin:24px 0 15px;
+  color:#f4e2c8;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:clamp(34px,6vw,54px);
+  font-weight:600;
+  line-height:.95;
+  letter-spacing:-.052em;
+}
+
+/* Shared post controls. */
+.post-shell[data-material="quiet-lacquer"] .primary-button{
+  border-radius:4px 15px 4px 15px;
+  border-color:rgba(243,208,147,.32);
+  background:linear-gradient(180deg,#d6ad6b,#a46d3e);
+  color:#21120e;
+  box-shadow:0 13px 28px rgba(0,0,0,.28),inset 1px 1px rgba(255,255,255,.34);
+}
+.post-shell[data-material="quiet-lacquer"] .primary-button:hover{background:linear-gradient(180deg,#e1bc79,#af7542)}
+.post-shell[data-material="quiet-lacquer"] .bare-link{color:#a88f79;text-decoration-color:rgba(205,164,103,.23)}
+.post-shell[data-material="quiet-lacquer"] .bare-link:hover{color:#edcf9d}
+
+/* Urge/outcome retain clarity without switching back to a pale UI. */
+.post-shell[data-material="quiet-lacquer"] .urge-scale{gap:5px}
+.post-shell[data-material="quiet-lacquer"] .urge-scale button{
+  height:58px;
+  border:1px solid rgba(225,185,123,.13);
+  border-radius:4px 12px 4px 12px;
+  background:color-mix(in srgb,#211310 calc((1 - var(--heat))*100%),#762829 calc(var(--heat)*100%));
+  color:#e4cdb0;
+  box-shadow:inset 1px 1px rgba(255,255,255,.025);
+}
+.post-shell[data-material="quiet-lacquer"] .urge-scale button:hover{
+  border-color:rgba(229,190,128,.35);
+  box-shadow:0 10px 22px rgba(0,0,0,.22),inset 1px 1px rgba(255,255,255,.04);
+}
+.post-shell[data-material="quiet-lacquer"] .urge-labels{color:#79685a}
+.post-shell[data-material="quiet-lacquer"] .urge-shift{color:#8a7462}
+.post-shell[data-material="quiet-lacquer"] .urge-shift strong{color:#e1b978}
+.post-shell[data-material="quiet-lacquer"] .urge-shift i{color:#6f594a}
+.post-shell[data-material="quiet-lacquer"] .outcome-choices button{
+  min-height:58px;
+  border:1px solid rgba(225,185,123,.14);
+  border-radius:4px 15px 4px 15px;
+  background:rgba(255,244,220,.035);
+  color:#d8c1a4;
+  box-shadow:none;
+}
+.post-shell[data-material="quiet-lacquer"] .outcome-choices button:hover{
+  border-color:rgba(226,185,122,.34);
+  background:linear-gradient(90deg,rgba(112,42,37,.18),rgba(255,244,220,.035));
+}
+.post-shell[data-material="quiet-lacquer"] .big-money-input>span{color:#b78b55}
+.post-shell[data-material="quiet-lacquer"] .big-money-input input{
+  border:1px solid rgba(225,185,123,.18);
+  border-radius:4px 15px 4px 15px;
+  background:rgba(8,5,4,.58);
+  color:#f0dbc0;
+}
+.post-shell[data-material="quiet-lacquer"] .big-money-input button{
+  border-radius:4px 13px 4px 13px;
+  background:#9f693c;
+  color:#21120e;
+}
+
+/* Money Kept becomes the single loud post-run idea. */
+.post-shell[data-material="quiet-lacquer"] .summary-topline{
+  position:relative;
+  z-index:1;
+  margin-bottom:28px;
+  padding-bottom:14px;
+  border-bottom:1px solid rgba(229,189,126,.14);
+  color:#826e5f;
+  font-size:9px;
+}
+.post-shell[data-material="quiet-lacquer"] .summary-topline strong{
+  color:#d9bb8d;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:27px;
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+}
+.post-shell[data-material="quiet-lacquer"] .money-kept{
+  position:relative;
+  z-index:1;
+  color:#f3dfc1;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:clamp(72px,14vw,112px);
+  font-weight:600;
+  line-height:.78;
+  letter-spacing:-.075em;
+  font-variant-numeric:tabular-nums;
+}
+.post-shell[data-material="quiet-lacquer"] .money-kept span{
+  margin-top:18px;
+  color:#bd8c50;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  font-size:8px;
+  font-weight:760;
+  letter-spacing:.23em;
+}
+.post-shell[data-material="quiet-lacquer"] .money-kept-grid{
+  position:relative;
+  z-index:1;
+  margin-top:28px;
+  border-color:rgba(229,189,126,.14);
+}
+.post-shell[data-material="quiet-lacquer"] .money-kept-grid>div{padding:18px 0}
+.post-shell[data-material="quiet-lacquer"] .money-kept-grid>div+div{border-color:rgba(229,189,126,.11)}
+.post-shell[data-material="quiet-lacquer"] .money-kept-grid span,
+.post-shell[data-material="quiet-lacquer"] .exit-metric span{
+  color:#786557;
+  font-size:8px;
+  letter-spacing:.14em;
+}
+.post-shell[data-material="quiet-lacquer"] .money-kept-grid strong,
+.post-shell[data-material="quiet-lacquer"] .exit-metric strong{
+  color:#dfc49d;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:24px;
+  font-weight:600;
+}
+.post-shell[data-material="quiet-lacquer"] .protected-card{
+  margin-top:22px;
+  border:1px solid rgba(231,185,120,.13);
+  border-left:2px solid rgba(194,124,61,.52);
+  border-radius:0;
+  background:
+    linear-gradient(90deg,rgba(112,37,38,.24),rgba(51,24,20,.18) 60%,transparent);
+  color:#e8d3b5;
+  padding:17px 16px;
+}
+.post-shell[data-material="quiet-lacquer"] .protected-card span{color:#a98d72}
+.post-shell[data-material="quiet-lacquer"] .protected-card strong{color:#ebcb98}
+.post-shell[data-material="quiet-lacquer"] .protected-card em{color:#bf8d50}
+.post-shell[data-material="quiet-lacquer"] .exit-metric{
+  border-color:rgba(229,189,126,.12);
+}
+.post-shell[data-material="quiet-lacquer"] .overspend-line{color:#c7a990}
+
+/* Earned question is part of the ledger, not another card. */
+.post-shell[data-material="quiet-lacquer"] .post-run-context-question{
+  margin-top:23px;
+  padding:18px 0 4px;
+  border:0;
+  border-top:1px solid rgba(229,189,126,.14);
+  border-radius:0;
+  background:transparent;
+}
+.post-shell[data-material="quiet-lacquer"] .post-context-head>span{
+  color:#b78d59;
+  font-size:8px;
+  letter-spacing:.15em;
+}
+.post-shell[data-material="quiet-lacquer"] .post-context-not-now{color:#7c685a}
+.post-shell[data-material="quiet-lacquer"] .post-run-context-question h2{
+  max-width:24ch;
+  color:#e7d2b6;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:24px;
+  font-weight:600;
+  line-height:1.02;
+  letter-spacing:-.04em;
+}
+.post-shell[data-material="quiet-lacquer"] .post-context-choices button,
+.post-shell[data-material="quiet-lacquer"] .post-context-input button{
+  min-height:44px;
+  border:1px solid rgba(224,183,121,.13);
+  border-radius:4px 12px 4px 12px;
+  background:rgba(255,244,220,.03);
+  color:#bda78f;
+}
+.post-shell[data-material="quiet-lacquer"] .post-context-choices button:hover,
+.post-shell[data-material="quiet-lacquer"] .post-context-input button:hover{
+  border-color:rgba(224,183,121,.3);
+  color:#e9cfa9;
+}
+.post-shell[data-material="quiet-lacquer"] .post-context-input input{
+  border:1px solid rgba(224,183,121,.15);
+  border-radius:4px 12px 4px 12px;
+  background:rgba(8,5,4,.58);
+  color:#e8d4b9;
+}
+.post-shell[data-material="quiet-lacquer"] .post-context-input .post-context-quiet{
+  border-color:transparent;
+  background:transparent;
+  color:#786658;
+}
+.post-shell[data-material="quiet-lacquer"] .summary-actions{
+  position:relative;
+  z-index:1;
+  margin-top:27px;
+  padding-top:16px;
+  border-top:1px solid rgba(229,189,126,.09);
+}
+
+@media(max-width:560px){
+  .post-shell[data-material="quiet-lacquer"]{padding:12px 10px 22px}
+  .post-shell[data-material="quiet-lacquer"] .post-card{
+    padding:27px 19px;
+    border-radius:4px 28px 4px 18px;
+  }
+  .post-shell[data-material="quiet-lacquer"] .exit-receipt.receipt-four{grid-template-columns:1fr 1fr}
+  .post-shell[data-material="quiet-lacquer"] .exit-receipt>div:nth-child(3){border-left:0;border-top:1px solid rgba(229,189,126,.11)}
+  .post-shell[data-material="quiet-lacquer"] .exit-receipt>div:nth-child(4){border-top:1px solid rgba(229,189,126,.11)}
+  .post-shell[data-material="quiet-lacquer"] .money-kept{font-size:78px}
+  .post-shell[data-material="quiet-lacquer"] .post-card:after{font-size:58px}
+}
+@media(max-width:340px){
+  .post-shell[data-material="quiet-lacquer"] .post-card{padding:24px 15px}
+  .post-shell[data-material="quiet-lacquer"] .exit-receipt>div{padding:16px 9px}
+  .post-shell[data-material="quiet-lacquer"] .money-kept{font-size:68px}
+}

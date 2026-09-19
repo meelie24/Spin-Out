@@ -227,8 +227,8 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
   };
 
   return (
-    <main className="post-shell">
-      <section className="post-card">
+    <main className="post-shell" data-material="quiet-lacquer" data-stage={stage}>
+      <section className={`post-card post-stage-${stage}`}>
         {stage === 'exit-receipt' ? <>
           <p className="kicker">Reality Receipt</p>
           <div className="exit-receipt receipt-four">
