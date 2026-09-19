@@ -169,6 +169,48 @@ async function assertModalKeyboardContract(page, dialogSelector, trigger) {
 }
 
 
+async function observeCanvasText(context, page) {
+  const latest = new Map();
+  page.on('console', message => {
+    const text = message.text();
+    if (!text.startsWith('QA_CANVAS_TEXT ')) return;
+    const entry = JSON.parse(text.slice('QA_CANVAS_TEXT '.length));
+    latest.set(entry.canvas, entry.text);
+  });
+  await context.addInitScript(() => {
+    const ids = new WeakMap();
+    let nextId = 0;
+    const draw = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText = function (text, ...args) {
+      const result = draw.call(this, text, ...args);
+      if (!ids.has(this.canvas)) ids.set(this.canvas, ++nextId);
+      console.debug('QA_CANVAS_TEXT ' + JSON.stringify({
+        canvas: ids.get(this.canvas), text: String(text),
+      }));
+      return result;
+    };
+  });
+  return latest;
+}
+
+async function completeOneObservedPlay(page) {
+  await page.locator('.game-action').click();
+  await page.waitForFunction(() => {
+    const active = JSON.parse(localStorage.getItem('spinout.active.v2') || 'null');
+    const button = document.querySelector('.game-action');
+    return active?.run?.actionCount === 1
+      && (Boolean(document.querySelector('.reality-ping, .xray-moment'))
+        || (button instanceof HTMLButtonElement && !button.disabled));
+  }, null, { timeout: 9_000 });
+  const intervention = page.locator('.reality-ping, .xray-moment');
+  if (await intervention.count()) {
+    await intervention.getByRole('button', { name: /^(Got it|Continue run)$/ }).first().click();
+    await intervention.waitFor({ state: 'hidden', timeout: 3_000 });
+  }
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+}
+
+
 const browser = await chromium.launch({ headless: true });
 
 try {
@@ -218,7 +260,10 @@ try {
       });
       if (!/Manrope/i.test(observed.uiFont)) findings.push(width + ': run UI font fell back: ' + observed.uiFont);
       if (!/Manrope/i.test(observed.displayFont)) findings.push(width + ': run display font fell back: ' + observed.displayFont);
-      if (observed.titleClipped || observed.questionOverlapsChoices) findings.push(width + ': optional question is clipped or overlaps answers');
+      if (observed.titleClipped || observed.questionOverlapsChoices) {
+        await page.screenshot({ path: `qa-artifacts/question-overlap-${width}.png`, fullPage: true });
+        findings.push(width + ': optional question is clipped or overlaps answers: ' + JSON.stringify(observed));
+      }
       if (!observed.soundFits || !observed.soundTarget) findings.push(width + ': sound control overflows or has a small touch target');
       if (observed.dockHeight > 140) findings.push(width + ': optional dock exceeds 140px');
       if (!observed.dockAtBottom) findings.push(width + ': optional question left its bottom dock');
@@ -1002,6 +1047,89 @@ await check('clearing income preserves null while an explicit zero remains zero'
   assert(cleared.obligationAmountCents === p.obligationAmountCents
     && cleared.obligationDueDate === p.obligationDueDate,
     'clearing income changed the separate obligation');
+});
+
+
+await check('roulette keeps the complete result after its outcome presentation', async context => {
+  const p = profile('casino');
+  await seedActive(context, p, runFor(p));
+  const page = await context.newPage();
+  const rendered = await observeCanvasText(context, page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+  await completeOneObservedPlay(page);
+  const texts = [...rendered.values()];
+  assert(texts.some(text => /^\d+ (?:RED|BLACK|GREEN) · (?:[-+]?\$[\d.]+|PUSH)$/.test(text)),
+    'roulette result lost its number/color and fell back to a bare amount; latest money labels: '
+      + JSON.stringify(texts.filter(text => /\$|PUSH/.test(text))));
+});
+
+await check('slot symbols stay inside the same reel windows after a spin', async context => {
+  const p = profile('slots');
+  await seedActive(context, p, runFor(p));
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+  await page.evaluate(() => document.fonts.ready);
+  const before = await page.locator('.phaser-stage canvas').screenshot();
+  await completeOneObservedPlay(page);
+  const after = await page.locator('.phaser-stage canvas').screenshot();
+
+  const observed = await page.evaluate(async ({ before, after }) => {
+    const pixels = async source => {
+      const image = new Image();
+      image.src = source;
+      await image.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0);
+      return context.getImageData(0, 0, image.width, image.height);
+    };
+    const initial = await pixels(before);
+    const final = await pixels(after);
+    if (initial.width !== final.width || initial.height !== final.height) {
+      return { sameSize: false };
+    }
+    const { width, height, data } = initial;
+    const cream = index => data[index] >= 225 && data[index] <= 255
+      && data[index + 1] >= 212 && data[index + 1] <= 242
+      && data[index + 2] >= 192 && data[index + 2] <= 222;
+    let top = -1;
+    for (let y = Math.floor(height * .18); y < height * .75; y++) {
+      let count = 0;
+      for (let x = 0; x < width; x++) if (cream((y * width + x) * 4)) count++;
+      if (count > width * .52) { top = y; break; }
+    }
+    if (top < 0) return { sameSize: true, anchorFound: false };
+    let eligible = 0;
+    let changed = 0;
+    const borderHeight = Math.max(2, Math.round(height * .006));
+    for (let y = top; y < top + borderHeight; y++) {
+      for (let x = 0; x < width; x++) {
+        const index = (y * width + x) * 4;
+        if (!cream(index)) continue;
+        eligible++;
+        const difference = Math.abs(data[index] - final.data[index])
+          + Math.abs(data[index + 1] - final.data[index + 1])
+          + Math.abs(data[index + 2] - final.data[index + 2]);
+        if (difference > 75) changed++;
+      }
+    }
+    return { sameSize: true, anchorFound: true, top, eligible, changed, changedRatio: changed / eligible };
+  }, {
+    before: 'data:image/png;base64,' + before.toString('base64'),
+    after: 'data:image/png;base64,' + after.toString('base64'),
+  });
+
+  assert(observed.sameSize, 'the game canvas changed size during a single spin');
+  assert(observed.anchorFound, 'could not locate the initial empty top edge of the reel windows');
+  assert(observed.changedRatio < .2,
+    'symbols clipped into the previously empty top reel border after a spin: ' + JSON.stringify(observed));
 });
 
   if (failures.length) {

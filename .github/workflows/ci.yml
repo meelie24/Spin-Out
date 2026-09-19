@@ -9,9 +9,10 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     env:
+      QA_VISUAL_FIXTURES: '1'
       NEXT_PUBLIC_SUPABASE_URL: https://vwjaoibxjklaepfllenk.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_MdPVpbAl0W7UQYlZy_lo6A_QQMX1pQW
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -19,6 +20,7 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npm run test:core
+      - run: node qa/install-visual-fixture.mjs
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run build
@@ -32,7 +34,11 @@ jobs:
             if curl -fsS http://127.0.0.1:3000 >/dev/null; then break; fi
             sleep 1
           done
-          npm run qa
+          qa_status=0
+          npm run qa || qa_status=$?
+          fixture_status=0
+          node qa/visual-fixtures.mjs || fixture_status=$?
+          test "$qa_status" -eq 0 && test "$fixture_status" -eq 0
       - uses: actions/upload-artifact@v7
         if: always()
         with:
