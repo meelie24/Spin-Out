@@ -501,7 +501,8 @@ export function InRunSetup({
                 type="button"
                 key={option.value}
                 onClick={() => {
-                  if (current.key === 'difficult-times') complete(current, option.value as DifficultTime);
+                  if (current.kind === 'yes-no') complete(current, option.value === 'yes');
+                  else if (current.key === 'difficult-times') complete(current, option.value as DifficultTime);
                   else if (current.key === 'payday-plan') complete(current, option.value === 'skip' ? null : option.value);
                   else complete(current, option.value);
                 }}

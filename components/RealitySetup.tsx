@@ -122,7 +122,7 @@ export function RealitySetup({
       difficultTimeCustom: existing?.difficultTimeCustom ?? null,
       paydayPlanActions: existing?.paydayPlanActions ?? [],
       paydayPlanCustom: existing?.paydayPlanCustom ?? null,
-      onboardingCompleted: existing?.onboardingCompleted ?? [],
+      onboardingCompleted: firstRun ? [] : existing?.onboardingCompleted,
       startingUrge,
       financialContextUpdatedAt: existing?.financialContextUpdatedAt ?? now,
       createdAt: existing?.createdAt ?? now,
