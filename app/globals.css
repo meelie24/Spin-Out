@@ -2487,3 +2487,873 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
 @media(max-width:560px){
   .mobile-game-quickpick{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+
+/* =========================================================
+   REFERENCE-LOCKED VISUAL SYSTEM
+   Founder refs A/B/C + UI Craft anti-slop pass
+   ========================================================= */
+.reference-locked{
+  --so-ink:#f4e7d0;
+  --so-ink-soft:#c5aa8d;
+  --so-ink-dim:#866f60;
+  --so-espresso:#100908;
+  --so-chocolate:#1d100d;
+  --so-lacquer:#3b1718;
+  --so-oxblood:#6f2025;
+  --so-bronze:#a7753f;
+  --so-bronze-hi:#e3bd78;
+  --so-aged-gold:#c49a58;
+  --so-glass:rgba(43,28,24,.48);
+  --so-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --so-display:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  --so-game:"Arial Narrow","Avenir Next Condensed","Segoe UI",Arial,sans-serif;
+  background:
+    linear-gradient(112deg,#0b0706 0%,#160c0a 36%,#21110e 67%,#0d0807 100%);
+  font-family:var(--so-ui);
+}
+.reference-locked .kicker,
+.reference-locked .game-tile-eyebrow,
+.reference-locked .game-enter,
+.reference-locked .hub-brand small{
+  font-family:var(--so-ui);
+  letter-spacing:.16em;
+}
+.reference-locked [data-type-role="display"],
+.reference-locked .games-heading h2{
+  font-family:var(--so-display);
+  font-weight:600;
+  letter-spacing:-.055em;
+  text-wrap:balance;
+}
+.reference-locked [data-type-role="game-title"]{
+  font-family:var(--so-game);
+  font-stretch:condensed;
+  font-weight:850;
+  letter-spacing:-.045em;
+}
+.reference-locked [data-type-role="intervention"]{
+  font-family:var(--so-ui);
+  font-weight:720;
+  letter-spacing:-.02em;
+}
+.reference-locked .sidebar-summary>strong,
+.reference-locked .sidebar-stat b,
+.reference-locked .hero-machine-bottom strong{
+  font-variant-numeric:tabular-nums;
+}
+
+/* Environment: staged typography and casino objects, not wallpaper. */
+.reference-locked .home-atmosphere{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+  background:
+    linear-gradient(104deg,rgba(0,0,0,.28),transparent 28%,transparent 76%,rgba(0,0,0,.34)),
+    linear-gradient(180deg,rgba(191,132,70,.028),transparent 34%,rgba(104,35,34,.045) 72%,transparent);
+}
+.reference-locked .env-quit{
+  position:absolute;
+  color:rgba(225,190,134,.052);
+  font-family:var(--so-game);
+  font-weight:900;
+  letter-spacing:-.075em;
+  line-height:.72;
+  user-select:none;
+  mix-blend-mode:screen;
+  text-shadow:0 28px 80px rgba(0,0,0,.55);
+}
+.reference-locked .env-quit-a{
+  font-size:clamp(220px,30vw,520px);
+  top:-4vh;
+  right:-8vw;
+  transform:rotate(-7deg);
+}
+.reference-locked .env-quit-b{
+  font-size:clamp(150px,20vw,340px);
+  top:48vh;
+  left:17vw;
+  transform:rotate(7deg);
+  opacity:.7;
+}
+.reference-locked .env-quit-c{
+  font-size:clamp(190px,25vw,430px);
+  bottom:-9vh;
+  right:3vw;
+  transform:rotate(-3deg);
+  opacity:.54;
+}
+.reference-locked .ambient-symbol{
+  position:absolute;
+  opacity:.12;
+  filter:saturate(.72) sepia(.22) drop-shadow(0 32px 35px rgba(0,0,0,.48));
+}
+.reference-locked .ambient-seven{top:16vh;left:29vw;transform:rotate(-18deg) scale(.72)}
+.reference-locked .ambient-coin{top:68vh;right:-3vw;transform:rotate(19deg) scale(.72);opacity:.09}
+.reference-locked .ambient-fu{bottom:12vh;left:4vw;transform:rotate(8deg) scale(.68);opacity:.1}
+.reference-locked .ambient-bar{top:40vh;right:20vw;transform:rotate(-10deg) scale(.58);opacity:.07}
+.reference-locked .ambient-rule{
+  position:absolute;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(224,183,112,.2),transparent);
+  transform-origin:left;
+}
+.reference-locked .ambient-rule-a{width:58vw;left:18vw;top:34vh;transform:rotate(-8deg)}
+.reference-locked .ambient-rule-b{width:48vw;right:-5vw;bottom:25vh;transform:rotate(11deg)}
+
+/* Reference A: one floating continuous smoked-glass navigation object. */
+.reference-locked .hub-sidebar[data-material="liquid-glass"]{
+  border-radius:34px 19px 34px 19px;
+  border:1px solid rgba(255,236,201,.2);
+  background:
+    linear-gradient(123deg,rgba(255,255,255,.125),transparent 17% 61%,rgba(199,139,73,.06)),
+    linear-gradient(180deg,rgba(62,39,32,.46),rgba(27,17,15,.58));
+  box-shadow:
+    -1px -1px 0 rgba(255,248,230,.08),
+    0 36px 86px rgba(0,0,0,.48),
+    12px 16px 44px rgba(65,32,24,.18),
+    inset 1px 1px rgba(255,255,255,.13),
+    inset -1px -1px rgba(102,57,37,.18);
+  backdrop-filter:blur(34px) saturate(1.38);
+  -webkit-backdrop-filter:blur(34px) saturate(1.38);
+}
+.reference-locked .hub-sidebar[data-material="liquid-glass"]:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(104deg,rgba(255,255,255,.11),transparent 14% 74%,rgba(227,183,116,.045)),
+    linear-gradient(180deg,transparent 72%,rgba(255,226,180,.025));
+  mask:linear-gradient(#000,transparent 68%);
+}
+.reference-locked .sidebar-shine{
+  width:160px;
+  height:440px;
+  top:-210px;
+  left:-55px;
+  background:linear-gradient(90deg,transparent,rgba(255,248,230,.14),transparent);
+  filter:blur(10px);
+  transform:rotate(24deg);
+}
+.reference-locked .hub-brand-mark{
+  border-radius:50% 50% 44% 56%;
+  font-family:var(--so-display);
+  font-style:italic;
+  font-size:19px;
+  background:
+    linear-gradient(145deg,#f0d29b 0%,#a66f3b 58%,#5f341f 100%);
+  box-shadow:
+    0 8px 26px rgba(0,0,0,.32),
+    inset 1px 1px rgba(255,255,255,.55),
+    inset -2px -3px rgba(70,31,19,.25);
+}
+.reference-locked .hub-brand strong{
+  font-family:var(--so-display);
+  font-size:17px;
+  font-weight:600;
+  letter-spacing:-.035em;
+}
+.reference-locked .hub-nav{gap:2px;margin:30px -4px 24px}
+.reference-locked .hub-nav a,
+.reference-locked .hub-nav button{
+  min-height:48px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:0 14px;
+  color:#aa9480;
+  border:0;
+  border-radius:15px 9px 15px 9px;
+  background:transparent;
+  font:600 12px/1 var(--so-ui);
+  text-align:left;
+  cursor:pointer;
+  transition:transform .24s cubic-bezier(.2,.75,.3,1),background .24s ease,color .24s ease,box-shadow .24s ease;
+}
+.reference-locked .hub-nav a span,
+.reference-locked .hub-nav button span{
+  width:20px;
+  color:#7c6654;
+  font-size:8px;
+  letter-spacing:.12em;
+}
+.reference-locked .hub-nav a:hover,
+.reference-locked .hub-nav button:hover{
+  color:#f0dec4;
+  transform:translateX(3px);
+  background:rgba(255,245,224,.035);
+}
+.reference-locked .hub-nav [data-nav-state="active"]{
+  color:#fff1da;
+  transform:translateX(2px);
+  background:
+    linear-gradient(110deg,rgba(255,248,230,.14),rgba(255,255,255,.045) 52%,rgba(198,136,70,.075));
+  box-shadow:
+    inset 1px 1px rgba(255,255,255,.15),
+    inset -1px -1px rgba(91,48,31,.14),
+    0 12px 28px rgba(0,0,0,.13);
+}
+.reference-locked .hub-nav [data-nav-state="active"]:after{
+  content:"";
+  position:absolute;
+  left:2px;
+  width:2px;
+  height:20px;
+  border-radius:2px;
+  background:linear-gradient(#f4d99f,#8f5430);
+  box-shadow:0 0 13px rgba(219,166,93,.45);
+}
+.reference-locked .sidebar-summary{
+  margin-top:auto;
+  padding:18px 4px 14px;
+  border:0;
+  border-radius:0;
+  border-top:1px solid rgba(232,199,144,.12);
+  background:transparent;
+  box-shadow:none;
+}
+.reference-locked .sidebar-insight{
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  border:0;
+  border-top:1px solid rgba(232,199,144,.08);
+  padding-left:4px;
+  padding-right:4px;
+}
+
+/* Hero: one lacquered gaming stage, not a generic app card. */
+.reference-locked .hub-content{max-width:1510px}
+.reference-locked .hub-hero{
+  min-height:510px;
+  grid-template-columns:minmax(0,.95fr) minmax(440px,1.05fr);
+  padding:58px clamp(30px,4.6vw,72px);
+  border-radius:4px 62px 4px 24px;
+  border:1px solid rgba(218,172,105,.28);
+  background:
+    linear-gradient(100deg,rgba(10,7,6,.2),transparent 34%),
+    linear-gradient(135deg,#27130f 0%,#421e19 40%,#1c0e0c 72%,#0d0807 100%);
+  box-shadow:
+    0 46px 105px rgba(0,0,0,.42),
+    inset 0 1px rgba(255,239,203,.09),
+    inset 0 -1px rgba(93,45,29,.28);
+}
+.reference-locked .hub-hero:after{
+  content:"";
+  position:absolute;
+  inset:12px;
+  border:1px solid rgba(225,181,111,.12);
+  border-radius:2px 51px 2px 17px;
+  pointer-events:none;
+  clip-path:polygon(0 0,100% 0,100% 74%,76% 100%,0 100%);
+}
+.reference-locked .hub-hero:before{
+  content:"QUIT";
+  right:-25px;
+  bottom:-55px;
+  font-family:var(--so-game);
+  font-size:clamp(160px,18vw,300px);
+  font-weight:900;
+  letter-spacing:-.09em;
+  color:rgba(246,212,159,.04);
+  transform:rotate(-6deg);
+}
+.reference-locked .hero-copy h1{
+  max-width:8.5ch;
+  font-family:var(--so-display);
+  font-size:clamp(58px,7.3vw,112px);
+  font-weight:600;
+  line-height:.82;
+  letter-spacing:-.065em;
+  color:#f7ead5;
+  text-shadow:0 22px 42px rgba(0,0,0,.24);
+}
+.reference-locked .hero-copy .kicker{
+  color:#cf9e61;
+  font-size:9px;
+  font-weight:730;
+}
+.reference-locked .hero-copy>p:not(.kicker){
+  max-width:44ch;
+  color:#b9a18d;
+  font-size:14px;
+  line-height:1.72;
+}
+.reference-locked .hero-actions .primary-cta{
+  border-radius:3px 15px 3px 15px;
+  min-width:174px;
+  min-height:52px;
+  background:
+    linear-gradient(180deg,#e1bd7a,#b07a42);
+  box-shadow:
+    0 16px 35px rgba(0,0,0,.28),
+    inset 1px 1px rgba(255,255,255,.5),
+    inset -1px -2px rgba(85,45,23,.24);
+}
+.reference-locked .hero-machine{
+  width:min(520px,100%);
+  padding:20px;
+  border-radius:48px 16px 48px 16px;
+  background:
+    linear-gradient(140deg,rgba(247,218,169,.15),transparent 18% 68%,rgba(126,61,34,.18)),
+    linear-gradient(155deg,#3b251f,#160e0c 65%);
+  border:1px solid rgba(239,197,128,.42);
+  box-shadow:
+    0 40px 86px rgba(0,0,0,.5),
+    15px 18px 55px rgba(60,29,22,.24),
+    inset 2px 2px rgba(255,255,255,.12),
+    inset -2px -3px rgba(74,35,24,.32);
+  transform:perspective(1200px) rotateY(-5deg) rotateX(1.5deg);
+}
+.reference-locked .hero-reel-window{
+  border-radius:29px 9px 29px 9px;
+  border:4px solid #24120d;
+  outline:1px solid rgba(228,178,101,.48);
+  box-shadow:
+    inset 0 0 40px rgba(0,0,0,.78),
+    0 20px 45px rgba(0,0,0,.33);
+}
+.reference-locked .hero-reel-window>div{
+  min-height:150px;
+  background:linear-gradient(92deg,#bba17c,#f7e8cd 16% 82%,#9b8060);
+}
+.reference-locked .hero-reel-window img{max-height:105px}
+
+/* Mobile quick selection stays immediate, but gets a crafted physical surface. */
+.reference-locked .mobile-game-quickpick{
+  gap:7px;
+  margin-top:20px;
+}
+.reference-locked .mobile-game-option{
+  min-height:52px;
+  border-radius:8px 18px 8px 18px;
+  border:1px solid rgba(227,190,129,.2);
+  background:
+    linear-gradient(145deg,rgba(255,245,224,.075),rgba(255,255,255,.018)),
+    rgba(34,19,16,.54);
+  box-shadow:inset 1px 1px rgba(255,255,255,.075),0 10px 24px rgba(0,0,0,.15);
+}
+.reference-locked .mobile-game-option img{
+  filter:drop-shadow(0 5px 7px rgba(0,0,0,.28));
+}
+
+/* Game hub: asymmetric authored compositions, deliberately not a repeated card grid. */
+.reference-locked .games-stage{
+  position:relative;
+  padding:62px 4px 18px;
+}
+.reference-locked .games-heading{
+  max-width:1160px;
+  align-items:flex-start;
+  padding-bottom:30px;
+}
+.reference-locked .games-heading h2{
+  max-width:12ch;
+  font-size:clamp(42px,5.2vw,76px);
+  line-height:.88;
+  color:#f1dec3;
+}
+.reference-locked .game-library{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  grid-template-rows:270px 270px 330px;
+  gap:13px;
+}
+.reference-locked .game-tile{
+  position:relative;
+  min-width:0;
+  overflow:hidden;
+  isolation:isolate;
+  display:flex;
+  flex-direction:column;
+  color:#f5e5cd;
+  text-decoration:none;
+  border:1px solid rgba(223,179,112,.2);
+  box-shadow:
+    0 28px 62px rgba(0,0,0,.28),
+    inset 1px 1px rgba(255,255,255,.055);
+  transition:
+    transform .28s cubic-bezier(.2,.72,.22,1),
+    box-shadow .28s ease,
+    border-color .28s ease;
+}
+.reference-locked .game-tile:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent 38%,rgba(8,5,4,.82) 76%,rgba(7,4,4,.96));
+}
+.reference-locked .game-tile:hover{
+  transform:translateY(-5px);
+  border-color:rgba(237,199,137,.4);
+  box-shadow:
+    0 42px 86px rgba(0,0,0,.39),
+    inset 1px 1px rgba(255,255,255,.075);
+}
+.reference-locked .game-tile:active{transform:translateY(-1px) scale(.995)}
+.reference-locked .game-tile:focus-visible{
+  outline:2px solid #f1ca86;
+  outline-offset:3px;
+}
+.reference-locked .game-tile-featured{
+  grid-column:1 / 8;
+  grid-row:1 / 3;
+  border-radius:5px 48px 5px 26px;
+  background:linear-gradient(138deg,#4c2018,#2b120f 55%,#120a08);
+}
+.reference-locked .game-sports{
+  grid-column:8 / 13;
+  grid-row:1;
+  border-radius:34px 6px 22px 6px;
+  background:linear-gradient(133deg,#2a211b,#15100d 62%,#0d0908);
+}
+.reference-locked .game-casino{
+  grid-column:8 / 13;
+  grid-row:2;
+  border-radius:6px 34px 6px 22px;
+  background:linear-gradient(133deg,#391815,#190d0c 62%,#0c0807);
+}
+.reference-locked .game-poker{
+  grid-column:1 / 5;
+  grid-row:3;
+  border-radius:30px 8px 8px 8px;
+  background:linear-gradient(145deg,#221514,#120c0a 70%);
+}
+.reference-locked .game-lottery{
+  grid-column:5 / 9;
+  grid-row:3;
+  border-radius:8px 8px 30px 8px;
+  background:linear-gradient(145deg,#3b2a1e,#160e0b 72%);
+}
+.reference-locked .game-other{
+  grid-column:9 / 13;
+  grid-row:3;
+  border-radius:8px 30px 8px 30px;
+  background:linear-gradient(145deg,#3a1a19,#140c0b 72%);
+}
+.reference-locked .tile-art{
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  overflow:hidden;
+  pointer-events:none;
+}
+.reference-locked .game-tile-meta{
+  position:relative;
+  z-index:2;
+  margin-top:auto;
+  padding:22px 24px 0;
+  max-width:90%;
+}
+.reference-locked .game-tile-featured .game-tile-meta{
+  padding:30px 32px 0;
+  max-width:64%;
+}
+.reference-locked .game-tile-eyebrow{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:#c1935d;
+  font-size:8px;
+  text-transform:uppercase;
+}
+.reference-locked .game-tile-eyebrow b{
+  color:#665245;
+  font-weight:600;
+}
+.reference-locked .game-tile h3{
+  margin:7px 0 7px;
+  font-size:clamp(28px,3.2vw,52px);
+  line-height:.92;
+  color:#f6e4c9;
+  text-shadow:0 12px 30px rgba(0,0,0,.32);
+}
+.reference-locked .game-tile-featured h3{font-size:clamp(52px,6.2vw,88px)}
+.reference-locked .game-tile p{
+  margin:0;
+  max-width:34ch;
+  color:#a88f7a;
+  font-size:11px;
+  line-height:1.5;
+}
+.reference-locked .game-tile small{
+  display:block;
+  margin-top:6px;
+  color:#d0a878;
+  font-size:9px;
+  line-height:1.45;
+}
+.reference-locked .game-enter{
+  position:relative;
+  z-index:2;
+  margin:16px 24px 20px;
+  padding-top:12px;
+  border-top:1px solid rgba(231,190,128,.12);
+  color:#d8b47d;
+}
+.reference-locked .game-tile-featured .game-enter{margin:18px 32px 28px}
+.reference-locked .game-enter b{
+  width:27px;
+  height:27px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  border:1px solid rgba(227,187,124,.22);
+  background:rgba(255,241,212,.045);
+}
+
+/* Slots art: dimensional cabinet and overlapping coins. */
+.reference-locked .tile-art-slots{
+  background:
+    linear-gradient(112deg,rgba(112,37,29,.28),transparent 36%),
+    linear-gradient(160deg,#341511,#180b09 70%);
+}
+.reference-locked .slots-arch{
+  position:absolute;
+  width:67%;
+  height:62%;
+  right:5%;
+  top:5%;
+  border:2px solid rgba(209,151,76,.62);
+  border-bottom:0;
+  border-radius:46% 46% 8px 8px / 24% 24% 6px 6px;
+  background:
+    linear-gradient(180deg,rgba(190,122,59,.18),transparent 20%),
+    linear-gradient(145deg,#371b15,#160c0a);
+  box-shadow:
+    0 30px 60px rgba(0,0,0,.45),
+    inset 0 2px rgba(255,225,173,.12),
+    0 0 0 7px rgba(50,23,15,.62);
+}
+.reference-locked .slots-arch span{
+  display:block;
+  padding-top:13px;
+  text-align:center;
+  color:#e0b66e;
+  font:850 11px/1 var(--so-game);
+  letter-spacing:.25em;
+}
+.reference-locked .slots-arch i{
+  position:absolute;
+  top:34px;
+  left:10%;
+  right:10%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#e6bd74,transparent);
+}
+.reference-locked .slots-cabinet{
+  position:absolute;
+  width:61%;
+  right:8%;
+  top:18%;
+  padding:14px;
+  border:4px solid #1a0c09;
+  border-radius:18px 18px 28px 28px;
+  background:linear-gradient(145deg,#b27a3e,#5a2e1d 13%,#20110d 20% 82%,#6f3d25 92%,#c2914f);
+  box-shadow:0 36px 58px rgba(0,0,0,.48),inset 0 0 0 1px rgba(236,190,117,.4);
+}
+.reference-locked .slots-reels{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:3px;
+  padding:8px;
+  border-radius:8px;
+  background:#090605;
+  box-shadow:inset 0 0 20px #000;
+}
+.reference-locked .slots-reels span{
+  min-height:128px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:linear-gradient(90deg,#a58a66,#f4dfbc 17% 82%,#8b6f50);
+}
+.reference-locked .slots-reels img{width:90%;height:auto;filter:drop-shadow(0 10px 9px rgba(54,25,16,.28))}
+.reference-locked .slots-tray{display:flex;gap:6px;justify-content:center;padding:13px 0 2px}
+.reference-locked .slots-tray i{
+  width:26px;height:7px;border-radius:2px;
+  background:linear-gradient(#d7ad6d,#75502c);
+  box-shadow:inset 0 1px rgba(255,255,255,.3);
+}
+.reference-locked .art-float{position:absolute;filter:drop-shadow(0 15px 15px rgba(0,0,0,.36))}
+.reference-locked .art-coin-one{right:1%;top:54%;transform:rotate(19deg)}
+.reference-locked .art-coin-two{right:20%;top:69%;transform:rotate(-15deg)}
+
+/* Sportsbook art: odds board, stadium arc, real slip. */
+.reference-locked .tile-art-sports{
+  background:
+    linear-gradient(180deg,rgba(194,154,99,.08),transparent 30%),
+    linear-gradient(140deg,#28211c,#100c0a 72%);
+}
+.reference-locked .stadium-rim{
+  position:absolute;left:-8%;right:-8%;top:-52%;height:85%;
+  border:1px solid rgba(219,185,127,.22);
+  border-radius:0 0 50% 50%;
+  background:repeating-linear-gradient(90deg,transparent 0 8%,rgba(255,238,200,.035) 8% 8.4%);
+}
+.reference-locked .stadium-rim i{
+  position:relative;display:inline-block;width:6px;height:6px;border-radius:50%;margin:64% 7% 0;
+  background:#e7c990;box-shadow:0 0 15px rgba(240,209,152,.65);
+}
+.reference-locked .odds-board{
+  position:absolute;left:7%;top:22%;display:flex;gap:2px;padding:5px;
+  background:#0a0807;border:1px solid rgba(205,164,101,.35);
+  transform:perspective(500px) rotateY(7deg);
+}
+.reference-locked .odds-board span{
+  padding:5px 7px;color:#dfbd83;background:#231a15;font:750 9px/1 var(--so-ui);
+}
+.reference-locked .sports-slip{
+  position:absolute;right:8%;bottom:1%;width:42%;height:auto;transform:rotate(9deg);
+  filter:drop-shadow(0 18px 17px rgba(0,0,0,.46));
+}
+.reference-locked .sports-coin{
+  position:absolute;right:37%;bottom:5%;width:19%;height:auto;transform:rotate(-17deg);
+  filter:drop-shadow(0 12px 12px rgba(0,0,0,.34));
+}
+.reference-locked .sports-field{
+  position:absolute;left:0;bottom:-15%;width:60%;height:48%;
+  transform:skewY(-7deg);border-top:1px solid rgba(212,176,117,.15);
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 1px,transparent 1px 34px);
+}
+
+/* Roulette art: wheel crop over felt table. */
+.reference-locked .tile-art-roulette{
+  background:linear-gradient(143deg,#371816,#190d0c 63%,#0d0807);
+}
+.reference-locked .roulette-felt{
+  position:absolute;inset:auto 0 -26% 0;height:66%;
+  transform:skewY(5deg);
+  background:
+    linear-gradient(90deg,transparent,rgba(220,183,119,.06)),
+    repeating-linear-gradient(90deg,rgba(224,194,147,.12) 0 1px,transparent 1px 52px),
+    #20100f;
+  border-top:1px solid rgba(224,186,123,.22);
+}
+.reference-locked .roulette-felt span{
+  display:inline-block;margin:19px 8px;padding:5px 8px;border:1px solid rgba(221,187,132,.18);color:#806550;font-size:9px;
+}
+.reference-locked .roulette-wheel-art{
+  position:absolute;width:54%;height:auto;right:2%;top:-13%;transform:rotate(13deg);
+  filter:drop-shadow(0 24px 26px rgba(0,0,0,.5));
+}
+.reference-locked .roulette-ball{
+  position:absolute;width:10px;height:10px;border-radius:50%;right:13%;top:22%;
+  background:#f4eee2;box-shadow:0 5px 8px rgba(0,0,0,.45);
+}
+.reference-locked .roulette-chip{position:absolute;height:auto;filter:drop-shadow(0 10px 10px rgba(0,0,0,.4))}
+.reference-locked .roulette-chip-one{width:18%;right:42%;top:20%;transform:rotate(-15deg)}
+.reference-locked .roulette-chip-two{width:14%;right:34%;top:43%;transform:rotate(11deg)}
+
+/* Poker art: felt, layered cards, physical chip stacks. */
+.reference-locked .tile-art-poker{background:linear-gradient(150deg,#251414,#0f0a08 74%)}
+.reference-locked .poker-felt-line{
+  position:absolute;inset:8% -12% -38%;
+  border-radius:50% 50% 0 0;
+  border:1px solid rgba(230,188,126,.18);
+  background:linear-gradient(135deg,#261716,#140d0b);
+  transform:rotate(-4deg);
+}
+.reference-locked .poker-cards-art{
+  position:absolute;width:57%;height:auto;right:2%;top:0;transform:rotate(6deg);
+  filter:drop-shadow(0 20px 20px rgba(0,0,0,.45));
+}
+.reference-locked .chip-stack{position:absolute;display:grid;gap:0}
+.reference-locked .chip-stack-a{right:7%;bottom:15%}.reference-locked .chip-stack-b{right:27%;bottom:8%}
+.reference-locked .chip-stack i{
+  width:44px;height:10px;margin-top:-3px;border-radius:50%;
+  border:2px solid #ad7c42;background:linear-gradient(90deg,#3c1718,#9b3334,#401719);
+  box-shadow:0 5px 8px rgba(0,0,0,.25);
+}
+.reference-locked .poker-suit{position:absolute;font-family:var(--so-display);font-size:30px;opacity:.15}
+.reference-locked .poker-heart{left:9%;top:20%;color:#b94646}.reference-locked .poker-spade{left:22%;top:35%;color:#e2c99c}
+
+/* Scratch art: a real ticket/foil composition rather than an icon row. */
+.reference-locked .tile-art-scratch{
+  background:
+    linear-gradient(132deg,rgba(199,148,78,.15),transparent 35%),
+    linear-gradient(145deg,#3b2b20,#150e0b 70%);
+}
+.reference-locked .scratch-shadow{
+  position:absolute;width:60%;height:68%;right:4%;top:5%;
+  background:#080604;transform:rotate(-9deg);filter:blur(10px);opacity:.55;
+}
+.reference-locked .scratch-ticket-art{
+  position:absolute;width:59%;height:auto;right:2%;top:-1%;transform:rotate(-9deg);
+  filter:drop-shadow(0 23px 18px rgba(0,0,0,.34));
+}
+.reference-locked .scratch-coin{
+  position:absolute;width:23%;height:auto;right:46%;top:33%;transform:rotate(22deg);
+  filter:drop-shadow(0 12px 11px rgba(0,0,0,.38));
+}
+.reference-locked .foil-patch{position:absolute;width:34px;height:16px;border-radius:50%;background:linear-gradient(110deg,#796e60,#ded2c1,#84796d);opacity:.38}
+.reference-locked .foil-one{right:17%;top:31%;transform:rotate(-16deg)}
+.reference-locked .foil-two{right:29%;top:45%;transform:rotate(10deg)}
+.reference-locked .foil-three{right:12%;top:54%;transform:rotate(-8deg)}
+
+/* Other: verified 福, sycee and coin framed as an ornamental casino tableau. */
+.reference-locked .tile-art-other{
+  background:
+    linear-gradient(140deg,rgba(120,34,37,.2),transparent 40%),
+    linear-gradient(145deg,#381818,#130c0b 73%);
+}
+.reference-locked .other-lattice{
+  position:absolute;right:-8%;top:-9%;width:68%;height:70%;transform:rotate(7deg);
+  background:
+    linear-gradient(45deg,transparent 46%,rgba(219,176,103,.09) 47% 53%,transparent 54%) 0 0/38px 38px,
+    linear-gradient(-45deg,transparent 46%,rgba(219,176,103,.08) 47% 53%,transparent 54%) 0 0/38px 38px;
+  mask-image:linear-gradient(#000,transparent);
+}
+.reference-locked .fortune-plaque{
+  position:absolute;width:52%;height:auto;right:4%;top:-5%;transform:rotate(5deg);
+  filter:drop-shadow(0 24px 22px rgba(0,0,0,.45));
+}
+.reference-locked .fortune-sycee{
+  position:absolute;width:30%;height:auto;right:38%;bottom:10%;transform:rotate(-8deg);
+  filter:drop-shadow(0 14px 12px rgba(0,0,0,.36));
+}
+.reference-locked .fortune-coin{
+  position:absolute;width:22%;height:auto;right:5%;bottom:7%;transform:rotate(17deg);
+  filter:drop-shadow(0 12px 12px rgba(0,0,0,.36));
+}
+.reference-locked .lantern-line{
+  position:absolute;top:0;width:1px;height:45%;background:linear-gradient(#b9864d,transparent);opacity:.35;
+}
+.reference-locked .lantern-line-a{right:24%}.reference-locked .lantern-line-b{right:47%}
+
+.reference-locked .library-ping{
+  position:absolute;
+  z-index:7;
+  left:55%;
+  top:49%;
+  width:min(250px,22vw);
+  transform:translate(-50%,-50%) rotate(-2deg);
+}
+.reference-locked .library-ping .home-prompt{
+  width:100%;
+  border-radius:4px 18px 4px 18px;
+  background:
+    linear-gradient(135deg,rgba(151,39,39,.4),rgba(69,20,20,.77)),
+    rgba(45,15,15,.9);
+  border-color:rgba(246,143,126,.35);
+  box-shadow:0 23px 44px rgba(0,0,0,.34),inset 1px 1px rgba(255,255,255,.08);
+}
+.reference-locked .home-prompt{
+  border-radius:4px 17px 4px 17px;
+  background:
+    linear-gradient(135deg,rgba(154,42,40,.34),rgba(72,20,22,.72)),
+    rgba(45,15,15,.82);
+  border-color:rgba(244,150,132,.28);
+}
+.reference-locked .home-prompt small{letter-spacing:.11em}
+
+/* Mobile is a recomposition, not desktop stacked. */
+@media(max-width:820px){
+  .reference-locked{display:block}
+  .reference-locked .home-atmosphere{position:absolute}
+  .reference-locked .env-quit-a{font-size:180px;top:9vh;right:-34vw}
+  .reference-locked .env-quit-b{font-size:130px;top:50vh;left:-14vw}
+  .reference-locked .env-quit-c{display:none}
+  .reference-locked .ambient-seven{top:35vh;left:68vw;opacity:.08}
+  .reference-locked .ambient-fu{bottom:14vh;left:-12vw;opacity:.07}
+  .reference-locked .ambient-bar,.reference-locked .ambient-coin{display:none}
+  .reference-locked .hub-hero{
+    grid-template-columns:1fr;
+    min-height:0;
+    padding:34px 22px 24px;
+    border-radius:2px 34px 2px 18px;
+  }
+  .reference-locked .hero-copy h1{
+    max-width:9ch;
+    font-size:clamp(52px,14.5vw,78px);
+    line-height:.85;
+  }
+  .reference-locked .hero-machine{
+    width:100%;
+    transform:none;
+    border-radius:28px 10px 28px 10px;
+    padding:13px;
+  }
+  .reference-locked .hero-reel-window>div{min-height:94px}
+  .reference-locked .games-stage{padding-top:42px}
+  .reference-locked .games-heading h2{font-size:clamp(38px,10vw,58px)}
+  .reference-locked .game-library{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-rows:auto;
+    gap:8px;
+  }
+  .reference-locked .game-tile,
+  .reference-locked .game-tile-featured,
+  .reference-locked .game-sports,
+  .reference-locked .game-casino,
+  .reference-locked .game-poker,
+  .reference-locked .game-lottery,
+  .reference-locked .game-other{
+    grid-column:auto;
+    grid-row:auto;
+  }
+  .reference-locked .game-tile-featured{
+    grid-column:1 / -1;
+    min-height:390px;
+    border-radius:4px 30px 4px 18px;
+  }
+  .reference-locked .game-tile-supporting{
+    min-height:260px;
+  }
+  .reference-locked .game-poker{grid-column:1 / -1;min-height:280px}
+  .reference-locked .game-tile-meta{padding:16px 16px 0;max-width:100%}
+  .reference-locked .game-tile-featured .game-tile-meta{padding:22px 22px 0;max-width:68%}
+  .reference-locked .game-tile h3{font-size:30px}
+  .reference-locked .game-tile-featured h3{font-size:54px}
+  .reference-locked .game-tile p{display:none}
+  .reference-locked .game-tile small{font-size:8px}
+  .reference-locked .game-enter{margin:12px 16px 14px;font-size:7px}
+  .reference-locked .game-tile-featured .game-enter{margin:14px 22px 18px}
+  .reference-locked .library-ping{display:none}
+  .reference-locked .games-top-prompt{margin-bottom:12px}
+  .reference-locked .slots-reels span{min-height:92px}
+}
+@media(max-width:430px){
+  .reference-locked .hub-content{padding-left:9px;padding-right:9px}
+  .reference-locked .hub-hero{padding:29px 17px 20px}
+  .reference-locked .game-library{gap:7px}
+  .reference-locked .game-tile-featured{min-height:350px}
+  .reference-locked .game-tile-supporting{min-height:225px}
+  .reference-locked .game-poker{min-height:250px}
+  .reference-locked .game-tile h3{font-size:25px}
+  .reference-locked .game-tile-featured h3{font-size:47px}
+  .reference-locked .game-tile small{max-width:23ch}
+  .reference-locked .game-tile-eyebrow{font-size:6.5px}
+  .reference-locked .game-enter{font-size:6.5px}
+  .reference-locked .slots-cabinet{width:68%;right:4%}
+  .reference-locked .slots-arch{width:75%;right:1%}
+  .reference-locked .sports-slip{width:50%;right:1%}
+  .reference-locked .roulette-wheel-art{width:62%;right:-6%}
+  .reference-locked .poker-cards-art{width:53%}
+  .reference-locked .scratch-ticket-art{width:67%;right:-5%}
+  .reference-locked .fortune-plaque{width:60%;right:-3%}
+}
+@media(max-width:340px){
+  .reference-locked .hero-copy h1{font-size:48px}
+  .reference-locked .game-tile-featured{min-height:330px}
+  .reference-locked .game-tile-supporting{min-height:208px}
+  .reference-locked .game-poker{min-height:235px}
+  .reference-locked .game-tile h3{font-size:22px}
+  .reference-locked .game-tile-featured h3{font-size:43px}
+  .reference-locked .game-tile small{font-size:7.5px}
+  .reference-locked .game-enter b{width:24px;height:24px}
+}
+@media(prefers-reduced-motion:reduce){
+  .reference-locked .game-tile,
+  .reference-locked .hub-nav a,
+  .reference-locked .hub-nav button{transition:none!important}
+  .reference-locked .game-tile:hover{transform:none}
+}
