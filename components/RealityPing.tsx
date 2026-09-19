@@ -26,6 +26,7 @@ export function RealityPing({
       ref={dialogRef}
       tabIndex={-1}
       className={`reality-ping ${reducedMotion ? 'reduced' : ''} ${ping.requiresChoice ? 'requires-choice' : ''}`}
+      data-material="oxblood-glass"
       style={{ backdropFilter: 'blur(24px) saturate(1.25)', WebkitBackdropFilter: 'blur(24px) saturate(1.25)' }}
       role="dialog"
       aria-modal="true"

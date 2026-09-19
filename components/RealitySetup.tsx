@@ -1,17 +1,18 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import type { GamblingType, ObligationType, RealityProfile, SessionLimit, TriggerType } from '@/lib/types';
 import { spinAudio } from '@/lib/audio';
 
 const gameChoices: { value: GamblingType; label: string; art: string }[] = [
-  { value: 'slots', label: 'Slots', art: '◫' },
-  { value: 'sports', label: 'Sportsbook', art: '◒' },
-  { value: 'casino', label: 'Roulette', art: '◇' },
-  { value: 'poker', label: 'Video Poker', art: '♠' },
-  { value: 'lottery', label: 'Lottery / scratch', art: '✦' },
-  { value: 'other', label: 'Something else', art: '·' },
+  { value: 'slots', label: 'Slots', art: '/symbols/seven.svg' },
+  { value: 'sports', label: 'Sportsbook', art: '/symbols/sports-ticket.svg' },
+  { value: 'casino', label: 'Roulette', art: '/symbols/roulette.svg' },
+  { value: 'poker', label: 'Video Poker', art: '/symbols/cards.svg' },
+  { value: 'lottery', label: 'Lottery / scratch', art: '/symbols/scratch-ticket.svg' },
+  { value: 'other', label: 'Something else', art: '/symbols/fu.svg' },
 ];
 
 const sessionIntent: { value: TriggerType; label: string }[] = [
@@ -152,7 +153,14 @@ export function RealitySetup({
   );
 
   return (
-    <main className="setup-shell">
+    <main className="setup-shell" data-material="casino-setup" data-step={step}>
+      <div className="setup-atmosphere" aria-hidden="true">
+        <span className="setup-quit setup-quit-a">QUIT</span>
+        <span className="setup-quit setup-quit-b">QUIT</span>
+        <Image className="setup-symbol setup-symbol-seven" src="/symbols/seven.svg" alt="" width={180} height={180} />
+        <Image className="setup-symbol setup-symbol-fu" src="/symbols/fu.svg" alt="" width={150} height={150} />
+        <Image className="setup-symbol setup-symbol-coin" src="/symbols/cash-coin.svg" alt="" width={170} height={170} />
+      </div>
       <div className="setup-top">
         <span className="brand-quiet">Spin Out</span>
         <span>{firstRun ? 'Quick setup' : 'Before this run'}</span>
@@ -188,7 +196,7 @@ export function RealitySetup({
               choice.value,
               choice.label,
               () => setGame(choice.value),
-              <b aria-hidden="true">{choice.art}</b>,
+              <span className="setup-game-art" aria-hidden="true"><Image src={choice.art} alt="" width={86} height={86} /></span>,
             ))}
           </div>
         </> : null}

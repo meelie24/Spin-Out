@@ -22,7 +22,7 @@ export function XRayMoment({
   }, []);
 
   return (
-    <section ref={dialogRef} tabIndex={-1} className="xray-moment" role="dialog" aria-modal="true" aria-label="X-Ray">
+    <section ref={dialogRef} tabIndex={-1} className="xray-moment" data-material="lacquer-cut" role="dialog" aria-modal="true" aria-label="X-Ray">
       <div className="xray-rule" aria-hidden="true" />
       <span className="xray-label">X-Ray</span>
       <strong>{insight.message}</strong>

@@ -29,7 +29,7 @@ export function RunIntro({
   }, []);
 
   return (
-    <main className="run-shell run-intro">
+    <main className="run-shell run-intro" data-material="casino-run">
       <section className="run-card run-intro-preview" aria-label="Reality Run preview" aria-hidden="true">
         <div className="run-hud">
           <div><span>Balance</span><strong>{formatMoney(profile.intendedWagerCents)}</strong></div>
@@ -64,7 +64,7 @@ export function RunIntro({
       </section>
 
       <div className="run-intro-scrim" aria-hidden="true" />
-      <section className="run-intro-dialog" role="dialog" aria-modal="true" aria-labelledby="run-intro-title">
+      <section className="run-intro-dialog" data-material="smoked-lacquer" role="dialog" aria-modal="true" aria-labelledby="run-intro-title">
         <span className="run-intro-glint" aria-hidden="true" />
         <p className="run-intro-kicker">Reality Run</p>
         <h1 id="run-intro-title">That’s enough to start.</h1>

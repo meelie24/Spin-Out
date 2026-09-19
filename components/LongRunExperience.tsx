@@ -43,7 +43,7 @@ export function LongRunExperience({
   const samples = useMemo(() => result.samples.slice(0, sampleCount), [result.samples, sampleCount]);
 
   return (
-    <section ref={panelRef} tabIndex={-1} className="longrun-panel" role="dialog" aria-modal="true" aria-label="10,000 run view">
+    <section ref={panelRef} tabIndex={-1} className="longrun-panel" data-material="long-run-stage" role="dialog" aria-modal="true" aria-label="10,000 run view">
       <div className="longrun-head">
         <div>
           <span>Long run · {gameLabel}</span>
