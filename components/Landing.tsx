@@ -13,6 +13,7 @@ import { RealityContextPanel } from './RealityContextPanel';
 import { buildRealityInsights } from '@/lib/realityEngine/insights';
 import { buildPaydayShield, type PaydayShieldCard as PaydayShieldData } from '@/lib/realityEngine/payday';
 import { PaydayShieldCard } from './PaydayShieldCard';
+import { GameTileArt } from './GameTileArt';
 import type { RealityProfile } from '@/lib/types';
 
 const games: Array<{
@@ -39,17 +40,6 @@ const prompts = [
   { id: 'chase', label: 'How much are you actually trying to get back?', detail: 'Reality Ping · tap to clear' },
   { id: 'exit', label: 'When do you usually realize you’ve gone too far?', detail: 'Reality Ping · tap to clear' },
   { id: 'one-more', label: 'What made you open this today?', detail: 'Reality Ping · tap to clear' },
-];
-
-const motif = [
-  { kind: 'word', value: 'QUIT' }, { kind: 'icon', value: '/symbols/seven.svg' },
-  { kind: 'icon', value: '/symbols/cherry.svg' }, { kind: 'icon', value: '/symbols/bar.svg' },
-  { kind: 'icon', value: '/symbols/fu.svg' }, { kind: 'word', value: 'QUIT' },
-  { kind: 'icon', value: '/symbols/cash-coin.svg' }, { kind: 'word', value: '★' },
-  { kind: 'word', value: 'QUIT' }, { kind: 'icon', value: '/symbols/sycee.svg' },
-  { kind: 'icon', value: '/symbols/roulette.svg' }, { kind: 'icon', value: '/symbols/cards.svg' },
-  { kind: 'word', value: 'QUIT' }, { kind: 'word', value: '◆' },
-  { kind: 'icon', value: '/symbols/scratch-ticket.svg' }, { kind: 'word', value: 'SPIN' },
 ];
 
 function formatTime(seconds: number | null) {
@@ -80,7 +70,7 @@ function PromptCard({
       onClick={onDismiss}
       aria-label={prompt.label + ' Dismiss'}
     >
-      <span>{prompt.label}</span>
+      <span data-type-role="intervention">{prompt.label}</span>
       <small>{prompt.detail}</small>
       <b className="prompt-close" aria-hidden="true">×</b>
     </button>
@@ -155,26 +145,20 @@ export function Landing() {
   });
 
   return (
-    <main className="home-hub">
+    <main className="home-hub reference-locked">
       <div className="home-atmosphere" aria-hidden="true">
-        <div className="motif-field">
-          {motif.concat(motif).map((item, index) => (
-            <span className={'motif-item motif-' + (index % 8)} key={index}>
-              {item.kind === 'icon'
-                ? <Image src={item.value} alt="" width={58} height={58} />
-                : item.value}
-            </span>
-          ))}
-        </div>
+        <span className="env-quit env-quit-a">QUIT</span>
+        <span className="env-quit env-quit-b">QUIT</span>
+        <span className="env-quit env-quit-c">QUIT</span>
         <div className="ambient-symbol ambient-seven"><Image src="/symbols/seven.svg" alt="" width={240} height={240} /></div>
         <div className="ambient-symbol ambient-coin"><Image src="/symbols/cash-coin.svg" alt="" width={260} height={260} /></div>
         <div className="ambient-symbol ambient-fu"><Image src="/symbols/fu.svg" alt="" width={220} height={220} /></div>
         <div className="ambient-symbol ambient-bar"><Image src="/symbols/bar.svg" alt="" width={250} height={250} /></div>
-        <div className="home-glow home-glow-a" />
-        <div className="home-glow home-glow-b" />
+        <div className="ambient-rule ambient-rule-a" />
+        <div className="ambient-rule ambient-rule-b" />
       </div>
 
-      <aside className="hub-sidebar" aria-label="Spin Out navigation">
+      <aside className="hub-sidebar" data-material="liquid-glass" aria-label="Spin Out navigation">
         <div className="sidebar-shine" aria-hidden="true" />
         <div className="hub-brand">
           <span className="hub-brand-mark">S</span>
@@ -182,7 +166,7 @@ export function Landing() {
         </div>
 
         <nav className="hub-nav">
-          <a className="is-active" href="#games"><span>01</span>Games</a>
+          <a className="is-active" data-nav-state="active" href="#games"><span>01</span>Games</a>
           <button type="button" onClick={() => setContextOpen(true)}><span>02</span>My reality</button>
           <Link href="/plus"><span>03</span>Spin Out+</Link>
           <Link href="/research"><span>04</span>Research</Link>
@@ -234,7 +218,7 @@ export function Landing() {
         <section className="hub-hero" aria-labelledby="home-title">
           <div className="hero-copy">
             <p className="kicker">Choose the game. Keep the money real.</p>
-            <h1 id="home-title">{returning ? formatMoney(kept) + ' kept. Keep it.' : 'About to gamble?'}</h1>
+            <h1 id="home-title" data-type-role="display">{returning ? formatMoney(kept) + ' kept. Keep it.' : 'About to gamble?'}</h1>
             <p>{returning
               ? 'Pick what you were about to play. This run keeps watching for the decisions that make stopping harder.'
               : 'Pick the game you were about to open. Spin Out pays attention to how you play and calls out what usually keeps you going.'}</p>
@@ -295,36 +279,27 @@ export function Landing() {
             <PromptCard prompt={prompts[1]} {...promptProps('chase')} />
           </div>
 
-          <div className="home-game-grid">
-            {games.slice(0, 3).map((game, index) => (
-              <Link className={'home-game-card game-' + game.tone} href={'/play?game=' + game.id} key={game.id}>
-                <div className="game-card-glow" aria-hidden="true" />
-                <div className="game-card-top"><span>{game.eyebrow}</span><b>0{index + 1}</b></div>
-                <div className="game-symbols" aria-hidden="true">
-                  {game.symbols.map((symbol, symbolIndex) => <Image src={symbol} alt="" width={64} height={64} key={symbolIndex} />)}
+          <div className="game-library">
+            {games.map((game, index) => (
+              <Link
+                className={'game-tile game-' + game.tone + (index === 0 ? ' game-tile-featured' : ' game-tile-supporting')}
+                data-game-layout={index === 0 ? 'featured' : 'supporting'}
+                href={'/play?game=' + game.id}
+                key={game.id}
+              >
+                <GameTileArt game={game.id} />
+                <div className="game-tile-meta">
+                  <div className="game-tile-eyebrow"><span>{game.eyebrow}</span><b>0{index + 1}</b></div>
+                  <h3 data-type-role="game-title">{game.name}</h3>
+                  <p>{game.description}</p>
+                  <small>{game.purpose}</small>
                 </div>
-                <div className="game-card-copy"><h3>{game.name}</h3><p>{game.description}</p><small className="game-purpose">{game.purpose}</small></div>
-                <div className="game-enter"><span>Enter Reality Run</span><b>↗</b></div>
+                <div className="game-enter"><span>Enter Reality Run</span><b aria-hidden="true">↗</b></div>
               </Link>
             ))}
-          </div>
-
-          <div className="games-mid-prompt">
-            <PromptCard prompt={prompts[2]} {...promptProps('exit')} className="prompt-grid" />
-          </div>
-
-          <div className="home-game-grid home-game-grid-second">
-            {games.slice(3).map((game, index) => (
-              <Link className={'home-game-card game-' + game.tone} href={'/play?game=' + game.id} key={game.id}>
-                <div className="game-card-glow" aria-hidden="true" />
-                <div className="game-card-top"><span>{game.eyebrow}</span><b>0{index + 4}</b></div>
-                <div className="game-symbols" aria-hidden="true">
-                  {game.symbols.map((symbol, symbolIndex) => <Image src={symbol} alt="" width={64} height={64} key={symbolIndex} />)}
-                </div>
-                <div className="game-card-copy"><h3>{game.name}</h3><p>{game.description}</p><small className="game-purpose">{game.purpose}</small></div>
-                <div className="game-enter"><span>Enter Reality Run</span><b>↗</b></div>
-              </Link>
-            ))}
+            <div className="library-ping library-ping-a">
+              <PromptCard prompt={prompts[2]} {...promptProps('exit')} className="prompt-grid" />
+            </div>
           </div>
 
           <div className="games-bottom-row">
