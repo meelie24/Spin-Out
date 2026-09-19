@@ -433,7 +433,16 @@ export async function mountRealityGame(
       else if (options.gameType === 'lottery') await this.animateLottery(outcome);
       else await this.animateSports(outcome);
       this.setContext(outcome.balanceCents);
-      this.showResult(outcome);
+      try {
+        this.showResult(outcome);
+      } catch {
+        // Result presentation is decorative. It must never block run state,
+        // Reality Pings, exits, or the intervention director.
+        const label = outcome.netCents > 0 ? '+' + money(outcome.netCents) : outcome.netCents === 0 ? 'PUSH' : money(outcome.netCents);
+        this.resultPlate?.setAlpha?.(0);
+        this.outcomeGlow?.setAlpha?.(0);
+        this.resultText?.setText?.(label)?.setColor?.(outcome.netCents > 0 ? '#f0d28f' : '#caa39b')?.setAlpha?.(1);
+      }
     }
 
     private showResult(outcome: AnimatedOutcome) {
