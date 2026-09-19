@@ -57,9 +57,10 @@ export async function mountRealityGame(
   options: { gameType: GamblingType; reducedMotion: boolean; initialBalanceCents: number },
 ): Promise<RealityGameBridge> {
   const Phaser = await import('phaser');
+  await document.fonts.ready;
   const bodyStyle = typeof document !== 'undefined' ? getComputedStyle(document.body) : null;
   const uiFont = bodyStyle?.getPropertyValue('--font-ui').trim() || 'Arial, sans-serif';
-  const displayFont = bodyStyle?.getPropertyValue('--font-display').trim() || 'Arial Narrow, Arial, sans-serif';
+  const displayFont = uiFont;
   let sceneApi: SceneApi | null = null;
 
   class RealityScene extends Phaser.Scene {

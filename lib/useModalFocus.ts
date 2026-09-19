@@ -31,7 +31,7 @@ export function useModalFocus(
         if (!(sibling instanceof HTMLElement) || sibling === branch
           || /^(SCRIPT|STYLE|LINK)$/.test(sibling.tagName)) continue;
         background.push({ element: sibling, wasInert: sibling.inert });
-        sibling.inert = true;
+        sibling.setAttribute('inert', '');
       }
       if (parent === document.body) break;
       branch = parent;
@@ -84,7 +84,7 @@ export function useModalFocus(
     return () => {
       document.removeEventListener('focusin', keepFocusInside);
       document.removeEventListener('keydown', handleKeyDown, true);
-      for (const { element, wasInert } of background) element.inert = wasInert;
+      for (const { element, wasInert } of background) element.toggleAttribute('inert', wasInert);
       if (previousFocus?.isConnected && !previousFocus.closest('[inert]')) {
         previousFocus.focus({ preventScroll: true });
       }
