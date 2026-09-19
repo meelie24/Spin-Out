@@ -217,10 +217,9 @@ try {
       quitReason: null,
     });
     await seedActive(context, p, runFor(p, {
-      actionCount: 4,
+      actionCount: 2,
       chosenLimitRounds: 3,
       lastPingAction: -10,
-      limitExceededAt: Date.now() - 2_000,
     }));
 
     const page = await context.newPage();
@@ -327,7 +326,7 @@ try {
     assert(!/\bkeep going\b/i.test(text), 'Run 10,000 used directive "Keep going" copy');
   });
 
-  await check('Reality Ping focus', async context => {
+  await check('strong Reality Ping focus', async context => {
     const p = profile('slots', {
       triggerType: 'other',
       availableUntilIncomeCents: null,
@@ -338,9 +337,10 @@ try {
       personalMoneyGoal: null,
     });
     await seedActive(context, p, runFor(p, {
-      actionCount: 2,
+      actionCount: 4,
       chosenLimitRounds: 3,
       lastPingAction: -10,
+      limitExceededAt: Date.now() - 2_000,
     }));
     const page = await context.newPage();
     await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
