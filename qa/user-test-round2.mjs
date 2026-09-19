@@ -710,9 +710,31 @@ try {
     assert(await page.locator('.reality-context-dialog input:visible, .reality-context-dialog select:visible').count() === 0,
       'My Reality exposed edit fields before the user chose to edit');
 
-    await page.getByRole('button', { name: 'Edit', exact: true }).click();
-    assert(await page.locator('.reality-context-dialog input:visible, .reality-context-dialog select:visible').count() > 0,
-      'My Reality Edit action did not reveal the existing controls');
+    assert(await page.getByRole('button', { name: 'Edit', exact: true }).count() === 0,
+      'My Reality still exposed one global Edit action');
+
+    const obligationEdit = page.getByRole('button', { name: 'Edit what this money is for', exact: true });
+    assert(await obligationEdit.count() === 1,
+      'My Reality did not expose a focused edit action for the obligation summary');
+    await obligationEdit.click();
+
+    assert(await page.locator('.context-focused-editor').count() === 1,
+      'My Reality did not open a focused editor');
+    assert(await page.locator('.reality-context-dialog select:visible').count() === 1,
+      'focused obligation edit did not expose exactly one obligation selector');
+    assert(await page.locator('.reality-context-dialog input:visible').count() === 2,
+      'focused obligation edit exposed controls outside amount and due date');
+    assert(await page.getByText(/When does it usually get harder\?/i).count() === 0,
+      'focused obligation edit leaked unrelated difficult-time controls');
+    assert(await page.getByText(/If payday gets hard/i).count() === 0,
+      'focused obligation edit leaked unrelated payday controls');
+
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await page.locator('.reality-context-summary').waitFor();
+    assert(await page.locator('.reality-context-dialog input:visible, .reality-context-dialog select:visible').count() === 0,
+      'saving a focused My Reality edit did not return to the summary');
+    assert(await page.getByText(/change or clear them anytime/i).count() === 1,
+      'My Reality summary did not make control over stored context clear');
   });
 
   await check('My Reality focus', async context => {
@@ -732,6 +754,74 @@ try {
     await page.getByRole('button', { name: 'My reality' }).first().click();
     await page.locator('.reality-context-dialog').waitFor();
     await assertFocusInside(page, '.reality-context-dialog', 'My Reality');
+  });
+
+  await check('post-run earns one relevant context question without becoming a checklist', async context => {
+    const p = profile('slots', {
+      personalMoneyGoal: null,
+      onboardingCompleted: [
+        'income-date','available-money','obligation-amount','obligation-date',
+        'quit-reason','difficult-times','lender-name','lender-helped','lender-amount','payday-plan'
+      ],
+    });
+    await seedActive(context, p, runFor(p));
+    const page = await context.newPage();
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.getByRole('button', { name: "I'm done" }).click();
+    await page.getByText(/You left\./i).waitFor();
+    await page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await page.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor();
+    await page.getByRole('button', { name: '5', exact: true }).click();
+    await page.getByRole('heading', { name: /Did you end up gambling/i }).waitFor();
+    await page.getByRole('button', { name: 'No', exact: true }).click();
+    await page.locator('.money-kept').waitFor();
+
+    const earned = page.locator('.post-run-context-question');
+    await earned.waitFor();
+    assert(await earned.getByRole('heading', { name: /rather this money still be there for/i }).count() === 1,
+      'Money Kept did not earn the missing money-goal question');
+    assert(await page.locator('.post-run-context-question').count() === 1,
+      'post-run summary showed more than one earned context question');
+    assert(await page.getByRole('button', { name: 'Back home', exact: true }).count() === 1,
+      'earned question blocked the normal post-run exit');
+
+    await earned.getByRole('button', { name: 'Savings', exact: true }).click();
+    await earned.waitFor({ state: 'detached' });
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2') || 'null'));
+    assert(stored?.profile?.personalMoneyGoal === 'Savings',
+      'post-run money-goal answer did not save');
+    assert((stored?.profile?.onboardingCompleted || []).includes('money-goal'),
+      'post-run money-goal answer did not mark the question complete');
+    assert(await page.locator('.post-run-context-question').count() === 0,
+      'answering one post-run question immediately chained into another');
+  });
+
+  await check('post-run Not now preserves the earned question for a later run', async context => {
+    const p = profile('slots', {
+      personalMoneyGoal: null,
+      onboardingCompleted: [
+        'income-date','available-money','obligation-amount','obligation-date',
+        'quit-reason','difficult-times','lender-name','lender-helped','lender-amount','payday-plan'
+      ],
+    });
+    await seedActive(context, p, runFor(p));
+    const page = await context.newPage();
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.getByRole('button', { name: "I'm done" }).click();
+    await page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await page.getByRole('button', { name: '5', exact: true }).click();
+    await page.getByRole('button', { name: 'No', exact: true }).click();
+    await page.locator('.money-kept').waitFor();
+
+    const earned = page.locator('.post-run-context-question');
+    await earned.waitFor();
+    await earned.getByRole('button', { name: 'Not now', exact: true }).click();
+    await earned.waitFor({ state: 'detached' });
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2') || 'null'));
+    assert(!(stored?.profile?.onboardingCompleted || []).includes('money-goal'),
+      'Not now incorrectly completed the post-run question');
   });
 
   await check('truthful post-run availability language', async context => {
