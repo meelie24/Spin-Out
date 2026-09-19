@@ -720,8 +720,21 @@ try {
   const longPanel = longPage.locator('.longrun-panel');
   await longPanel.waitFor({ timeout: 5000 });
   assert(await longPanel.getAttribute('data-material') === 'long-run-stage', 'Run 10,000 is missing its reference-locked long-run stage identity');
-  await longPage.getByText(/This 10,000-run sample/i).waitFor({ timeout: 5000 });
-  await longPage.getByText('Model expectation', { exact: true }).waitFor({ timeout: 5000 });
+  const sampleLabel = longPage.getByText(/This 10,000-run sample/i);
+  const modelLabel = longPage.getByText('Model expectation', { exact: true });
+  await sampleLabel.waitFor({ timeout: 5000 });
+  await modelLabel.waitFor({ timeout: 5000 });
+  const [longBox, sampleBox, modelBox] = await Promise.all([
+    longPanel.boundingBox(),
+    sampleLabel.boundingBox(),
+    modelLabel.boundingBox(),
+  ]);
+  assert(Boolean(longBox && sampleBox && modelBox)
+    && sampleBox.y >= longBox.y
+    && modelBox.y >= longBox.y
+    && sampleBox.y + sampleBox.height <= longBox.y + longBox.height
+    && modelBox.y + modelBox.height <= longBox.y + longBox.height,
+    'Run 10,000 sample/model comparison exists in the DOM but is clipped outside the visible panel');
   await longPage.screenshot({ path: `${out}/longrun-10000-390.png`, fullPage: true });
   const duringLong = await longPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
   assert(duringLong?.actionCount === 2 && duringLong?.balanceCents === 8000, 'Run 10,000 mutated the live Reality Run');
