@@ -9,6 +9,7 @@ export interface AnimatedOutcome {
   balanceCents: number;
   actionCount: number;
   decision?: string;
+  nearMiss?: boolean;
   visual?: GameVisual;
 }
 
@@ -67,6 +68,8 @@ export async function mountRealityGame(
     private reelMasks: any[] = [];
     private reelContainers: any[] = [];
     private resultText: any;
+    private resultPlate: any;
+    private outcomeGlow: any;
     private wheel: any;
     private rouletteNumberText: any;
     private rouletteBall: any;
@@ -86,6 +89,7 @@ export async function mountRealityGame(
     create() {
       this.cameras.main.setBackgroundColor('#140c0b');
       this.drawRoom(Phaser);
+      this.outcomeGlow = this.add.rectangle(500, 315, 850, 400, 0xd4aa67, 0).setBlendMode(Phaser.BlendModes.ADD);
       this.balanceText = this.add.text(500, 65, money(options.initialBalanceCents), {
         fontFamily: uiFont, fontSize: '23px', fontStyle: '600', color: '#fff7e8'
       }).setOrigin(.5);
@@ -439,10 +443,38 @@ export async function mountRealityGame(
       if (outcome.visual?.kind === 'sports') prefix = `${outcome.visual.winner} · `;
       if (outcome.visual?.kind === 'poker') prefix = `${outcome.visual.handName} · `;
       if (outcome.visual?.kind === 'scratch') prefix = outcome.visual.won ? 'MATCH 3 · ' : 'NO MATCH · ';
+
       const label = outcome.netCents > 0 ? '+' + money(outcome.netCents) : money(outcome.netCents);
-      this.resultText.setText(prefix + (outcome.netCents === 0 ? 'PUSH' : label));
-      this.resultText.setColor(outcome.netCents > 0 ? '#e9d6a6' : outcome.netCents < 0 ? '#d7b7ad' : '#b9b1a5');
-      this.tweens.add({ targets: this.resultText, alpha: 1, y: { from: 548, to: 540 }, duration: options.reducedMotion ? 0 : 180 });
+      const result = prefix + (outcome.netCents === 0 ? 'PUSH' : label);
+      const isWin = outcome.netCents > 0;
+      const isBig = outcome.band === 'big-win';
+      const isNear = outcome.nearMiss === true;
+      const resultColor = isWin ? '#f0d28f' : outcome.netCents < 0 ? '#caa39b' : '#bfb4a5';
+      const plateColor = isWin ? 0x25160d : outcome.netCents < 0 ? 0x1c0d0d : 0x13100d;
+      const glowColor = isWin ? 0xd4aa67 : isNear ? 0xc47f4b : 0x7a2e2b;
+
+      this.tweens.killTweensOf([this.resultText, this.resultPlate, this.outcomeGlow]);
+      this.resultText.setText(result).setColor(resultColor).setAlpha(0).setScale(.94).setY(546);
+      this.resultPlate.setFillStyle(plateColor, .92).setStrokeStyle(1, isWin ? 0xe1b66f : 0x9a6b4c, isWin ? .55 : .28).setAlpha(0);
+      this.outcomeGlow.setFillStyle(glowColor, 1).setAlpha(0);
+
+      const duration = options.reducedMotion ? 0 : 180;
+      this.tweens.add({ targets:this.resultPlate, alpha:.92, duration });
+      this.tweens.add({ targets:this.resultText, alpha:1, y:542, scale:1, duration, ease:'Back.Out' });
+
+      if (!options.reducedMotion) {
+        this.tweens.add({
+          targets:this.outcomeGlow,
+          alpha:{ from:0, to:isBig ? .19 : isWin ? .11 : isNear ? .065 : .028 },
+          duration:isBig ? 220 : 150,
+          yoyo:true,
+          hold:isBig ? 90 : 0,
+          ease:'Sine.easeOut',
+        });
+        if (isBig) {
+          this.tweens.add({ targets:this.resultText, scale:{ from:1, to:1.055 }, duration:180, yoyo:true, ease:'Sine.easeInOut' });
+        }
+      }
     }
 
     private animateSlots(outcome: AnimatedOutcome) {
