@@ -388,34 +388,6 @@ export function InRunSetup({
     };
   };
 
-  const renderChoicePage = (
-    options: ChoiceOption[],
-    onSelect: (option: ChoiceOption) => void,
-  ) => {
-    const page = pagedOptions(options);
-    return (
-      <div className="setup-choice-row is-paged">
-        {page.canBack ? (
-          <button
-            type="button"
-            className="setup-page-control"
-            onClick={() => setChoicePager({ key: current?.key ?? null, page: Math.max(0, currentChoicePage - 1) })}
-          >Back</button>
-        ) : null}
-        {page.visible.map(option => (
-          <button type="button" key={option.value} onClick={() => onSelect(option)}>{option.label}</button>
-        ))}
-        {page.canMore ? (
-          <button
-            type="button"
-            className="setup-page-control"
-            onClick={() => setChoicePager({ key: current?.key ?? null, page: currentChoicePage + 1 })}
-          >More</button>
-        ) : null}
-      </div>
-    );
-  };
-
   if (!current) return null;
 
   const state = forcedCollapsed ? 'collapsed' : consuming ? 'consuming' : effectiveExpanded ? 'expanded' : 'collapsed';
@@ -471,7 +443,30 @@ export function InRunSetup({
               <button type="submit">Use</button>
               <button type="button" className="setup-quiet" onClick={() => setCustomDate(false)}>Back</button>
             </form>
-          ) : renderChoicePage(current.options ?? [], option => answerDate(option.value))
+          ) : (() => {
+            const page = pagedOptions(current.options ?? []);
+            return (
+              <div className="setup-choice-row is-paged">
+                {page.canBack ? (
+                  <button
+                    type="button"
+                    className="setup-page-control"
+                    onClick={() => setChoicePager({ key: current.key, page: Math.max(0, currentChoicePage - 1) })}
+                  >Back</button>
+                ) : null}
+                {page.visible.map(option => (
+                  <button type="button" key={option.value} onClick={() => answerDate(option.value)}>{option.label}</button>
+                ))}
+                {page.canMore ? (
+                  <button
+                    type="button"
+                    className="setup-page-control"
+                    onClick={() => setChoicePager({ key: current.key, page: currentChoicePage + 1 })}
+                  >More</button>
+                ) : null}
+              </div>
+            );
+          })()
         ) : null}
 
         {current.kind === 'money' ? (
@@ -517,7 +512,30 @@ export function InRunSetup({
         ) : null}
 
         {current.kind === 'choices' || current.kind === 'yes-no'
-          ? renderChoicePage(current.options ?? [], answerChoice)
+          ? (() => {
+              const page = pagedOptions(current.options ?? []);
+              return (
+                <div className="setup-choice-row is-paged">
+                  {page.canBack ? (
+                    <button
+                      type="button"
+                      className="setup-page-control"
+                      onClick={() => setChoicePager({ key: current.key, page: Math.max(0, currentChoicePage - 1) })}
+                    >Back</button>
+                  ) : null}
+                  {page.visible.map(option => (
+                    <button type="button" key={option.value} onClick={() => answerChoice(option)}>{option.label}</button>
+                  ))}
+                  {page.canMore ? (
+                    <button
+                      type="button"
+                      className="setup-page-control"
+                      onClick={() => setChoicePager({ key: current.key, page: currentChoicePage + 1 })}
+                    >More</button>
+                  ) : null}
+                </div>
+              );
+            })()
           : null}
       </div>
 
