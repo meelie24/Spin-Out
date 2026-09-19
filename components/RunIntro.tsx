@@ -29,7 +29,7 @@ export function RunIntro({
   }, []);
 
   return (
-    <main className="run-shell run-intro" data-material="casino-run">
+    <main className="run-shell run-intro" data-material="casino-run" data-environment="layered-casino">
       <section className="run-card run-intro-preview" aria-label="Reality Run preview" aria-hidden="true">
         <div className="run-hud">
           <div><span>Balance</span><strong>{formatMoney(profile.intendedWagerCents)}</strong></div>
