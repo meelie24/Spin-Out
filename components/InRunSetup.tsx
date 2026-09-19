@@ -346,27 +346,6 @@ export function InRunSetup({
     }, duration);
   };
 
-  const answerDate = (value: string) => {
-    if (!activeQuestion) return;
-    if (value === 'pick-date') {
-      setCustomDate(true);
-      return;
-    }
-    if (value === 'today') complete(activeQuestion, isoInDays(0));
-    else if (value === 'tomorrow') complete(activeQuestion, isoInDays(1));
-    else if (value === 'this-week') complete(activeQuestion, isoInDays(5));
-    else if (value === 'next-week') complete(activeQuestion, isoInDays(7));
-    else complete(activeQuestion, null);
-  };
-
-  const answerChoice = (option: ChoiceOption) => {
-    if (!activeQuestion) return;
-    if (activeQuestion.kind === 'yes-no') complete(activeQuestion, option.value === 'yes');
-    else if (activeQuestion.key === 'difficult-times') complete(activeQuestion, option.value as DifficultTime);
-    else if (activeQuestion.key === 'payday-plan') complete(activeQuestion, option.value === 'skip' ? null : option.value);
-    else complete(activeQuestion, option.value);
-  };
-
   const currentChoicePage = activeQuestion && choicePager.key === activeQuestion.key ? choicePager.page : 0;
 
   const pagedOptions = (options: ChoiceOption[]) => {
@@ -455,7 +434,26 @@ export function InRunSetup({
                   >Back</button>
                 ) : null}
                 {page.visible.map(option => (
-                  <button type="button" key={option.value} onClick={() => answerDate(option.value)}>{option.label}</button>
+                  <button
+                    type="button"
+                    key={option.value}
+                    onClick={() => {
+                      const value = option.value;
+                      if (value === 'pick-date') {
+                        setCustomDate(true);
+                      } else if (value === 'today') {
+                        complete(activeQuestion, isoInDays(0));
+                      } else if (value === 'tomorrow') {
+                        complete(activeQuestion, isoInDays(1));
+                      } else if (value === 'this-week') {
+                        complete(activeQuestion, isoInDays(5));
+                      } else if (value === 'next-week') {
+                        complete(activeQuestion, isoInDays(7));
+                      } else {
+                        complete(activeQuestion, null);
+                      }
+                    }}
+                  >{option.label}</button>
                 ))}
                 {page.canMore ? (
                   <button
@@ -524,7 +522,21 @@ export function InRunSetup({
                     >Back</button>
                   ) : null}
                   {page.visible.map(option => (
-                    <button type="button" key={option.value} onClick={() => answerChoice(option)}>{option.label}</button>
+                    <button
+                      type="button"
+                      key={option.value}
+                      onClick={() => {
+                        if (activeQuestion.kind === 'yes-no') {
+                          complete(activeQuestion, option.value === 'yes');
+                        } else if (activeQuestion.key === 'difficult-times') {
+                          complete(activeQuestion, option.value as DifficultTime);
+                        } else if (activeQuestion.key === 'payday-plan') {
+                          complete(activeQuestion, option.value === 'skip' ? null : option.value);
+                        } else {
+                          complete(activeQuestion, option.value);
+                        }
+                      }}
+                    >{option.label}</button>
                   ))}
                   {page.canMore ? (
                     <button
