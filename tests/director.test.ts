@@ -125,3 +125,31 @@ test('ambient mode reflects chasing and ledger context without forcing foregroun
   assert.equal(ledger.foreground,null);
   assert.equal(ledger.ambientMode,'ledger');
 });
+
+
+test('specific real-life money context outranks generic observations without overriding urgent chase or limit events', () => {
+  const contextual = decideIntervention(input({
+    candidates:[
+      candidate('rapid-replay',3),
+      candidate('win-streak',3),
+      candidate('obligation',4),
+    ],
+  }));
+  assert.equal(contextual.foreground?.candidate.type,'obligation');
+
+  const chase = decideIntervention(input({
+    candidates:[
+      candidate('obligation',4),
+      candidate('stake-up',5),
+    ],
+  }));
+  assert.equal(chase.foreground?.candidate.type,'stake-up');
+
+  const limit = decideIntervention(input({
+    candidates:[
+      candidate('shortfall',5),
+      candidate('limit-exceeded',5,{requiresChoice:true}),
+    ],
+  }));
+  assert.equal(limit.foreground?.candidate.type,'limit-exceeded');
+});
