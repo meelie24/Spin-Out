@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 // Copied into an ephemeral CI checkout by qa/install-visual-fixture.mjs only.
 // These records are synthetic rendering fixtures, never an entitlement decision.
 export default async function PlusFixture({ searchParams }: {
-  searchParams: Promise<{ state?: string }>;
+  searchParams: Promise<{ state?: string; clock?: string }>;
 }) {
-  const { state } = await searchParams;
-  const now = Date.now();
+  const { state, clock } = await searchParams;
+  const now = Number(clock) || 1_790_000_000_000;
   const runs: RunRecord[] = state === 'empty' ? [] : Array.from({ length: 10 }, (_, index) => ({
     id: `qa-history-${index}`,
     startedAt: now - (10 - index) * 86_400_000 - (240 - index * 12) * 1000,
