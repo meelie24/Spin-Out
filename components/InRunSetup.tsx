@@ -260,7 +260,7 @@ export function InRunSetup({
   const [openAtSignal, setOpenAtSignal] = useState(collapseSignal);
   const [choicePager, setChoicePager] = useState<{ key: OnboardingQuestionKey | null; page: number }>({ key: null, page: 0 });
 
-  const current = consumingQuestion ?? questions[0] ?? null;
+  const activeQuestion = consumingQuestion ?? questions[0] ?? null;
   const forcedCollapsed = foregroundOpen || collapseSignal > openAtSignal;
   const effectiveExpanded = expanded && !forcedCollapsed;
 
@@ -347,27 +347,27 @@ export function InRunSetup({
   };
 
   const answerDate = (value: string) => {
-    if (!current) return;
+    if (!activeQuestion) return;
     if (value === 'pick-date') {
       setCustomDate(true);
       return;
     }
-    if (value === 'today') complete(current, isoInDays(0));
-    else if (value === 'tomorrow') complete(current, isoInDays(1));
-    else if (value === 'this-week') complete(current, isoInDays(5));
-    else if (value === 'next-week') complete(current, isoInDays(7));
-    else complete(current, null);
+    if (value === 'today') complete(activeQuestion, isoInDays(0));
+    else if (value === 'tomorrow') complete(activeQuestion, isoInDays(1));
+    else if (value === 'this-week') complete(activeQuestion, isoInDays(5));
+    else if (value === 'next-week') complete(activeQuestion, isoInDays(7));
+    else complete(activeQuestion, null);
   };
 
   const answerChoice = (option: ChoiceOption) => {
-    if (!current) return;
-    if (current.kind === 'yes-no') complete(current, option.value === 'yes');
-    else if (current.key === 'difficult-times') complete(current, option.value as DifficultTime);
-    else if (current.key === 'payday-plan') complete(current, option.value === 'skip' ? null : option.value);
-    else complete(current, option.value);
+    if (!activeQuestion) return;
+    if (activeQuestion.kind === 'yes-no') complete(activeQuestion, option.value === 'yes');
+    else if (activeQuestion.key === 'difficult-times') complete(activeQuestion, option.value as DifficultTime);
+    else if (activeQuestion.key === 'payday-plan') complete(activeQuestion, option.value === 'skip' ? null : option.value);
+    else complete(activeQuestion, option.value);
   };
 
-  const currentChoicePage = current && choicePager.key === current.key ? choicePager.page : 0;
+  const currentChoicePage = activeQuestion && choicePager.key === activeQuestion.key ? choicePager.page : 0;
 
   const pagedOptions = (options: ChoiceOption[]) => {
     if (options.length <= 4) {
@@ -388,7 +388,7 @@ export function InRunSetup({
     };
   };
 
-  if (!current) return null;
+  if (!activeQuestion) return null;
 
   const state = forcedCollapsed ? 'collapsed' : consuming ? 'consuming' : effectiveExpanded ? 'expanded' : 'collapsed';
 
@@ -420,7 +420,7 @@ export function InRunSetup({
     >
       <div className={`setup-question ${consuming ? 'is-consuming' : ''}`}>
         <div className="setup-question-top">
-          <h2 className="setup-question-title">{current.title}</h2>
+          <h2 className="setup-question-title">{activeQuestion.title}</h2>
           <button
             type="button"
             className="setup-not-now"
@@ -429,14 +429,14 @@ export function InRunSetup({
           >Not now</button>
         </div>
 
-        {current.kind === 'date' ? (
+        {activeQuestion.kind === 'date' ? (
           customDate ? (
             <form
               className="setup-input-row"
               onSubmit={event => {
                 event.preventDefault();
                 const value = String(new FormData(event.currentTarget).get('date') ?? '');
-                if (value) complete(current, value);
+                if (value) complete(activeQuestion, value);
               }}
             >
               <input name="date" type="date" aria-label="Pick a date" required />
@@ -444,14 +444,14 @@ export function InRunSetup({
               <button type="button" className="setup-quiet" onClick={() => setCustomDate(false)}>Back</button>
             </form>
           ) : (() => {
-            const page = pagedOptions(current.options ?? []);
+            const page = pagedOptions(activeQuestion.options ?? []);
             return (
               <div className="setup-choice-row is-paged">
                 {page.canBack ? (
                   <button
                     type="button"
                     className="setup-page-control"
-                    onClick={() => setChoicePager({ key: current.key, page: Math.max(0, currentChoicePage - 1) })}
+                    onClick={() => setChoicePager({ key: activeQuestion.key, page: Math.max(0, currentChoicePage - 1) })}
                   >Back</button>
                 ) : null}
                 {page.visible.map(option => (
@@ -461,7 +461,7 @@ export function InRunSetup({
                   <button
                     type="button"
                     className="setup-page-control"
-                    onClick={() => setChoicePager({ key: current.key, page: currentChoicePage + 1 })}
+                    onClick={() => setChoicePager({ key: activeQuestion.key, page: currentChoicePage + 1 })}
                   >More</button>
                 ) : null}
               </div>
@@ -469,58 +469,58 @@ export function InRunSetup({
           })()
         ) : null}
 
-        {current.kind === 'money' ? (
+        {activeQuestion.kind === 'money' ? (
           <form
             className="setup-input-row"
             onSubmit={event => {
               event.preventDefault();
               const value = cents(inputValue);
-              if (value != null) complete(current, value);
+              if (value != null) complete(activeQuestion, value);
             }}
           >
             <span aria-hidden="true">$</span>
             <input
               inputMode="decimal"
-              aria-label={current.placeholder ?? 'Amount'}
+              aria-label={activeQuestion.placeholder ?? 'Amount'}
               value={inputValue}
               onChange={event => setInputValue(event.target.value)}
-              placeholder={current.placeholder}
+              placeholder={activeQuestion.placeholder}
             />
             <button type="submit">Use</button>
-            <button type="button" className="setup-quiet" onClick={() => complete(current, null)}>{current.skipLabel}</button>
+            <button type="button" className="setup-quiet" onClick={() => complete(activeQuestion, null)}>{activeQuestion.skipLabel}</button>
           </form>
         ) : null}
 
-        {current.kind === 'text' ? (
+        {activeQuestion.kind === 'text' ? (
           <form
             className="setup-input-row setup-text-row"
             onSubmit={event => {
               event.preventDefault();
-              complete(current, inputValue);
+              complete(activeQuestion, inputValue);
             }}
           >
             <input
-              aria-label={current.placeholder ?? 'Answer'}
+              aria-label={activeQuestion.placeholder ?? 'Answer'}
               value={inputValue}
               onChange={event => setInputValue(event.target.value)}
-              placeholder={current.placeholder}
+              placeholder={activeQuestion.placeholder}
               maxLength={180}
             />
             <button type="submit" disabled={!inputValue.trim()}>Use</button>
-            <button type="button" className="setup-quiet" onClick={() => complete(current, null)}>{current.skipLabel}</button>
+            <button type="button" className="setup-quiet" onClick={() => complete(activeQuestion, null)}>{activeQuestion.skipLabel}</button>
           </form>
         ) : null}
 
-        {current.kind === 'choices' || current.kind === 'yes-no'
+        {activeQuestion.kind === 'choices' || activeQuestion.kind === 'yes-no'
           ? (() => {
-              const page = pagedOptions(current.options ?? []);
+              const page = pagedOptions(activeQuestion.options ?? []);
               return (
                 <div className="setup-choice-row is-paged">
                   {page.canBack ? (
                     <button
                       type="button"
                       className="setup-page-control"
-                      onClick={() => setChoicePager({ key: current.key, page: Math.max(0, currentChoicePage - 1) })}
+                      onClick={() => setChoicePager({ key: activeQuestion.key, page: Math.max(0, currentChoicePage - 1) })}
                     >Back</button>
                   ) : null}
                   {page.visible.map(option => (
@@ -530,7 +530,7 @@ export function InRunSetup({
                     <button
                       type="button"
                       className="setup-page-control"
-                      onClick={() => setChoicePager({ key: current.key, page: currentChoicePage + 1 })}
+                      onClick={() => setChoicePager({ key: activeQuestion.key, page: currentChoicePage + 1 })}
                     >More</button>
                   ) : null}
                 </div>
