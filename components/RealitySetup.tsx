@@ -217,7 +217,7 @@ export function RealitySetup({
         </> : null}
 
         {step === 'obligation' ? <>
-          <h1>What does this money need to make it past?</h1>
+          <h1>What do you still need this money for?</h1>
           <div className="obligation-grid">
             {obligations.map(choice => chip(choice.value, choice.label, () => setObligation(choice.value)))}
           </div>
