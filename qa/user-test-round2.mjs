@@ -105,7 +105,7 @@ async function finishKnownGameCoreSetup(page, game = 'slots') {
   await page.getByRole('heading', { name: 'What were you hoping would happen?' }).waitFor();
   await page.getByRole('button', { name: 'Win back what I lost', exact: true }).click();
 
-  await page.getByRole('heading', { name: 'What do you still need this money for?' }).waitFor();
+  await page.getByRole('heading', { name: 'What do you still need this money for?' }).waitFor({ timeout: 5_000 });
   await page.getByRole('button', { name: 'Car payment', exact: true }).click();
 
   await page.getByRole('heading', { name: 'How bad do you want to play right now?' }).waitFor();
