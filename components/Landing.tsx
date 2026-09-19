@@ -242,6 +242,19 @@ export function Landing() {
               <a className="primary-cta" href="#games">Choose a game</a>
               <span>Practice only · no cash value</span>
             </div>
+
+            <nav className="mobile-game-quickpick" aria-label="Choose a game">
+              {games.map(game => (
+                <Link
+                  className={'mobile-game-option game-' + game.tone}
+                  href={'/play?game=' + game.id}
+                  key={'quick-' + game.id}
+                >
+                  <Image src={game.symbols[0]} alt="" width={28} height={28} />
+                  <span>{game.name}</span>
+                </Link>
+              ))}
+            </nav>
           </div>
 
           <div className="hero-machine" aria-hidden="true">
