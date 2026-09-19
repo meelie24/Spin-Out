@@ -135,6 +135,40 @@ async function startKnownGameRealityRun(page, game = 'slots') {
 }
 
 
+async function assertModalKeyboardContract(page, dialogSelector, trigger) {
+  await trigger.focus();
+  await trigger.evaluate(el => el.setAttribute('data-qa-modal-trigger', 'true'));
+  await trigger.click();
+  const dialog = page.locator(dialogSelector);
+  const stableTrigger = page.locator('[data-qa-modal-trigger="true"]');
+  await dialog.waitFor();
+  await assertFocusInside(page, dialogSelector, 'modal opened');
+  assert(await stableTrigger.evaluate(el => Boolean(el.closest('[inert]'))),
+    'background controls remain interactive while the modal is open');
+
+  const buttons = dialog.locator('button:not(:disabled):visible');
+  const first = buttons.first();
+  const last = buttons.last();
+  await first.focus();
+  await page.keyboard.press('Shift+Tab');
+  assert(await last.evaluate(el => el === document.activeElement),
+    'Shift+Tab escaped the first modal control');
+  await last.focus();
+  await page.keyboard.press('Tab');
+  assert(await first.evaluate(el => el === document.activeElement),
+    'Tab escaped the last modal control');
+
+  await stableTrigger.evaluate(el => el.focus());
+  await assertFocusInside(page, dialogSelector, 'background focus attempt');
+  await page.keyboard.press('Escape');
+  await dialog.waitFor({ state: 'hidden', timeout: 2_000 });
+  assert(await stableTrigger.evaluate(el => el === document.activeElement),
+    'closing the modal did not restore focus to its trigger');
+  assert(await stableTrigger.evaluate(el => !el.closest('[inert]')),
+    'background remained inert after the modal closed');
+}
+
+
 const browser = await chromium.launch({ headless: true });
 
 try {
@@ -888,6 +922,87 @@ try {
     assert(await page.getByRole('button', { name: 'Done', exact: true }).count() === 0,
       'ambiguous Done action remained on the post-run summary');
   });
+
+await check('My Reality contains keyboard focus and restores its trigger', async context => {
+  const p = profile('slots');
+  await context.addInitScript(({ profile }) => {
+    localStorage.setItem('spinout.v2', JSON.stringify({
+      version: 2, profile, runs: [], pingLearning: {}, events: [], account: {},
+    }));
+  }, { profile: p });
+  const page = await context.newPage();
+  await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await assertModalKeyboardContract(page, '.reality-context-dialog',
+    page.getByRole('button', { name: 'My reality', exact: true }).first());
+});
+
+await check('Run 10,000 contains keyboard focus and restores its trigger', async context => {
+  const p = profile('slots');
+  await seedActive(context, p, runFor(p, { actionCount: 2, balanceCents: 8_000 }));
+  const page = await context.newPage();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+  await assertModalKeyboardContract(page, '.longrun-panel',
+    page.getByRole('button', { name: 'Run 10,000', exact: true }));
+});
+
+await check('editing a goal preserves unknown money and financial freshness', async context => {
+  const p = profile('slots', {
+    availableUntilIncomeCents: null,
+    obligationAmountCents: null,
+    financialContextUpdatedAt: '2026-01-01T12:00:00.000Z',
+  });
+  await context.addInitScript(({ profile }) => {
+    localStorage.setItem('spinout.v2', JSON.stringify({
+      version: 2, profile, runs: [], pingLearning: {}, events: [], account: {},
+    }));
+  }, { profile: p });
+  const page = await context.newPage();
+  await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: 'My reality', exact: true }).first().click();
+  await page.getByRole('button', { name: /Edit what.*trying to keep it for/i }).click();
+  await page.locator('.context-focused-editor input').fill('Emergency fund');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.locator('.reality-context-summary').waitFor();
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2')).profile);
+  const findings = [];
+  if (saved.personalMoneyGoal !== 'Emergency fund') findings.push('edited goal was not saved');
+  if (saved.availableUntilIncomeCents !== null) findings.push('unknown available money became a recorded number');
+  if (saved.obligationAmountCents !== null) findings.push('unknown obligation amount became a recorded number');
+  if (saved.financialContextUpdatedAt !== p.financialContextUpdatedAt) findings.push('unreviewed financial details were marked fresh');
+  if (saved.nextIncomeDate !== p.nextIncomeDate || saved.obligationDueDate !== p.obligationDueDate) findings.push('unrelated financial dates changed');
+  assert(findings.length === 0, findings.join('; '));
+});
+
+await check('clearing income preserves null while an explicit zero remains zero', async context => {
+  const p = profile('slots');
+  await context.addInitScript(({ profile }) => {
+    localStorage.setItem('spinout.v2', JSON.stringify({
+      version: 2, profile, runs: [], pingLearning: {}, events: [], account: {},
+    }));
+  }, { profile: p });
+  const page = await context.newPage();
+  await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: 'My reality', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Edit money coming in', exact: true }).click();
+  await page.getByLabel('Money until more comes in', { exact: true }).fill('0');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.locator('.reality-context-summary').waitFor();
+  const explicit = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2')).profile);
+  assert(explicit.availableUntilIncomeCents === 0, 'an explicit zero was discarded');
+
+  await page.getByRole('button', { name: 'Edit money coming in', exact: true }).click();
+  await page.getByRole('button', { name: 'Clear', exact: true }).click();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.locator('.reality-context-summary').waitFor();
+  const cleared = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2')).profile);
+  assert(cleared.availableUntilIncomeCents === null && cleared.nextIncomeDate === null,
+    'clearing the income section did not preserve unspecified values');
+  assert(cleared.obligationAmountCents === p.obligationAmountCents
+    && cleared.obligationDueDate === p.obligationDueDate,
+    'clearing income changed the separate obligation');
+});
 
   if (failures.length) {
     throw new Error('Round 2 user-test failures:\n- ' + failures.join('\n- '));
