@@ -146,6 +146,16 @@ try {
     await page.goto(base, { waitUntil: 'domcontentloaded' });
     await page.getByRole('link', { name: /Enter Reality Run/i }).first().waitFor();
     assert(await page.getByRole('link', { name: /Enter Reality Run/i }).count() === 6, `${name}: homepage did not expose all six game choices`);
+    assert(await page.locator('[data-game-art]').count() === 6, `${name}: each game did not expose dedicated authored artwork`);
+    if (width >= 1024) {
+      assert(await page.locator('[data-game-layout="featured"]').count() === 1, `${name}: desktop game library has no featured composition`);
+      assert(await page.locator('[data-game-layout="supporting"]').count() === 5, `${name}: desktop supporting games are not explicitly composed`);
+      assert(await page.locator('.hub-sidebar[data-material="liquid-glass"]').count() === 1, `${name}: sidebar is not marked as the continuous liquid-glass material surface`);
+      assert(await page.locator('.hub-nav [data-nav-state="active"]').count() === 1, `${name}: liquid-glass nav has no integrated active state`);
+    }
+    assert(await page.locator('[data-type-role="display"]').count() >= 1, `${name}: display typography role is missing`);
+    assert(await page.locator('[data-type-role="game-title"]').count() === 6, `${name}: game-title typography role is not explicit on all games`);
+    assert(await page.locator('[data-type-role="intervention"]').count() >= 1, `${name}: intervention typography role is missing`);
     await noHorizontalOverflow(page, name);
     await page.screenshot({ path: `${out}/home-${name}.png`, fullPage: true });
     if (name === 'desktop-1440' || name === 'mobile-390') await assertA11y(page, name);
