@@ -161,7 +161,7 @@ try {
   await moneyPrompt.click();
   await hubPage.waitForTimeout(300);
   assert(await moneyPrompt.count() === 0, 'homepage intervention did not dismiss');
-  await hubPage.locator('a[href="/play?game=slots"]').click();
+  await hubPage.locator('.mobile-game-quickpick a[href="/play?game=slots"]').click();
   await hubPage.getByRole('heading', { name: /How much were you about to put in/i }).waitFor();
   await hubPage.getByRole('button', { name: '$100' }).click();
   await hubPage.getByRole('heading', { name: /What were you hoping would happen/i }).waitFor();
