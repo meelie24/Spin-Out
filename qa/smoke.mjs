@@ -258,6 +258,10 @@ try {
   await brandPage.goto(`${base}/help`, { waitUntil: 'domcontentloaded' });
   await brandPage.getByRole('heading', { name: /Put more distance between you and gambling/i }).waitFor();
   await noHorizontalOverflow(brandPage, 'Help 390');
+  const helpResourceName = brandPage.getByRole('link', { name: /Gambling Therapy/i }).locator('strong');
+  const helpNameBox = await helpResourceName.boundingBox();
+  assert(Boolean(helpNameBox) && helpNameBox.x >= 0 && helpNameBox.x + helpNameBox.width <= 390,
+    `Help 390 resource name is clipped outside the visible ledger: ${JSON.stringify(helpNameBox)}`);
   await brandPage.screenshot({ path: `${out}/help-390.png`, fullPage: true });
 
   await brandPage.goto(`${base}/privacy`, { waitUntil: 'domcontentloaded' });
