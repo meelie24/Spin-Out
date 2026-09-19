@@ -667,8 +667,10 @@ try {
     'My Reality did not open on the summary-first surface');
   assert(await contextPage.locator('.reality-context-dialog input:visible, .reality-context-dialog select:visible').count() === 0,
     'My Reality summary exposed edit controls before the user asked for them');
+  assert(await contextPage.locator('.reality-context-dialog[data-material="smoked-lacquer"]').count() === 1,
+    'My Reality is not using the reference-locked smoked-lacquer material surface');
   await contextPage.screenshot({ path: `${out}/my-reality-390.png`, fullPage: true });
-  await contextPage.getByRole('button', { name: 'Edit', exact: true }).click();
+  await contextPage.getByRole('button', { name: 'Edit what this money is for', exact: true }).click();
   const realitySave = contextPage.getByRole('button', { name: 'Save' });
   await realitySave.waitFor();
   assert(await realitySave.isVisible(), 'My Reality save action is not visible after entering edit mode');
