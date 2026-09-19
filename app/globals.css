@@ -4985,3 +4985,195 @@ body:has(.plain-page) .resource-list b{color:#bd8c52}
   .longrun-panel[data-material="long-run-stage"] .longrun-net-pair strong{font-size:30px}
   body:has(.plain-page) .plain-page h1{font-size:54px}
 }
+
+
+/* =========================================================
+   REFERENCE CONVERGENCE PASS — authored setup art, mobile glass,
+   and tighter post-run composition.
+   ========================================================= */
+
+/* Setup game chooser now uses the same authored mini-scenes as the hub. */
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card{
+  min-height:218px;
+  padding:0;
+  display:flex;
+  align-items:flex-end;
+  overflow:hidden;
+  isolation:isolate;
+  border-radius:3px 22px 3px 16px;
+  background:#120b09;
+}
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:after{
+  left:0;right:0;top:auto;bottom:0;width:auto;height:54%;
+  opacity:1;
+  background:linear-gradient(180deg,transparent,rgba(8,5,4,.93) 68%);
+  pointer-events:none;
+  z-index:1;
+}
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card .tile-art{
+  z-index:0;
+  inset:-7%;
+  transform:scale(.86);
+  transform-origin:center;
+  opacity:.96;
+  transition:transform .24s cubic-bezier(.2,.72,.22,1),filter .24s ease;
+}
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:hover .tile-art{
+  transform:scale(.91) translateY(-3px);
+  filter:brightness(1.08);
+}
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card>span:last-child{
+  position:relative;
+  z-index:3;
+  width:100%;
+  padding:0 17px 17px;
+  color:#f2dcc0;
+  font-family:var(--so-game);
+  font-size:25px;
+  font-weight:850;
+  line-height:.95;
+  letter-spacing:-.045em;
+  text-shadow:0 8px 22px rgba(0,0,0,.65);
+}
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="sports"])>span:last-child,
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="lottery"])>span:last-child{
+  font-size:22px;
+}
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="slots"]){
+  grid-column:span 2;
+  min-height:250px;
+}
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="slots"]) .tile-art{
+  inset:-4%;
+  transform:scale(.93);
+}
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="slots"])>span:last-child{
+  font-size:34px;
+}
+.setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="poker"]){
+  grid-column:span 2;
+}
+
+/* Home mobile navigation borrows the liquid-glass reference instead of a flat bar. */
+@media(max-width:820px){
+  .reference-locked .hub-mobile-head{
+    top:8px;
+    margin:8px 2px 18px;
+    min-height:58px;
+    padding:8px 12px;
+    border:1px solid rgba(255,239,211,.17);
+    border-radius:22px 12px 22px 12px;
+    background:
+      linear-gradient(125deg,rgba(255,255,255,.1),transparent 18% 70%,rgba(184,119,68,.05)),
+      rgba(43,27,23,.5);
+    box-shadow:
+      0 18px 46px rgba(0,0,0,.32),
+      inset 1px 1px rgba(255,255,255,.11),
+      inset -1px -1px rgba(98,48,31,.14);
+    backdrop-filter:blur(28px) saturate(1.32);
+    -webkit-backdrop-filter:blur(28px) saturate(1.32);
+  }
+  .reference-locked .hub-mobile-head .hub-brand-mark{
+    border-radius:50% 50% 43% 57%;
+    box-shadow:0 7px 18px rgba(0,0,0,.28),inset 1px 1px rgba(255,255,255,.35);
+  }
+  .reference-locked .hub-mobile-actions{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    padding:4px;
+    border:1px solid rgba(232,193,130,.08);
+    border-radius:12px 7px 12px 7px;
+    background:rgba(255,244,220,.025);
+  }
+  .reference-locked .hub-mobile-actions button,
+  .reference-locked .hub-mobile-actions a{
+    min-height:38px;
+    padding:0 9px;
+    display:flex;
+    align-items:center;
+    color:#bda58d;
+    border-radius:9px 5px 9px 5px;
+  }
+  .reference-locked .hub-mobile-actions button:hover,
+  .reference-locked .hub-mobile-actions a:hover{
+    color:#f0d7b2;
+    background:rgba(255,244,220,.045);
+  }
+}
+
+/* Post-run is staged near the action, not floating in a large empty app canvas. */
+@media(max-width:720px){
+  .post-shell[data-material="quiet-lacquer"]{
+    place-items:start center;
+    align-content:start;
+    min-height:calc(100vh - 58px);
+    padding:30px 10px 44px;
+  }
+  .post-shell[data-material="quiet-lacquer"] .post-card{
+    margin-top:18px;
+  }
+  .post-shell[data-material="quiet-lacquer"]:before{
+    right:-20vw;
+    bottom:-2vh;
+    font-size:250px;
+  }
+}
+
+/* Supporting/Plus pages get actual environmental depth, not only dark colors. */
+body:has(.plus-page):before,
+body:has(.plain-page):before{
+  content:"QUIT";
+  position:fixed;
+  z-index:-2;
+  right:-8vw;
+  bottom:-8vh;
+  color:rgba(229,190,127,.022);
+  font:900 clamp(220px,34vw,560px)/.72 var(--so-game);
+  letter-spacing:-.09em;
+  transform:rotate(-7deg);
+  pointer-events:none;
+}
+body:has(.plus-page):after,
+body:has(.plain-page):after{
+  content:"";
+  position:fixed;
+  z-index:-3;
+  inset:0;
+  background:
+    radial-gradient(circle at 84% 12%,rgba(108,45,34,.13),transparent 28rem),
+    radial-gradient(circle at 12% 75%,rgba(81,35,30,.08),transparent 26rem),
+    linear-gradient(145deg,#0c0706,#160c0a 55%,#0b0605);
+  pointer-events:none;
+}
+
+@media(max-width:720px){
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card{
+    min-height:164px;
+  }
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="slots"]),
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="poker"]){
+    grid-column:span 2;
+    min-height:205px;
+  }
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card .tile-art{
+    transform:scale(.78);
+  }
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:hover .tile-art{
+    transform:scale(.8);
+  }
+}
+@media(max-width:430px){
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card{
+    min-height:150px;
+  }
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="slots"]),
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="poker"]){
+    min-height:190px;
+  }
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card>span:last-child{font-size:20px}
+  .setup-shell[data-material="casino-setup"].reference-locked .game-choice-grid .choice-card:has([data-game-art="slots"])>span:last-child{font-size:28px}
+}

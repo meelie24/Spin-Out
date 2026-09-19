@@ -5,14 +5,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import type { GamblingType, ObligationType, RealityProfile, SessionLimit, TriggerType } from '@/lib/types';
 import { spinAudio } from '@/lib/audio';
+import { GameTileArt } from './GameTileArt';
 
-const gameChoices: { value: GamblingType; label: string; art: string }[] = [
-  { value: 'slots', label: 'Slots', art: '/symbols/seven.svg' },
-  { value: 'sports', label: 'Sportsbook', art: '/symbols/sports-ticket.svg' },
-  { value: 'casino', label: 'Roulette', art: '/symbols/roulette.svg' },
-  { value: 'poker', label: 'Video Poker', art: '/symbols/cards.svg' },
-  { value: 'lottery', label: 'Lottery / scratch', art: '/symbols/scratch-ticket.svg' },
-  { value: 'other', label: 'Something else', art: '/symbols/fu.svg' },
+const gameChoices: { value: GamblingType; label: string }[] = [
+  { value: 'slots', label: 'Slots' },
+  { value: 'sports', label: 'Sportsbook' },
+  { value: 'casino', label: 'Roulette' },
+  { value: 'poker', label: 'Video Poker' },
+  { value: 'lottery', label: 'Lottery / scratch' },
+  { value: 'other', label: 'Something else' },
 ];
 
 const sessionIntent: { value: TriggerType; label: string }[] = [
@@ -153,7 +154,7 @@ export function RealitySetup({
   );
 
   return (
-    <main className="setup-shell" data-material="casino-setup" data-step={step}>
+    <main className="setup-shell reference-locked" data-material="casino-setup" data-step={step}>
       <div className="setup-atmosphere" aria-hidden="true">
         <span className="setup-quit setup-quit-a">QUIT</span>
         <span className="setup-quit setup-quit-b">QUIT</span>
@@ -196,7 +197,7 @@ export function RealitySetup({
               choice.value,
               choice.label,
               () => setGame(choice.value),
-              <span className="setup-game-art" aria-hidden="true"><Image src={choice.art} alt="" width={86} height={86} /></span>,
+              <GameTileArt game={choice.value} />,
             ))}
           </div>
         </> : null}
