@@ -84,7 +84,7 @@ export function RealityContextPanel({
 
   if (!draft || !committed) {
     return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
-      <section ref={dialogRef} tabIndex={-1} className="glass-dialog reality-context-dialog" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
+      <section ref={dialogRef} tabIndex={-1} className="glass-dialog reality-context-dialog" data-material="smoked-lacquer" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
         <p className="kicker">My reality</p>
         <h2 id="reality-context-title">Set this up during your first Reality Run.</h2>
         <p className="provider-note">Spin Out only asks for the money and timing it can actually use during a run.</p>
@@ -205,7 +205,7 @@ export function RealityContextPanel({
     body: React.ReactNode,
     extra?: React.ReactNode,
   ) => (
-    <article>
+    <article className={`context-summary-card context-summary-${section}`}>
       <div className="context-summary-card-head">
         <span>{label}</span>
         <button
@@ -221,7 +221,7 @@ export function RealityContextPanel({
   );
 
   return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
-    <section ref={dialogRef} tabIndex={-1} className="glass-dialog reality-context-dialog" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
+    <section ref={dialogRef} tabIndex={-1} className="glass-dialog reality-context-dialog" data-material="smoked-lacquer" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
       <div className="reality-context-head">
         <div>
           <p className="kicker">My reality</p>

@@ -3542,3 +3542,328 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .context-focused-actions .primary-button{width:100%}
   .context-focused-actions .bare-link{align-self:center}
 }
+
+
+/* =========================================================
+   REFERENCE-LOCKED MY REALITY
+   One smoked-lacquer information sheet, not a settings-card stack.
+   ========================================================= */
+.reference-locked .modal-backdrop:has(.reality-context-dialog[data-material="smoked-lacquer"]){
+  background:
+    radial-gradient(circle at 50% 8%,rgba(126,75,43,.14),transparent 32rem),
+    rgba(8,4,3,.74);
+  backdrop-filter:blur(18px) saturate(1.08);
+  -webkit-backdrop-filter:blur(18px) saturate(1.08);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"]{
+  --context-line:rgba(232,193,129,.15);
+  --context-line-strong:rgba(232,193,129,.28);
+  --context-cream:#f3e5cf;
+  --context-muted:#ae9783;
+  --context-dim:#796455;
+  --context-gold:#d1a261;
+  width:min(720px,calc(100% - 24px));
+  max-height:min(840px,calc(100vh - 28px));
+  position:relative;
+  isolation:isolate;
+  overflow:auto;
+  padding:30px;
+  border-radius:5px 38px 5px 24px;
+  border:1px solid rgba(238,200,137,.27);
+  background:
+    linear-gradient(118deg,rgba(255,245,224,.075),transparent 17% 69%,rgba(151,88,47,.06)),
+    radial-gradient(circle at 88% 0%,rgba(126,42,38,.19),transparent 22rem),
+    linear-gradient(148deg,rgba(50,27,23,.97),rgba(20,12,10,.985) 56%,rgba(11,8,7,.99));
+  color:var(--context-cream);
+  box-shadow:
+    0 46px 120px rgba(0,0,0,.62),
+    18px 20px 55px rgba(64,28,21,.18),
+    inset 1px 1px rgba(255,255,255,.09),
+    inset -1px -1px rgba(89,45,29,.2);
+  backdrop-filter:blur(34px) saturate(1.22);
+  -webkit-backdrop-filter:blur(34px) saturate(1.22);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"]:before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:10px;
+  border:1px solid rgba(222,177,108,.08);
+  border-radius:2px 29px 2px 17px;
+  pointer-events:none;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"]:after{
+  content:"REALITY";
+  position:absolute;
+  z-index:-2;
+  right:-18px;
+  top:88px;
+  font-family:"Arial Narrow","Avenir Next Condensed","Segoe UI",sans-serif;
+  font-size:108px;
+  font-weight:900;
+  line-height:.8;
+  letter-spacing:-.08em;
+  color:rgba(231,192,127,.026);
+  transform:rotate(-90deg) translateX(34%);
+  transform-origin:right top;
+  pointer-events:none;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .reality-context-head{
+  position:relative;
+  margin-bottom:20px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--context-line);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .reality-context-head .kicker{
+  margin-bottom:7px;
+  color:var(--context-gold);
+  font-size:8px;
+  letter-spacing:.19em;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .reality-context-head h2{
+  max-width:17ch;
+  margin:0;
+  color:#f7e9d2;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:clamp(31px,4.2vw,45px);
+  font-weight:600;
+  line-height:.91;
+  letter-spacing:-.05em;
+  text-wrap:balance;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .bare-link{
+  color:#bda78f;
+  text-decoration-color:rgba(220,181,118,.22);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .bare-link:hover{color:#f1dcc0}
+
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-top{
+  padding:0 2px 17px;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-top p{
+  color:#c4ad97;
+  font-size:12px;
+  line-height:1.55;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-top small{
+  display:block;
+  margin-top:4px;
+  color:#776457;
+  font-size:9px;
+  line-height:1.5;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-grid{
+  display:grid;
+  grid-template-columns:1.12fr .88fr;
+  gap:0;
+  border-top:1px solid var(--context-line);
+  border-bottom:1px solid var(--context-line);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card{
+  min-width:0;
+  padding:16px 13px;
+  border:0;
+  border-bottom:1px solid rgba(232,193,129,.1);
+  border-radius:0;
+  background:transparent;
+  display:grid;
+  align-content:start;
+  gap:5px;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card:nth-last-child(-n+2){
+  border-bottom-color:transparent;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card-head{
+  align-items:center;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card-head>span{
+  color:#947b66;
+  font-size:7.5px;
+  line-height:1.35;
+  letter-spacing:.14em;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-card-edit{
+  min-height:32px;
+  padding:0 1px 0 10px;
+  color:#b9915d;
+  font-size:9px;
+  font-weight:720;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-card-edit:hover{color:#f0c981}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card>strong{
+  color:#f2dfc3;
+  font-size:15px;
+  font-weight:660;
+  line-height:1.3;
+  letter-spacing:-.018em;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card>small{
+  color:#816d5e;
+  font-size:10px;
+  line-height:1.35;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation{
+  grid-column:1 / -1;
+  min-height:118px;
+  grid-template-columns:minmax(0,1fr) auto;
+  padding:20px 18px;
+  border-left:2px solid rgba(204,143,70,.52);
+  background:
+    linear-gradient(90deg,rgba(114,36,37,.2),rgba(93,43,30,.06) 47%,transparent),
+    linear-gradient(180deg,rgba(255,238,205,.02),transparent);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation .context-summary-card-head{
+  grid-column:1 / -1;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation>strong{
+  grid-column:1;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:23px;
+  font-weight:600;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-money{
+  grid-column:2;
+  grid-row:2 / span 2;
+  align-self:end;
+  color:#e0b56f;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  font-size:38px;
+  font-weight:680;
+  line-height:.9;
+  letter-spacing:-.055em;
+  font-variant-numeric:tabular-nums;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-income,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-difficult,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-lender{
+  border-right:1px solid rgba(232,193,129,.1);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-difficult,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-reason{
+  min-height:90px;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-payday{
+  grid-column:1 / -1;
+  border-bottom:0;
+  border-top:1px solid rgba(232,193,129,.05);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-saved-note{
+  margin:12px 0 0;
+  color:#d7b578;
+  font-size:10px;
+}
+
+/* Focused editing stays narrow and calm inside the same material. */
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-editor{
+  gap:14px;
+  padding:4px 2px 0;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-title{
+  padding:0 0 13px;
+  border-bottom:1px solid var(--context-line);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-title>span{
+  color:#e4c79b;
+  font-family:"Iowan Old Style","Baskerville","Times New Roman",serif;
+  font-size:20px;
+  font-weight:600;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-editor label{
+  color:#9f856f;
+  font-size:8px;
+  letter-spacing:.12em;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-editor>input,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-editor label>input,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-editor select,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-money-input input{
+  min-height:48px;
+  border:1px solid rgba(227,188,126,.18);
+  border-radius:5px 13px 5px 13px;
+  background:
+    linear-gradient(145deg,rgba(255,245,224,.04),rgba(255,255,255,.012)),
+    rgba(10,7,6,.62);
+  color:#f0dec5;
+  padding:0 12px;
+  color-scheme:dark;
+  box-shadow:inset 1px 1px rgba(255,255,255,.025);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-money-input{
+  min-height:48px;
+  border:1px solid rgba(227,188,126,.18);
+  border-radius:5px 13px 5px 13px;
+  background:rgba(10,7,6,.62);
+  color:#c9a474;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-money-input input{
+  border:0;
+  background:transparent;
+  border-radius:0;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-chip-grid button,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .inline-choices button{
+  min-height:42px;
+  border:1px solid rgba(225,185,122,.14);
+  border-radius:4px 12px 4px 12px;
+  background:rgba(255,244,220,.035);
+  color:#ae9580;
+  box-shadow:none;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-chip-grid button.is-on,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .inline-choices button.is-on{
+  border-color:rgba(231,190,123,.38);
+  background:
+    linear-gradient(135deg,rgba(126,38,40,.42),rgba(75,31,25,.5));
+  color:#f1d8b6;
+  box-shadow:inset 1px 1px rgba(255,255,255,.05);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-actions{
+  padding-top:4px;
+  border-top:1px solid rgba(232,193,129,.07);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-focused-actions .primary-button{
+  border-radius:4px 14px 4px 14px;
+  border-color:rgba(244,210,151,.35);
+  background:linear-gradient(180deg,#d7ad69,#a66e3c);
+  color:#21120e;
+  box-shadow:0 13px 27px rgba(0,0,0,.26),inset 1px 1px rgba(255,255,255,.35);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .provider-note{
+  background:rgba(255,244,220,.035);
+  border-left:2px solid rgba(205,148,78,.38);
+  border-radius:0;
+  color:#aa927d!important;
+}
+
+@media(max-width:560px){
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"]{
+    width:calc(100% - 20px);
+    max-height:calc(100vh - 20px);
+    padding:22px 18px;
+    border-radius:4px 28px 4px 18px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .reality-context-head h2{
+    max-width:14ch;
+    font-size:34px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-grid{
+    grid-template-columns:1fr;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card,
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation,
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-payday{
+    grid-column:1;
+    border-right:0;
+    padding-left:8px;
+    padding-right:8px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation{
+    padding:18px 12px 18px 15px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card:nth-last-child(-n+2){
+    border-bottom:1px solid rgba(232,193,129,.1);
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-payday{border-bottom:0}
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-money{font-size:32px}
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"]:after{font-size:76px;opacity:.7}
+}
