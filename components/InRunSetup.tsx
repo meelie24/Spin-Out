@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { isFinancialContextStale } from '@/lib/engine';
 import type {
   DifficultTime,
@@ -256,7 +256,6 @@ export function InRunSetup({
   const [customDate, setCustomDate] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [reducedMotion, setReducedMotion] = useState(false);
-  const timerRef = useRef<number | null>(null);
   const [openAtSignal, setOpenAtSignal] = useState(collapseSignal);
   const [choicePager, setChoicePager] = useState<{ key: OnboardingQuestionKey | null; page: number }>({ key: null, page: 0 });
 
@@ -270,10 +269,6 @@ export function InRunSetup({
     sync();
     media?.addEventListener?.('change', sync);
     return () => media?.removeEventListener?.('change', sync);
-  }, []);
-
-  useEffect(() => () => {
-    if (timerRef.current != null) window.clearTimeout(timerRef.current);
   }, []);
 
   const complete = (question: SetupQuestion, value: string | number | boolean | null) => {
@@ -337,7 +332,7 @@ export function InRunSetup({
     onProfileChange(next);
 
     const duration = reducedMotion ? 130 : 960;
-    timerRef.current = window.setTimeout(() => {
+    window.setTimeout(() => {
       setConsuming(false);
       setConsumingQuestion(null);
       setCustomDate(false);
