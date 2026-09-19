@@ -31,7 +31,7 @@ type RevenueCatCustomer = {
   };
 };
 
-export function revenueCatServerApiKey(env: NodeJS.ProcessEnv = process.env) {
+export function revenueCatServerApiKey(env: Record<string, string | undefined> = process.env) {
   return env.REVENUECAT_SECRET_API_KEY
     ?? env.REVENUECAT_PUBLIC_API_KEY
     ?? env.NEXT_PUBLIC_REVENUECAT_WEB_API_KEY
