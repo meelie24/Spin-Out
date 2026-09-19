@@ -153,6 +153,41 @@ try {
       'mobile pre-run explanation did not explain that setup continues during play');
   });
 
+  await check('run typography and optional questions remain readable at phone widths', async context => {
+    const page = await context.newPage();
+    await startKnownGameRealityRun(page, 'slots');
+    await page.evaluate(() => document.fonts.ready);
+    const findings = [];
+    for (const width of [320, 390, 430]) {
+      await page.setViewportSize({ width, height: 844 });
+      const observed = await page.evaluate(() => {
+        const title = document.querySelector('.setup-question-title');
+        const ui = document.querySelector('.run-hud span');
+        const number = document.querySelector('.run-hud strong');
+        const sound = document.querySelector('.sound-button');
+        const question = title.getBoundingClientRect();
+        const choices = document.querySelector('.setup-choice-row').getBoundingClientRect();
+        const hud = document.querySelector('.run-hud').getBoundingClientRect();
+        const soundBox = sound.getBoundingClientRect();
+        return {
+          uiFont: getComputedStyle(ui).fontFamily,
+          displayFont: getComputedStyle(number).fontFamily,
+          titleClipped: title.scrollHeight > title.clientHeight + 1,
+          questionOverlapsChoices: question.bottom > choices.top + 1,
+          soundFits: soundBox.left >= hud.left && soundBox.right <= hud.right + 1,
+          soundTarget: soundBox.width >= 44 && soundBox.height >= 44,
+          dockHeight: document.querySelector('.in-run-setup').getBoundingClientRect().height,
+        };
+      });
+      if (!/Manrope/i.test(observed.uiFont)) findings.push(width + ': run UI font fell back: ' + observed.uiFont);
+      if (!/Barlow/i.test(observed.displayFont)) findings.push(width + ': run display font fell back: ' + observed.displayFont);
+      if (observed.titleClipped || observed.questionOverlapsChoices) findings.push(width + ': optional question is clipped or overlaps answers');
+      if (!observed.soundFits || !observed.soundTarget) findings.push(width + ': sound control overflows or has a small touch target');
+      if (observed.dockHeight > 140) findings.push(width + ': optional dock exceeds 140px');
+    }
+    assert(findings.length === 0, findings.join('; '));
+  });
+
   await check('mobile continuation setup stays compact and one-question-at-a-time', async context => {
     const page = await context.newPage();
     await startKnownGameRealityRun(page, 'slots');
