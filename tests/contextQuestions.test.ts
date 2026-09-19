@@ -80,18 +80,87 @@ test('an honest null answer stays completed when the marker exists', () => {
   assert(!getAutomaticInRunContextKeys(p).includes('income-date'));
 });
 
-test('post-run earns the money-goal ask only while it is genuinely unanswered', () => {
-  assert.equal(nextPostRunContextQuestion(profile()), 'money-goal');
+test('post-run earns one deeper question from the moment that gives it a job', () => {
+  const base = {
+    runCount: 1,
+    moneyKeptCents: 6_000,
+    exitedAfterPing: false,
+    limitExceeded: false,
+    financialPressure: false,
+    paydaySoon: false,
+  };
 
-  const answered = profile({
+  assert.equal(nextPostRunContextQuestion(profile(), base), 'money-goal');
+
+  const goalAnswered = profile({
     personalMoneyGoal: 'Savings',
     onboardingCompleted: ['money-goal'],
   });
-  assert.equal(nextPostRunContextQuestion(answered), null);
+  assert.equal(nextPostRunContextQuestion(goalAnswered, { ...base, runCount: 2 }), 'difficult-times');
 
+  const patternAnswered = profile({
+    personalMoneyGoal: 'Savings',
+    difficultTimes: ['late-night'],
+    onboardingCompleted: ['money-goal','difficult-times'],
+  });
+  assert.equal(nextPostRunContextQuestion(patternAnswered, {
+    ...base,
+    runCount: 3,
+    exitedAfterPing: true,
+  }), 'quit-reason');
+
+  const reasonAnswered = profile({
+    personalMoneyGoal: 'Savings',
+    difficultTimes: ['late-night'],
+    quitReason: 'Stop taking bill money',
+    onboardingCompleted: ['money-goal','difficult-times','quit-reason'],
+  });
+  assert.equal(nextPostRunContextQuestion(reasonAnswered, {
+    ...base,
+    runCount: 3,
+    paydaySoon: true,
+  }), 'payday-plan');
+});
+
+test('post-run sensitive lender questions only appear when financially relevant', () => {
+  const p = profile({
+    personalMoneyGoal: 'Savings',
+    difficultTimes: ['late-night'],
+    quitReason: 'Stop taking bill money',
+    paydayPlanActions: ['move-bill-money'],
+    onboardingCompleted: ['money-goal','difficult-times','quit-reason','payday-plan'],
+  });
+
+  assert.equal(nextPostRunContextQuestion(p, {
+    runCount: 4,
+    moneyKeptCents: 0,
+    exitedAfterPing: false,
+    limitExceeded: false,
+    financialPressure: false,
+    paydaySoon: false,
+  }), null);
+
+  assert.equal(nextPostRunContextQuestion(p, {
+    runCount: 4,
+    moneyKeptCents: 0,
+    exitedAfterPing: false,
+    limitExceeded: false,
+    financialPressure: true,
+    paydaySoon: false,
+  }), 'lender-name');
+});
+
+test('an honest completed post-run answer is never asked again', () => {
   const honestlyUnsure = profile({
     personalMoneyGoal: null,
     onboardingCompleted: ['money-goal'],
   });
-  assert.equal(nextPostRunContextQuestion(honestlyUnsure), null);
+  assert.equal(nextPostRunContextQuestion(honestlyUnsure, {
+    runCount: 1,
+    moneyKeptCents: 6_000,
+    exitedAfterPing: false,
+    limitExceeded: false,
+    financialPressure: false,
+    paydaySoon: false,
+  }), null);
 });
