@@ -83,7 +83,7 @@ export function LongRunExperience({
           </div>
           <p className="longrun-readout">{result.netCents >= 0
             ? 'This sample finished ahead. That can happen. One sample does not change what the game is expected to return over time.'
-            : 'This sample finished down. Individual samples move around; the model expectation is the long-run comparison.'}</p>
+            : 'This sample finished down. Individual samples move around; the long-run model is the comparison.'}</p>
           <button
             type="button"
             className="longrun-details-toggle"
