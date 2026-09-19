@@ -77,7 +77,7 @@ const FAMILY_PRIORITY: Record<string, number> = {
   dismissal: 76,
   'near-miss': 70,
   win: 68,
-  ledger: 58,
+  ledger: 82,
   personal: 56,
   return: 52,
   session: 48,
