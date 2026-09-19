@@ -155,6 +155,7 @@ try {
     }
     assert(await page.locator('[data-type-role="display"]').count() >= 1, `${name}: display typography role is missing`);
     assert(await page.locator('[data-type-role="game-title"]').count() === 6, `${name}: game-title typography role is not explicit on all games`);
+    await page.locator('[data-type-role="intervention"]').first().waitFor({ timeout: 3000 });
     assert(await page.locator('[data-type-role="intervention"]').count() >= 1, `${name}: intervention typography role is missing`);
     await noHorizontalOverflow(page, name);
     await page.screenshot({ path: `${out}/home-${name}.png`, fullPage: true });
