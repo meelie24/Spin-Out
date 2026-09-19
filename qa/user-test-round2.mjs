@@ -241,9 +241,13 @@ try {
     assert(hiddenEffects, 'reduced-motion path still displayed the black-hole or bouncing droplets');
 
     await page.waitForTimeout(220);
+    await page.locator('.in-run-setup[data-state="collapsed"]').waitFor();
+    assert(await page.locator('.setup-question-title').count() === 0,
+      'reduced-motion path chained immediately into another optional question');
+    await page.getByRole('button', { name: 'Make it more immersive', exact: true }).click();
     const nextQuestion = (await page.locator('.setup-question-title').innerText()).trim();
     assert(nextQuestion !== firstQuestion,
-      'reduced-motion path did not advance to the next setup question');
+      'reduced-motion manual reopen did not advance to the next setup question');
   });
 
   await check('continuation answer persists before next question', async context => {
@@ -261,8 +265,15 @@ try {
     assert(await page.locator('.setup-droplet').count() === 3,
       'question completion did not render exactly three liquid droplets');
     await page.waitForTimeout(1_100);
+    await page.locator('.in-run-setup[data-state="collapsed"]').waitFor();
+    assert(await page.locator('.setup-question-title').count() === 0,
+      'answering one optional question chained directly into the next one');
+    assert(await page.getByRole('button', { name: 'Make it more immersive', exact: true }).count() === 1,
+      'next optional question was not preserved behind the collapsed dock');
+
+    await page.getByRole('button', { name: 'Make it more immersive', exact: true }).click();
     const nextQuestion = (await page.locator('.setup-question-title').innerText()).trim();
-    assert(nextQuestion !== firstQuestion, 'next continuation question did not replace the completed one');
+    assert(nextQuestion !== firstQuestion, 'manual reopen did not advance to the next continuation question');
 
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2') || 'null'));
     assert(Array.isArray(stored?.profile?.onboardingCompleted)
@@ -280,7 +291,7 @@ try {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
     if (await page.locator('.in-run-setup[data-state="collapsed"]').count()) {
-      await page.getByRole('button', { name: /Finish your setup/i }).click();
+      await page.getByRole('button', { name: 'Make it more immersive', exact: true }).click();
     }
     const restoredQuestion = (await page.locator('.setup-question-title').innerText()).trim();
     assert(!/money coming in/i.test(restoredQuestion),
