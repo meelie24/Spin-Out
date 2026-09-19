@@ -7074,8 +7074,19 @@ body:has(.plain-page[data-editorial="ledger"]){
     min-height:92px;
     padding:16px 0;
   }
+  .plain-page[data-editorial="ledger"] .resource-list a::before{
+    grid-column:1;
+    grid-row:1;
+  }
   .plain-page[data-editorial="ledger"] .resource-list strong{
+    grid-column:2;
+    grid-row:1;
+    min-width:0;
     font-size:21px;
+  }
+  .plain-page[data-editorial="ledger"] .resource-list b{
+    grid-column:3;
+    grid-row:1;
   }
   .plain-page[data-editorial="ledger"] .resource-list span{
     grid-column:2 / 4;
@@ -7231,12 +7242,12 @@ body:has(.plain-page[data-editorial="ledger"]){
 @media(max-width:700px){
   .in-run-setup[data-state="expanded"] .setup-question-title,
   .in-run-setup[data-state="consuming"] .setup-question-title{
-    max-height:38px!important;
+    max-height:none!important;
     margin:1px 0 5px!important;
     font-size:18px!important;
-    line-height:1.02!important;
+    line-height:1.15!important;
     letter-spacing:-.025em!important;
-    overflow:hidden!important;
+    overflow:visible!important;
     text-wrap:balance;
   }
   .in-run-setup[data-state="expanded"] .setup-question-top,
@@ -7310,5 +7321,53 @@ body:has(.plain-page[data-editorial="ledger"]){
     min-width:44px!important;
     height:44px!important;
     min-height:44px!important;
+  }
+}
+
+/* Keep optional context within reach without covering the machine controls. */
+@media(max-width:900px){
+  .run-shell[data-environment="layered-casino"]:has(.in-run-setup){
+    padding-bottom:calc(158px + env(safe-area-inset-bottom));
+  }
+  .run-shell[data-environment="layered-casino"]:has(.in-run-setup[data-state="collapsed"]){
+    padding-bottom:calc(64px + env(safe-area-inset-bottom));
+  }
+  .run-shell[data-environment="layered-casino"] .in-run-setup{
+    position:fixed;
+    z-index:20;
+  }
+  .setup-not-now{
+    min-height:44px;
+  }
+}
+@media(max-width:700px){
+  .run-shell[data-environment="layered-casino"] .run-hud{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.65fr) minmax(0,.9fr) 44px;
+    gap:4px;
+  }
+  .run-shell[data-environment="layered-casino"] .run-hud>div{
+    min-width:0;
+    padding-left:4px;
+  }
+  .run-shell[data-environment="layered-casino"] .run-hud span{
+    font-size:9px;
+    letter-spacing:.025em;
+  }
+  .run-shell[data-environment="layered-casino"] .run-hud strong{
+    font-size:22px;
+    line-height:1.05;
+    overflow-wrap:anywhere;
+  }
+  .run-shell[data-environment="layered-casino"] .run-access strong{
+    font-size:12px!important;
+  }
+  .run-shell[data-environment="layered-casino"] .sound-button{
+    width:44px!important;
+    padding:0;
+    font-size:0;
+  }
+  .run-shell[data-environment="layered-casino"] .sound-button::after{
+    content:'♪';
+    font-size:16px;
   }
 }
