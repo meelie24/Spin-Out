@@ -5896,3 +5896,114 @@ body:has(.plain-page){
     font-size:48px!important;
   }
 }
+
+
+/* =========================================================
+   ACTIVE RUN ENVIRONMENT — no tiled wallpaper
+   ========================================================= */
+.run-shell[data-environment="layered-casino"]{
+  background:
+    radial-gradient(circle at 76% 15%,rgba(117,45,35,.18),transparent 27rem),
+    radial-gradient(circle at 12% 78%,rgba(82,35,30,.13),transparent 25rem),
+    linear-gradient(148deg,#0b0706 0%,#180d0b 48%,#0c0706 100%)!important;
+}
+.run-shell[data-environment="layered-casino"]:before{
+  content:"QUIT"!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:-3!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:flex-end!important;
+  padding:0 clamp(18px,7vw,90px) clamp(24px,7vh,70px) 0!important;
+  background-image:
+    url('/symbols/fu.svg'),
+    url('/symbols/seven.svg'),
+    url('/symbols/cash-coin.svg')!important;
+  background-repeat:no-repeat!important;
+  background-position:
+    5% 72%,
+    91% 53%,
+    21% 93%!important;
+  background-size:
+    clamp(120px,18vw,240px),
+    clamp(150px,23vw,310px),
+    clamp(120px,17vw,220px)!important;
+  color:#e4b66e!important;
+  font:800 clamp(190px,31vw,480px)/.7 var(--so-game)!important;
+  letter-spacing:-.07em!important;
+  text-align:right!important;
+  opacity:.075!important;
+  transform:none!important;
+  pointer-events:none!important;
+  filter:saturate(.85) drop-shadow(0 34px 40px rgba(0,0,0,.42))!important;
+}
+.run-shell[data-environment="layered-casino"]:after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:-2!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(102deg,rgba(0,0,0,.38),transparent 22% 77%,rgba(0,0,0,.36)),
+    linear-gradient(171deg,transparent 0 38%,rgba(218,170,101,.035) 38.2% 38.45%,transparent 38.7%),
+    linear-gradient(9deg,transparent 0 67%,rgba(218,170,101,.025) 67.2% 67.45%,transparent 67.7%),
+    radial-gradient(ellipse at center,transparent 0 42%,rgba(5,2,2,.58) 100%)!important;
+}
+.run-shell[data-environment="layered-casino"] .run-card:before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:clamp(120px,18vw,230px);
+  aspect-ratio:1;
+  left:-7%;
+  top:21%;
+  border:1px solid rgba(215,165,94,.07);
+  border-radius:50%;
+  box-shadow:
+    0 0 0 24px rgba(215,165,94,.018),
+    0 0 0 48px rgba(215,165,94,.012);
+  opacity:.72;
+  pointer-events:none;
+}
+.run-shell[data-environment="layered-casino"] .run-card:after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  right:-10%;
+  top:44%;
+  width:40%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(226,184,118,.13),transparent);
+  transform:rotate(-9deg);
+  box-shadow:0 42px 0 rgba(226,184,118,.055);
+  pointer-events:none;
+}
+@media(max-width:700px){
+  .run-shell[data-environment="layered-casino"]:before{
+    align-items:center!important;
+    justify-content:flex-end!important;
+    padding:170px -10px 0 0!important;
+    background-position:
+      -16% 77%,
+      110% 56%,
+      12% 94%!important;
+    background-size:
+      130px,
+      190px,
+      120px!important;
+    font-size:210px!important;
+    opacity:.07!important;
+  }
+  .run-shell[data-environment="layered-casino"]:after{
+    background:
+      linear-gradient(90deg,rgba(0,0,0,.32),transparent 18% 82%,rgba(0,0,0,.3)),
+      linear-gradient(168deg,transparent 0 45%,rgba(218,170,101,.035) 45.2% 45.5%,transparent 45.8%),
+      radial-gradient(ellipse at 50% 36%,transparent 0 36%,rgba(5,2,2,.57) 100%)!important;
+  }
+  .run-shell[data-environment="layered-casino"] .run-card:before{
+    width:150px;
+    left:-17%;
+    top:38%;
+  }
+}
