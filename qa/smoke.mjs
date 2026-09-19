@@ -278,6 +278,8 @@ try {
   await page.screenshot({ path: `${out}/run-390.png`, fullPage: true });
   await page.getByRole('button', { name: "I'm done" }).click();
   await page.getByText(/You left\./i).waitFor();
+  assert(await page.locator('.post-shell[data-material="quiet-lacquer"]').count() === 1,
+    'post-run flow is not using the reference-locked quiet-lacquer material');
   assert(await page.locator('.exit-receipt > div').count() === 4, 'Reality Receipt did not show the four core session facts');
   assert(await page.getByText('started', { exact: true }).isVisible(), 'Reality Receipt missing starting balance');
   assert(await page.getByText('ended', { exact: true }).isVisible(), 'Reality Receipt missing ending balance');
