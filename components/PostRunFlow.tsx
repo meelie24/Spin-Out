@@ -2,12 +2,14 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { PlusPanel } from './PlusPanel';
+import { PostRunContextQuestion } from './PostRunContextQuestion';
 import { classifyRealWorldOutcome, computeMoneyKept, formatMoney, recentExitAverageSeconds } from '@/lib/engine';
 import { currentMonthMoneyKept, loadData, totalMoneyKept, track, updateData } from '@/lib/storage';
-import type { RealityProfile, RunRecord } from '@/lib/types';
+import type { OnboardingQuestionKey, RealityProfile, RunRecord } from '@/lib/types';
 import type { RunEndData } from './RealityRun';
 import { syncProfileIfSignedIn, syncRunIfSignedIn } from '@/lib/sync';
 import { buildRealityReceipt } from '@/lib/realityEngine/receipt';
+import { nextPostRunContextQuestion } from '@/lib/contextQuestions';
 
 function formatTime(seconds: number | null) {
   if (seconds == null) return '—';
@@ -18,6 +20,15 @@ function average(values: number[]) {
   return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : null;
 }
 
+function daysUntil(date: string | null) {
+  if (!date) return null;
+  const target = new Date(date + 'T12:00:00');
+  if (Number.isNaN(target.getTime())) return null;
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  return Math.ceil((target.getTime() - today.getTime()) / 86_400_000);
+}
+
 export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile; end: RunEndData; onDone: () => void }) {
   const [initialRuns] = useState<RunRecord[]>(() => loadData().runs);
   const [stage, setStage] = useState<'exit-receipt'|'urge'|'urge-shift'|'outcome'|'amount'|'summary'>('exit-receipt');
@@ -25,7 +36,8 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
   const [actualWagerCents, setActualWagerCents] = useState(0);
   const [savedRuns, setSavedRuns] = useState<RunRecord[]>(initialRuns);
   const [plusOpen, setPlusOpen] = useState(false);
-  const [extraGoal, setExtraGoal] = useState<string | null>(profile.additionalMoneyGoal ?? null);
+  const [contextProfile, setContextProfile] = useState(profile);
+  const [postRunQuestionClosed, setPostRunQuestionClosed] = useState(false);
   const saved = useRef(false);
 
   const durationSeconds = Math.max(0, Math.round((end.endedAt - end.run.startedAt) / 1000));
@@ -123,6 +135,86 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
   const monthKept = useMemo(() => currentMonthMoneyKept(savedRuns), [savedRuns]);
   const allKept = useMemo(() => totalMoneyKept(savedRuns), [savedRuns]);
   const recentExit = useMemo(() => recentExitAverageSeconds(savedRuns), [savedRuns]);
+
+  const incomeDays = daysUntil(contextProfile.nextIncomeDate);
+  const financialPressure = contextProfile.availableUntilIncomeCents != null && (
+    contextProfile.availableUntilIncomeCents <= contextProfile.intendedWagerCents * 2
+    || (
+      contextProfile.obligationAmountCents != null
+      && contextProfile.availableUntilIncomeCents < contextProfile.obligationAmountCents + contextProfile.intendedWagerCents
+    )
+  );
+
+  const postRunQuestionKey = stage === 'summary' && !postRunQuestionClosed
+    ? nextPostRunContextQuestion(contextProfile, {
+        runCount: savedRuns.length,
+        moneyKeptCents: money.keptCents,
+        exitedAfterPing,
+        limitExceeded: limitExceededByRounds > 0 || limitExceededSeconds > 0,
+        financialPressure,
+        paydaySoon: incomeDays != null && incomeDays >= 0 && incomeDays <= 7,
+      })
+    : null;
+
+  const savePostRunContext = (
+    key: OnboardingQuestionKey,
+    value: string | number | boolean | null,
+  ) => {
+    const completed = new Set(contextProfile.onboardingCompleted ?? []);
+    completed.add(key);
+
+    let next: RealityProfile = {
+      ...contextProfile,
+      onboardingCompleted: Array.from(completed),
+    };
+
+    if (key === 'money-goal') {
+      next = { ...next, personalMoneyGoal: typeof value === 'string' ? value : null };
+    } else if (key === 'difficult-times') {
+      next = { ...next, difficultTimes: typeof value === 'string' ? [value as RealityProfile['difficultTimes'][number]] : [] };
+    } else if (key === 'quit-reason') {
+      next = {
+        ...next,
+        quitReason: typeof value === 'string' && value.trim() ? value.trim().slice(0, 180) : null,
+      };
+    } else if (key === 'payday-plan') {
+      next = {
+        ...next,
+        paydayPlanActions: typeof value === 'string'
+          ? [value as RealityProfile['paydayPlanActions'][number]]
+          : [],
+      };
+    } else if (key === 'lender-name') {
+      const name = typeof value === 'string' && value.trim() ? value.trim().slice(0, 40) : null;
+      if (!name) {
+        completed.add('lender-helped');
+        completed.add('lender-amount');
+      }
+      next = {
+        ...next,
+        recentLenderName: name,
+        recentLenderHelpedRecently: name ? next.recentLenderHelpedRecently : false,
+        recentLenderAmountCents: name ? next.recentLenderAmountCents : null,
+        onboardingCompleted: Array.from(completed),
+      };
+    } else if (key === 'lender-helped') {
+      const helped = value === true;
+      if (!helped) completed.add('lender-amount');
+      next = {
+        ...next,
+        recentLenderHelpedRecently: helped,
+        recentLenderAmountCents: helped ? next.recentLenderAmountCents : null,
+        onboardingCompleted: Array.from(completed),
+      };
+    } else if (key === 'lender-amount') {
+      next = { ...next, recentLenderAmountCents: typeof value === 'number' ? value : null };
+    }
+
+    const stored = updateData(data => ({ ...data, profile: next }));
+    setContextProfile(next);
+    setPostRunQuestionClosed(true);
+    void syncProfileIfSignedIn(stored.profile);
+  };
 
   const finishAndLeave = async () => {
     await fetch('/api/access/consume', {
@@ -244,25 +336,13 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
             <div className="exit-metric"><span>Recent exit average</span><strong>{formatTime(recentExit)}</strong></div>
           ) : null}
 
-          {savedRuns.length >= 3 && !extraGoal ? (
-            <div className="progressive-card">
-              <span>One more thing for next time</span>
-              <strong>Anything else you want this money available for?</strong>
-              <div className="progressive-choices">
-                {['Emergency fund','Family','Debt','Savings'].map(label => (
-                  <button key={label} type="button" onClick={() => {
-                    setExtraGoal(label);
-                    const next = updateData(data => ({
-                      ...data,
-                      profile: data.profile ? { ...data.profile, additionalMoneyGoal: label } : data.profile,
-                    }));
-                    void syncProfileIfSignedIn(next.profile);
-                  }}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          {postRunQuestionKey ? (
+            <PostRunContextQuestion
+              questionKey={postRunQuestionKey}
+              profile={contextProfile}
+              onAnswer={value => savePostRunContext(postRunQuestionKey, value)}
+              onNotNow={() => setPostRunQuestionClosed(true)}
+            />
           ) : null}
 
           <div className="summary-actions">
