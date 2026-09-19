@@ -317,6 +317,11 @@ try {
   await page.screenshot({ path: `${out}/transition-390.png`, fullPage: true });
   await page.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
+  assert(await page.locator('.run-shell[data-environment="layered-casino"]').count() === 1,
+    'active run fell back to the old wallpaper environment');
+  const runEnvironmentImage = await page.locator('.run-shell').evaluate(el => getComputedStyle(el, '::before').backgroundImage);
+  assert(!runEnvironmentImage.includes('repeating-'),
+    'active run environment still uses a repeating wallpaper pattern');
   await page.locator('.in-run-setup').waitFor({ timeout: 5000 });
   await page.waitForFunction(() => {
     const raw = localStorage.getItem('spinout.active.v2');
