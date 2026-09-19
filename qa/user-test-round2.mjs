@@ -127,7 +127,10 @@ async function startKnownGameRealityRun(page, game = 'slots') {
   assert(await visibleHook.count() === 1
     && /The more context you add, the more immersive your experience will be\./i.test(await visibleHook.innerText()),
     'pre-run explanation did not include the visible immersive-context hook');
-  await page.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
+  const startRun = page.getByRole('button', { name: 'Start Reality Run', exact: true });
+  await startRun.waitFor();
+  await page.waitForTimeout(80);
+  await startRun.click();
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
 }
 
