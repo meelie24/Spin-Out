@@ -7222,3 +7222,66 @@ body:has(.plain-page[data-editorial="ledger"]){
     margin-top:0!important;
   }
 }
+
+
+/* =========================================================
+   FINAL MOBILE LEGIBILITY + LONG-RUN DENSITY
+   Close the last visible deductions from the green render.
+   ========================================================= */
+@media(max-width:700px){
+  .in-run-setup[data-state="expanded"] .setup-question-title,
+  .in-run-setup[data-state="consuming"] .setup-question-title{
+    max-height:38px!important;
+    margin:1px 0 5px!important;
+    font-size:18px!important;
+    line-height:1.02!important;
+    letter-spacing:-.025em!important;
+    overflow:hidden!important;
+    text-wrap:balance;
+  }
+  .in-run-setup[data-state="expanded"] .setup-question-top,
+  .in-run-setup[data-state="consuming"] .setup-question-top{
+    min-height:39px!important;
+    align-items:start!important;
+  }
+
+  .reference-locked .game-tile small{
+    display:none!important;
+  }
+  .reference-locked .game-enter{
+    font-size:9px!important;
+    letter-spacing:.1em!important;
+    line-height:1.1!important;
+  }
+  .reference-locked .game-tile-eyebrow{
+    font-size:7.5px!important;
+    letter-spacing:.12em!important;
+  }
+}
+@media(max-width:340px){
+  .in-run-setup[data-state="expanded"] .setup-question-title,
+  .in-run-setup[data-state="consuming"] .setup-question-title{
+    font-size:17px!important;
+  }
+  .reference-locked .game-enter{
+    font-size:8.5px!important;
+  }
+}
+
+/* The Long Run stage sizes to its authored content instead of leaving a dead lower half. */
+.longrun-panel[data-material="long-run-stage"]{
+  top:50%!important;
+  bottom:auto!important;
+  min-height:0!important;
+  max-height:calc(100vh - 96px)!important;
+  transform:translate(-50%,-46%)!important;
+}
+@media(max-width:700px){
+  .longrun-panel[data-material="long-run-stage"]{
+    top:50%!important;
+    bottom:auto!important;
+    min-height:0!important;
+    max-height:calc(100vh - 76px)!important;
+    transform:translate(-50%,-47%)!important;
+  }
+}
