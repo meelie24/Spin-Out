@@ -36,6 +36,8 @@ const planOptions: Array<{ value: PaydayPlanAction; label: string }> = [
   { value:'use-gambling-block', label:'Use a gambling block' },
 ];
 
+type EditSection = 'obligation' | 'income' | 'goal' | 'difficult' | 'lender' | 'reason' | 'payday';
+
 function moneyValue(cents: number | null) {
   return cents == null ? '' : String(cents / 100);
 }
@@ -58,20 +60,29 @@ export function RealityContextPanel({
   onClose: () => void;
   onSaved: (profile: RealityProfile) => void;
 }) {
+  const [committed, setCommitted] = useState<RealityProfile | null>(profile);
   const [draft, setDraft] = useState<RealityProfile | null>(profile);
   const [amount, setAmount] = useState(profile ? moneyValue(profile.obligationAmountCents) : '');
   const [available, setAvailable] = useState(profile ? moneyValue(profile.availableUntilIncomeCents) : '');
   const [saved, setSaved] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [editingSection, setEditingSection] = useState<EditSection | null>(null);
   const dialogRef = useRef<HTMLElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     dialogRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    if (!editingSection) return;
+    window.setTimeout(() => {
+      editorRef.current?.querySelector<HTMLElement>('select,input,button')?.focus();
+    }, 0);
+  }, [editingSection]);
+
   const selectedPlans = useMemo(() => draft?.paydayPlanActions ?? [], [draft?.paydayPlanActions]);
 
-  if (!draft) {
+  if (!draft || !committed) {
     return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
       <section ref={dialogRef} tabIndex={-1} className="glass-dialog reality-context-dialog" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
         <p className="kicker">My reality</p>
@@ -109,32 +120,52 @@ export function RealityContextPanel({
       paydayPlanCustom: draft.paydayPlanCustom?.trim().slice(0, 120) || null,
       personalMoneyGoal: draft.personalMoneyGoal?.trim().slice(0, 100) || null,
       quitReason: draft.quitReason?.trim().slice(0, 160) || null,
+      recentLenderName: draft.recentLenderName?.trim().slice(0, 40) || null,
       financialContextUpdatedAt: new Date().toISOString(),
     };
-    updateData(data => ({ ...data, profile: next }));
-    void syncProfileIfSignedIn(next);
+
+    const stored = updateData(data => ({ ...data, profile: next }));
+    void syncProfileIfSignedIn(stored.profile);
+    setCommitted(next);
     setDraft(next);
     setAmount(moneyValue(next.obligationAmountCents));
     setAvailable(moneyValue(next.availableUntilIncomeCents));
     setSaved(true);
-    setEditing(false);
+    setEditingSection(null);
     onSaved(next);
     window.setTimeout(() => setSaved(false), 900);
   };
 
-  const clearLedger = () => {
-    setAmount('');
-    setAvailable('');
-    setDraft({
-      ...draft,
-      obligationType:'none',
-      obligationAmountCents:null,
-      obligationDueDate:null,
-      availableUntilIncomeCents:null,
-      nextIncomeDate:null,
-      personalMoneyGoal:null,
-      additionalMoneyGoal:null,
-    });
+  const cancelEdit = () => {
+    setDraft(committed);
+    setAmount(moneyValue(committed.obligationAmountCents));
+    setAvailable(moneyValue(committed.availableUntilIncomeCents));
+    setEditingSection(null);
+  };
+
+  const clearSection = (section: EditSection) => {
+    if (section === 'obligation') {
+      setAmount('');
+      setDraft({ ...draft, obligationType:'none', obligationAmountCents:null, obligationDueDate:null });
+    } else if (section === 'income') {
+      setAvailable('');
+      setDraft({ ...draft, availableUntilIncomeCents:null, nextIncomeDate:null });
+    } else if (section === 'goal') {
+      setDraft({ ...draft, personalMoneyGoal:null });
+    } else if (section === 'difficult') {
+      setDraft({ ...draft, difficultTimes:[], difficultTimeCustom:null });
+    } else if (section === 'lender') {
+      setDraft({
+        ...draft,
+        recentLenderName:null,
+        recentLenderHelpedRecently:false,
+        recentLenderAmountCents:null,
+      });
+    } else if (section === 'reason') {
+      setDraft({ ...draft, quitReason:null });
+    } else if (section === 'payday') {
+      setDraft({ ...draft, paydayPlanActions:[], paydayPlanCustom:null });
+    }
   };
 
   const obligationLabel = obligations.find(option => option.value === draft.obligationType)?.label ?? 'Not set';
@@ -158,64 +189,86 @@ export function RealityContextPanel({
     .map(value => planOptions.find(option => option.value === value)?.label ?? value)
     .join(' · ') || 'Not set';
 
+  const sectionTitle: Record<EditSection, string> = {
+    obligation: 'What this money is for',
+    income: 'Money coming in',
+    goal: 'What I’m trying to keep it for',
+    difficult: 'When gambling gets harder to ignore',
+    lender: 'Who I might call',
+    reason: 'What I’m trying to stop',
+    payday: 'Payday plan',
+  };
+
+  const summaryCard = (
+    section: EditSection,
+    label: string,
+    body: React.ReactNode,
+    extra?: React.ReactNode,
+  ) => (
+    <article>
+      <div className="context-summary-card-head">
+        <span>{label}</span>
+        <button
+          type="button"
+          className="context-card-edit"
+          aria-label={`Edit ${label.toLowerCase()}`}
+          onClick={() => setEditingSection(section)}
+        >Edit</button>
+      </div>
+      {body}
+      {extra}
+    </article>
+  );
+
   return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
     <section ref={dialogRef} tabIndex={-1} className="glass-dialog reality-context-dialog" role="dialog" aria-modal="true" aria-labelledby="reality-context-title" onMouseDown={e => e.stopPropagation()}>
       <div className="reality-context-head">
         <div>
           <p className="kicker">My reality</p>
-          <h2 id="reality-context-title">{editing ? 'Change what Spin Out keeps in mind.' : 'What Spin Out knows right now.'}</h2>
+          <h2 id="reality-context-title">{editingSection ? sectionTitle[editingSection] : 'What Spin Out knows right now.'}</h2>
         </div>
         <button className="bare-link" type="button" onClick={onClose}>Close</button>
       </div>
 
-      {!editing ? (
+      {!editingSection ? (
         <div className="reality-context-summary">
           <div className="context-summary-top">
-            <p>These are the details Spin Out can use when they actually matter.</p>
-            <button className="soft-button" type="button" onClick={() => setEditing(true)}>Edit</button>
+            <div>
+              <p>These are the details Spin Out can use when they actually matter.</p>
+              <small>Spin Out uses them to make Reality Runs more specific. You can change or clear them anytime.</small>
+            </div>
           </div>
 
           <div className="context-summary-grid">
-            <article>
-              <span>What this money is for</span>
-              <strong>{obligationLabel}</strong>
-              {draft.obligationType !== 'none' && draft.obligationAmountCents != null
-                ? <b className="context-summary-money">{moneyLabel(draft.obligationAmountCents)}</b>
-                : null}
-              <small>{moneyDue}</small>
-            </article>
-            <article>
-              <span>Money coming in</span>
-              <strong>{incomeSummary}</strong>
-            </article>
-            <article>
-              <span>What I’m trying to keep it for</span>
-              <strong>{draft.personalMoneyGoal?.trim() || 'Not set'}</strong>
-            </article>
-            <article>
-              <span>When gambling gets harder to ignore</span>
-              <strong>{difficultSummary}</strong>
-            </article>
-            <article>
-              <span>Who I might call</span>
-              <strong>{draft.recentLenderName?.trim() || 'Not set'}</strong>
-            </article>
-            <article>
-              <span>Payday plan</span>
-              <strong>{paydaySummary}</strong>
-            </article>
+            {summaryCard(
+              'obligation',
+              'What this money is for',
+              <strong>{obligationLabel}</strong>,
+              <>
+                {draft.obligationType !== 'none' && draft.obligationAmountCents != null
+                  ? <b className="context-summary-money">{moneyLabel(draft.obligationAmountCents)}</b>
+                  : null}
+                <small>{moneyDue}</small>
+              </>,
+            )}
+            {summaryCard('income', 'Money coming in', <strong>{incomeSummary}</strong>)}
+            {summaryCard('goal', 'What I’m trying to keep it for', <strong>{draft.personalMoneyGoal?.trim() || 'Not set'}</strong>)}
+            {summaryCard('difficult', 'When gambling gets harder to ignore', <strong>{difficultSummary}</strong>)}
+            {summaryCard('lender', 'Who I might call', <strong>{draft.recentLenderName?.trim() || 'Not set'}</strong>)}
+            {summaryCard('reason', 'What I’m trying to stop', <strong>{draft.quitReason?.trim() || 'Not set'}</strong>)}
+            {summaryCard('payday', 'Payday plan', <strong>{paydaySummary}</strong>)}
           </div>
 
           {saved ? <p className="context-saved-note" role="status">Saved.</p> : null}
         </div>
       ) : (
-        <div className="reality-context-editor">
-          <div className="context-edit-section">
-            <div className="context-edit-title">
-              <strong>Life Ledger</strong>
-              <button type="button" className="bare-link" onClick={clearLedger}>Clear</button>
-            </div>
+        <div ref={editorRef} className="context-focused-editor">
+          <div className="context-focused-title">
+            <span>{sectionTitle[editingSection]}</span>
+            <button type="button" className="bare-link" onClick={() => clearSection(editingSection)}>Clear</button>
+          </div>
 
+          {editingSection === 'obligation' ? <>
             <label>{"What's due next?"}
               <select value={draft.obligationType} onChange={e => setDraft({ ...draft, obligationType:e.target.value as ObligationType })}>
                 {obligations.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -230,7 +283,9 @@ export function RealityContextPanel({
                 <input type="date" value={draft.obligationDueDate ?? ''} onChange={e => setDraft({ ...draft, obligationDueDate:e.target.value || null })}/>
               </label>
             </div> : null}
+          </> : null}
 
+          {editingSection === 'income' ? (
             <div className="context-edit-pair">
               <label>Money until more comes in
                 <span className="context-money-input">$<input inputMode="decimal" value={available} onChange={e => setAvailable(e.target.value)} placeholder="850"/></span>
@@ -239,66 +294,63 @@ export function RealityContextPanel({
                 <input type="date" value={draft.nextIncomeDate ?? ''} onChange={e => setDraft({ ...draft, nextIncomeDate:e.target.value || null })}/>
               </label>
             </div>
+          ) : null}
 
+          {editingSection === 'goal' ? (
             <label>Something you want the money available for
               <input value={draft.personalMoneyGoal ?? ''} onChange={e => setDraft({ ...draft, personalMoneyGoal:e.target.value })} placeholder="Emergency fund"/>
             </label>
+          ) : null}
+
+          {editingSection === 'difficult' ? <>
+            <div className="context-chip-grid">
+              {difficultOptions.map(option => <button key={option.value} type="button" className={(draft.difficultTimes ?? []).includes(option.value) ? 'is-on' : ''} onClick={() => toggleDifficult(option.value)}>{option.label}</button>)}
+            </div>
+            <input value={draft.difficultTimeCustom ?? ''} onChange={e => setDraft({ ...draft, difficultTimeCustom:e.target.value })} placeholder="Something else" aria-label="Something else"/>
+          </> : null}
+
+          {editingSection === 'lender' ? <>
+            <label>If you came up short, who would you call?
+              <input
+                value={draft.recentLenderName ?? ''}
+                onChange={e => setDraft({ ...draft, recentLenderName:e.target.value.replace(/[^a-zA-Z '-]/g,'').slice(0,32) })}
+                placeholder="First name"
+              />
+            </label>
+
+            {draft.recentLenderName?.trim() ? <>
+              <div className="inline-choices">
+                <button type="button" className={draft.recentLenderHelpedRecently ? 'is-on' : ''} onClick={() => setDraft({ ...draft, recentLenderHelpedRecently:true })}>Helped recently</button>
+                <button type="button" className={!draft.recentLenderHelpedRecently ? 'is-on' : ''} onClick={() => setDraft({ ...draft, recentLenderHelpedRecently:false, recentLenderAmountCents:null })}>No</button>
+              </div>
+              {draft.recentLenderHelpedRecently ? <label>About how much?
+                <span className="context-money-input">$<input
+                  inputMode="decimal"
+                  value={moneyValue(draft.recentLenderAmountCents)}
+                  onChange={e => setDraft({ ...draft, recentLenderAmountCents:cents(e.target.value) })}
+                  placeholder="Optional"
+                /></span>
+              </label> : null}
+            </> : null}
+          </> : null}
+
+          {editingSection === 'reason' ? (
+            <label>Why are you trying to stop?
+              <input value={draft.quitReason ?? ''} onChange={e => setDraft({ ...draft, quitReason:e.target.value })} placeholder="Your words"/>
+            </label>
+          ) : null}
+
+          {editingSection === 'payday' ? <>
+            <div className="context-chip-grid">
+              {planOptions.map(option => <button key={option.value} type="button" className={selectedPlans.includes(option.value) ? 'is-on' : ''} onClick={() => togglePlan(option.value)}>{option.label}</button>)}
+            </div>
+            <input value={draft.paydayPlanCustom ?? ''} onChange={e => setDraft({ ...draft, paydayPlanCustom:e.target.value })} placeholder="My own plan" aria-label="My own plan"/>
+          </> : null}
+
+          <div className="context-focused-actions">
+            <button className="primary-button" type="button" onClick={save}>Save</button>
+            <button className="bare-link" type="button" onClick={cancelEdit}>Cancel</button>
           </div>
-
-          <details className="context-edit-details">
-            <summary>When does it usually get harder?<span>Optional</span></summary>
-            <div className="context-edit-details-body">
-              <div className="context-chip-grid">
-                {difficultOptions.map(option => <button key={option.value} type="button" className={(draft.difficultTimes ?? []).includes(option.value) ? 'is-on' : ''} onClick={() => toggleDifficult(option.value)}>{option.label}</button>)}
-              </div>
-              <input value={draft.difficultTimeCustom ?? ''} onChange={e => setDraft({ ...draft, difficultTimeCustom:e.target.value })} placeholder="Something else"/>
-            </div>
-          </details>
-
-          <details className="context-edit-details">
-            <summary>If payday gets hard<span>Pick up to 2</span></summary>
-            <div className="context-edit-details-body">
-              <div className="context-chip-grid">
-                {planOptions.map(option => <button key={option.value} type="button" className={selectedPlans.includes(option.value) ? 'is-on' : ''} onClick={() => togglePlan(option.value)}>{option.label}</button>)}
-              </div>
-              <input value={draft.paydayPlanCustom ?? ''} onChange={e => setDraft({ ...draft, paydayPlanCustom:e.target.value })} placeholder="My own plan"/>
-            </div>
-          </details>
-
-          <details className="context-edit-details">
-            <summary>More personal context<span>Optional</span></summary>
-            <div className="context-edit-details-body">
-              <label>If you came up short, who would you call?
-                <input
-                  value={draft.recentLenderName ?? ''}
-                  onChange={e => setDraft({ ...draft, recentLenderName:e.target.value.replace(/[^a-zA-Z '-]/g,'').slice(0,32) })}
-                  placeholder="First name"
-                />
-              </label>
-
-              {draft.recentLenderName?.trim() ? <>
-                <div className="inline-choices">
-                  <button type="button" className={draft.recentLenderHelpedRecently ? 'is-on' : ''} onClick={() => setDraft({ ...draft, recentLenderHelpedRecently:true })}>Helped recently</button>
-                  <button type="button" className={!draft.recentLenderHelpedRecently ? 'is-on' : ''} onClick={() => setDraft({ ...draft, recentLenderHelpedRecently:false, recentLenderAmountCents:null })}>No</button>
-                </div>
-                {draft.recentLenderHelpedRecently ? <label>About how much?
-                  <span className="context-money-input">$<input
-                    inputMode="decimal"
-                    value={moneyValue(draft.recentLenderAmountCents)}
-                    onChange={e => setDraft({ ...draft, recentLenderAmountCents:cents(e.target.value) })}
-                    placeholder="Optional"
-                  /></span>
-                </label> : null}
-              </> : null}
-
-              <label>Why are you trying to stop?
-                <input value={draft.quitReason ?? ''} onChange={e => setDraft({ ...draft, quitReason:e.target.value })} placeholder="Your words"/>
-              </label>
-            </div>
-          </details>
-
-          <button className="primary-button reality-context-save" type="button" onClick={save}>{saved ? 'Saved' : 'Save'}</button>
-          <button className="bare-link context-cancel-edit" type="button" onClick={() => setEditing(false)}>Cancel</button>
         </div>
       )}
     </section>
