@@ -298,6 +298,28 @@ try {
       'completed continuation question returned after active-run restore');
   });
 
+  await check('deeper context waits for a deliberate immersive reopen', async context => {
+    const completed = ['income-date','available-money','obligation-amount','obligation-date'];
+    const p = profile('slots', {
+      onboardingCompleted: completed,
+      quitReason: null,
+      personalMoneyGoal: null,
+      difficultTimes: [],
+      recentLenderName: null,
+      paydayPlanActions: [],
+    });
+    await seedActive(context, p, runFor(p));
+
+    const page = await context.newPage();
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.locator('.in-run-setup[data-state="collapsed"]').waitFor();
+    assert(await page.locator('.setup-question-title').count() === 0,
+      'deeper personal context auto-opened even though immediate money context was complete');
+    await page.getByRole('button', { name: 'Make it more immersive', exact: true }).click();
+    await page.getByRole('heading', { name: /What are you trying to stop from happening again/i }).waitFor();
+  });
+
   await check('foreground intervention collapses continuation setup', async context => {
     const p = profile('slots', {
       onboardingCompleted: [],
