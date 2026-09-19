@@ -9,5 +9,16 @@ const resources = [
   ['NCPG', 'U.S. help and state-by-state support information.', 'https://www.ncpgambling.org/help-treatment/help-by-state/'],
 ];
 export default function HelpPage() {
-  return <main className="plain-page help-page"><p className="kicker">Get help</p><h1>Put more distance between you and gambling.</h1><p className="lead">Blocking tools, self-exclusion and direct support can add another layer beyond Spin Out.</p><div className="resource-list">{resources.map(([name,desc,url])=><a key={name} href={url} target="_blank" rel="noreferrer"><strong>{name}</strong><span>{desc}</span><b aria-hidden="true">↗</b></a>)}</div><p className="research-limit">Services vary by country. Check the provider for local availability.</p><Link href="/" className="text-link">Back home</Link></main>;
+  return <main className="plain-page help-page" data-editorial="ledger">
+    <header className="plain-page-intro">
+      <p className="kicker">Get help</p>
+      <h1>Put more distance between you and gambling.</h1>
+      <p className="lead">Blocking tools, self-exclusion and direct support can add another layer beyond Spin Out.</p>
+    </header>
+    <div className="plain-page-body">
+      <div className="resource-list">{resources.map(([name,desc,url])=><a key={name} href={url} target="_blank" rel="noreferrer"><strong>{name}</strong><span>{desc}</span><b aria-hidden="true">↗</b></a>)}</div>
+      <p className="research-limit">Services vary by country. Check the provider for local availability.</p>
+      <Link href="/" className="text-link">Back home</Link>
+    </div>
+  </main>;
 }

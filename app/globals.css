@@ -6818,3 +6818,272 @@ body:has(.loading-page[data-material="casino-loading"])>.site-header nav{color:#
     font-size:37px;
   }
 }
+
+
+/* =========================================================
+   BRANDED EDITORIAL LEDGER — Help / Research / Privacy / Terms
+   ========================================================= */
+body:has(.plain-page[data-editorial="ledger"]){
+  background:#0b0605;
+}
+.plain-page[data-editorial="ledger"]{
+  width:min(1180px,calc(100% - 42px));
+  min-height:calc(100vh - 58px);
+  margin:0 auto;
+  padding:clamp(54px,7vh,86px) 0 100px;
+  display:grid;
+  grid-template-columns:minmax(280px,.72fr) minmax(0,1.28fr);
+  gap:clamp(50px,7vw,110px);
+  position:relative;
+  isolation:isolate;
+  color:#d9c3a7;
+}
+.plain-page[data-editorial="ledger"]::before{
+  content:"";
+  position:fixed;
+  z-index:-1;
+  inset:58px 0 0;
+  pointer-events:none;
+  background-image:
+    url('/symbols/fu.svg'),
+    url('/symbols/cash-coin.svg'),
+    url('/symbols/seven.svg');
+  background-repeat:no-repeat;
+  background-position:
+    calc(100% + 90px) 20%,
+    -80px 76%,
+    86% calc(100% + 120px);
+  background-size:
+    300px auto,
+    250px auto,
+    330px auto;
+  opacity:.045;
+  filter:sepia(.28) saturate(.72) brightness(.82);
+}
+.plain-page[data-editorial="ledger"]::after{
+  content:"QUIT";
+  position:fixed;
+  z-index:-2;
+  right:-7vw;
+  bottom:-7vh;
+  color:rgba(231,190,127,.023);
+  font:800 clamp(250px,36vw,590px)/.68 var(--so-display);
+  letter-spacing:-.075em;
+  transform:rotate(-7deg);
+  pointer-events:none;
+}
+.plain-page[data-editorial="ledger"] .plain-page-intro{
+  position:sticky;
+  top:88px;
+  align-self:start;
+  padding:0 0 28px;
+}
+.plain-page[data-editorial="ledger"] .plain-page-intro::after{
+  content:"";
+  display:block;
+  width:84px;
+  height:1px;
+  margin-top:28px;
+  background:linear-gradient(90deg,#b77c43,transparent);
+}
+.plain-page[data-editorial="ledger"] .plain-page-intro .kicker{
+  margin:0 0 16px;
+  color:#ae7c48;
+  font:700 8px/1 var(--so-ui);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+}
+.plain-page[data-editorial="ledger"] .plain-page-intro h1{
+  max-width:8.8ch;
+  margin:0;
+  color:#f0ddbd;
+  font:700 clamp(62px,7vw,98px)/.78 var(--so-display);
+  letter-spacing:-.04em;
+  text-transform:uppercase;
+  text-wrap:balance;
+}
+.plain-page[data-editorial="ledger"] .plain-page-intro .lead{
+  max-width:34ch;
+  margin:26px 0 0;
+  color:#9f8774;
+  font:500 15px/1.7 var(--so-ui);
+}
+.plain-page[data-editorial="ledger"] .plain-page-body{
+  min-width:0;
+  counter-reset:ledger;
+  border-top:1px solid rgba(229,188,123,.13);
+}
+.plain-page[data-editorial="ledger"] .plain-page-body>section{
+  counter-increment:ledger;
+  position:relative;
+  margin:0;
+  padding:31px 0 31px 66px;
+  border:0;
+  border-bottom:1px solid rgba(229,188,123,.1);
+}
+.plain-page[data-editorial="ledger"] .plain-page-body>section::before{
+  content:counter(ledger,decimal-leading-zero);
+  position:absolute;
+  left:1px;
+  top:34px;
+  color:#675344;
+  font:700 8px/1 var(--so-ui);
+  letter-spacing:.14em;
+}
+.plain-page[data-editorial="ledger"] .plain-page-body>section::after{
+  content:"";
+  position:absolute;
+  left:35px;
+  top:31px;
+  bottom:31px;
+  width:1px;
+  background:linear-gradient(#a9723e,rgba(169,114,62,0));
+  opacity:.42;
+}
+.plain-page[data-editorial="ledger"] .plain-page-body>section h2{
+  max-width:16ch;
+  margin:0 0 11px;
+  color:#dfc29a;
+  font:700 31px/.9 var(--so-display);
+  letter-spacing:-.025em;
+  text-transform:uppercase;
+}
+.plain-page[data-editorial="ledger"] .plain-page-body>section p{
+  max-width:61ch;
+  margin:0 0 12px;
+  color:#9a8270;
+  font:500 14px/1.7 var(--so-ui);
+}
+.plain-page[data-editorial="ledger"] .plain-page-body>section a{
+  display:inline-flex;
+  min-height:38px;
+  align-items:center;
+  color:#c79455;
+  font:650 11px/1.2 var(--so-ui);
+  text-decoration:none;
+  border-bottom:1px solid rgba(199,148,85,.42);
+}
+.plain-page[data-editorial="ledger"] .research-limit{
+  margin:30px 0 0;
+  padding:19px 22px 19px 25px;
+  border:1px solid rgba(199,108,79,.16);
+  border-left:3px solid #9c4a37;
+  border-radius:3px 16px 3px 12px;
+  background:
+    linear-gradient(100deg,rgba(113,37,35,.18),transparent 75%),
+    rgba(35,17,15,.54);
+  color:#a98b78;
+  font:500 12px/1.65 var(--so-ui);
+}
+.plain-page[data-editorial="ledger"] .text-link{
+  display:inline-flex;
+  min-height:44px;
+  align-items:center;
+  margin-top:22px;
+  color:#d1a15e;
+  font:650 11px/1 var(--so-ui);
+  text-decoration:none;
+  border-bottom:1px solid rgba(209,161,94,.36);
+}
+
+/* Help resources are one indexed ledger, not a stack of cards. */
+.plain-page[data-editorial="ledger"] .resource-list{
+  counter-reset:resource;
+  display:grid;
+  margin:0;
+  border:0;
+}
+.plain-page[data-editorial="ledger"] .resource-list a{
+  counter-increment:resource;
+  min-height:102px;
+  position:relative;
+  display:grid;
+  grid-template-columns:48px minmax(140px,.62fr) minmax(0,1fr) 24px;
+  gap:17px;
+  align-items:center;
+  padding:18px 0;
+  border:0;
+  border-bottom:1px solid rgba(229,188,123,.1);
+  color:inherit;
+  text-decoration:none;
+  transition:background .18s ease,padding .18s ease;
+}
+.plain-page[data-editorial="ledger"] .resource-list a::before{
+  content:counter(resource,decimal-leading-zero);
+  color:#655143;
+  font:700 8px/1 var(--so-ui);
+  letter-spacing:.13em;
+}
+.plain-page[data-editorial="ledger"] .resource-list a:hover{
+  padding-left:12px;
+  padding-right:10px;
+  background:linear-gradient(90deg,rgba(107,36,34,.13),transparent 82%);
+}
+.plain-page[data-editorial="ledger"] .resource-list strong{
+  color:#dfc29b;
+  font:700 22px/.95 var(--so-display);
+  letter-spacing:-.02em;
+  text-transform:uppercase;
+}
+.plain-page[data-editorial="ledger"] .resource-list span{
+  color:#89715f;
+  font:500 12px/1.55 var(--so-ui);
+}
+.plain-page[data-editorial="ledger"] .resource-list b{
+  justify-self:end;
+  color:#bf8849;
+  font:700 16px/1 var(--so-ui);
+}
+
+@media(max-width:820px){
+  .plain-page[data-editorial="ledger"]{
+    width:calc(100% - 28px);
+    display:block;
+    padding:48px 0 76px;
+  }
+  .plain-page[data-editorial="ledger"] .plain-page-intro{
+    position:relative;
+    top:auto;
+    padding-bottom:34px;
+  }
+  .plain-page[data-editorial="ledger"] .plain-page-intro h1{
+    max-width:9.4ch;
+    font-size:clamp(54px,15vw,78px);
+  }
+  .plain-page[data-editorial="ledger"] .plain-page-intro .lead{
+    max-width:38ch;
+    font-size:14px;
+  }
+  .plain-page[data-editorial="ledger"] .plain-page-body>section{
+    padding:27px 0 27px 48px;
+  }
+  .plain-page[data-editorial="ledger"] .plain-page-body>section::before{
+    top:30px;
+  }
+  .plain-page[data-editorial="ledger"] .plain-page-body>section::after{
+    left:28px;
+    top:27px;
+    bottom:27px;
+  }
+  .plain-page[data-editorial="ledger"] .plain-page-body>section h2{
+    font-size:28px;
+  }
+  .plain-page[data-editorial="ledger"] .resource-list a{
+    grid-template-columns:34px 1fr 22px;
+    gap:11px;
+    min-height:92px;
+    padding:16px 0;
+  }
+  .plain-page[data-editorial="ledger"] .resource-list strong{
+    font-size:21px;
+  }
+  .plain-page[data-editorial="ledger"] .resource-list span{
+    grid-column:2 / 4;
+    margin-top:-6px;
+  }
+  .plain-page[data-editorial="ledger"]::before{
+    background-size:190px auto,170px auto,230px auto;
+    background-position:calc(100% + 68px) 12%,-75px 70%,calc(100% + 98px) calc(100% + 60px);
+    opacity:.04;
+  }
+}
