@@ -740,7 +740,6 @@ export function RealityRun({
             : ping
               ? <RealityPing ping={ping} reducedMotion={reducedMotion} onDismiss={dismissPing} onExit={leaveFromPing}/>
               : null}
-          {longRun ? <LongRunExperience result={longRun} gameLabel={gameLabel} onClose={() => setLongRun(null)} /> : null}
           {!ping?.requiresChoice && interventionSurface !== 'xray' && !longRun ? <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button> : null}
         </div>
 
@@ -783,6 +782,7 @@ export function RealityRun({
         </div>
       </section>
       </div>
+      {longRun ? <LongRunExperience result={longRun} gameLabel={gameLabel} onClose={() => setLongRun(null)} /> : null}
     </main>
   );
 }

@@ -7176,3 +7176,49 @@ body:has(.plain-page[data-editorial="ledger"]){
     inset 1px 1px rgba(255,255,255,.65),
     inset -2px -3px rgba(70,31,19,.24);
 }
+
+
+/* Run 10,000 owns the run stage instead of being clipped by the casino frame. */
+.longrun-panel[data-material="long-run-stage"]{
+  position:fixed!important;
+  inset:auto!important;
+  left:50%!important;
+  top:72px!important;
+  bottom:14px!important;
+  width:min(840px,calc(100vw - 24px))!important;
+  max-height:none!important;
+  transform:translateX(-50%)!important;
+  z-index:120!important;
+  box-sizing:border-box;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  backdrop-filter:blur(16px) saturate(1.08);
+  -webkit-backdrop-filter:blur(16px) saturate(1.08);
+  box-shadow:
+    0 0 0 100vmax rgba(6,3,3,.58),
+    0 44px 120px rgba(0,0,0,.7),
+    inset 1px 1px rgba(255,255,255,.055)!important;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-stream{
+  flex:none!important;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-final{
+  display:grid;
+  align-content:start;
+}
+@media(max-width:700px){
+  .longrun-panel[data-material="long-run-stage"]{
+    top:64px!important;
+    bottom:8px!important;
+    width:calc(100vw - 12px)!important;
+    padding:18px 14px 16px!important;
+    border-radius:4px 26px 4px 16px!important;
+  }
+  .longrun-panel[data-material="long-run-stage"] .longrun-stream{
+    min-height:54px!important;
+    margin:14px 0 16px!important;
+  }
+  .longrun-panel[data-material="long-run-stage"] .longrun-net-pair{
+    margin-top:0!important;
+  }
+}
