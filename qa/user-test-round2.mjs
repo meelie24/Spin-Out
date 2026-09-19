@@ -1273,6 +1273,37 @@ await check('home and optional questions reflow when text is enlarged to 200 per
     '200% text is clipped: ' + JSON.stringify({ homeOverflow, setupOverflow, home, setup }));
 });
 
+
+await check('poker result remains legible above the table artwork', async context => {
+  const p = profile('poker');
+  await seedActive(context, p, runFor(p));
+  const page = await context.newPage();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+  await completeOneObservedPlay(page);
+  const capture = await page.locator('.phaser-stage canvas').screenshot();
+  const visibleTextPixels = await page.evaluate(async source => {
+    const image = new Image();
+    image.src = source;
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width; canvas.height = image.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0);
+    const pixels = ctx.getImageData(0, 0, image.width, image.height).data;
+    let visible = 0;
+    for (let y = Math.floor(image.height * .8); y < image.height * .89; y++) {
+      for (let x = Math.floor(image.width * .25); x < image.width * .75; x++) {
+        const i = (y * image.width + x) * 4;
+        if (pixels[i] > 175 && pixels[i + 1] > 135 && pixels[i + 2] > 110) visible++;
+      }
+    }
+    return visible;
+  }, 'data:image/png;base64,' + capture.toString('base64'));
+  assert(visibleTextPixels >= 40, 'poker result is obscured by table artwork: ' + visibleTextPixels + ' visible text pixels');
+});
+
   if (failures.length) {
     throw new Error('Round 2 user-test failures:\n- ' + failures.join('\n- '));
   }

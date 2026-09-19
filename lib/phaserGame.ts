@@ -97,10 +97,10 @@ export async function mountRealityGame(
         fontFamily: uiFont, fontSize: '23px', fontStyle: '600', color: '#fff7e8'
       }).setOrigin(.5).setVisible(false);
       // Balance and controls are readable HTML in the HUD; the canvas owns the game.
-      this.resultPlate = this.add.rectangle(500, 542, 850, 62, 0x13100d, .92).setAlpha(0);
+      this.resultPlate = this.add.rectangle(500, 542, 850, 62, 0x13100d, .92).setDepth(100).setAlpha(0);
       this.resultText = this.add.text(500, 540, '', {
         fontFamily: uiFont, fontSize: '48px', fontStyle: '600', color: '#ead4ad', align: 'center'
-      }).setOrigin(.5).setAlpha(0);
+      }).setOrigin(.5).setDepth(101).setAlpha(0);
 
       switch (options.gameType) {
         case 'sports': this.createSports(); break;

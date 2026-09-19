@@ -7609,3 +7609,20 @@ body:has(.plain-page[data-editorial="ledger"]){
 .scratch-result-grid span:nth-child(n+4){border-top:1px solid #c5a67626;}
 .scratch-result-grid span:not(:nth-child(3n)){border-right:1px solid #c5a67626;}
 @media(max-width:340px){.scratch-result-grid{font-size:14px;margin-inline:10px;}}
+
+/* Keep enlarged HUD text in its own field and protect mobile Sportsbook titles over pale artwork. */
+@media(max-width:700px){
+  .run-shell[data-environment="layered-casino"] .run-hud{
+    display:flex;flex-wrap:wrap;height:auto;min-height:70px;gap:8px 4px;padding-block:8px;
+  }
+  .run-shell[data-environment="layered-casino"] .run-hud>div{
+    flex:1 0 max-content;min-width:max-content;
+  }
+  .run-shell[data-environment="layered-casino"] .run-hud span{white-space:nowrap;}
+  .run-shell[data-environment="layered-casino"] .run-hud .sound-button{flex:0 0 44px;}
+}
+@media(max-width:900px){
+  .reference-locked .game-sports::after{
+    background:linear-gradient(180deg,rgba(12,7,5,.62),rgba(12,7,5,.72) 58%,#0c0705);
+  }
+}
