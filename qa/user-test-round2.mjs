@@ -482,6 +482,30 @@ try {
     await page.getByRole('heading', { name: /About how much did they have to cover/i }).waitFor();
   });
 
+  await check('mobile home makes game choice the dominant compact task', async context => {
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(base, { waitUntil: 'domcontentloaded' });
+    await page.locator('.home-game-card').first().waitFor();
+
+    assert(await page.locator('.home-game-card').count() === 6,
+      'mobile homepage did not keep all six games discoverable');
+
+    const columns = await page.locator('.home-game-grid').first().evaluate(el =>
+      getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length
+    );
+    assert(columns === 2, `mobile game grid used ${columns} columns instead of a compact two-column layout`);
+
+    const visibleDescriptions = await page.locator('.home-game-card .game-card-copy > p').evaluateAll(nodes =>
+      nodes.filter(node => getComputedStyle(node).display !== 'none').length
+    );
+    assert(visibleDescriptions === 0,
+      'mobile game cards still showed full descriptive paragraphs');
+
+    assert(await page.locator('.games-mid-prompt:visible, .prompt-bottom:visible').count() === 0,
+      'secondary homepage prompts still interrupted the six-game mobile scan');
+  });
+
   await check('same-visit home prompt dismissal', async context => {
     const page = await context.newPage();
     await page.goto(base, { waitUntil: 'domcontentloaded' });
@@ -504,6 +528,32 @@ try {
     await page.getByRole('button', { name: 'Run 10,000' }).click();
     await page.locator('.longrun-panel').waitFor();
     await assertFocusInside(page, '.longrun-panel', 'Run 10,000');
+  });
+
+  await check('Run 10,000 keeps secondary numbers behind an explicit reveal', async context => {
+    const p = profile('slots');
+    await seedActive(context, p, runFor(p, { actionCount: 2, balanceCents: 8_000 }));
+    const page = await context.newPage();
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.getByRole('button', { name: 'Run 10,000' }).click();
+    await page.locator('.longrun-final').waitFor();
+
+    assert(await page.getByText('This 10,000-run sample', { exact: true }).count() === 1,
+      'Run 10,000 lost the sample label');
+    assert(await page.getByText('Model expectation', { exact: true }).count() === 1,
+      'Run 10,000 lost the model expectation label');
+    assert(await page.getByRole('button', { name: 'See the numbers', exact: true }).count() === 1,
+      'Run 10,000 did not offer an explicit secondary-details reveal');
+    assert(await page.locator('.longrun-stats:visible').count() === 0,
+      'secondary Run 10,000 stats competed with the primary comparison before reveal');
+
+    await page.getByRole('button', { name: 'See the numbers', exact: true }).click();
+    assert(await page.locator('.longrun-stats:visible').count() === 1,
+      'Run 10,000 secondary stats did not appear after explicit reveal');
+    assert(await page.getByRole('button', { name: 'Hide the numbers', exact: true }).count() === 1,
+      'Run 10,000 reveal did not become a reversible Hide the numbers action');
   });
 
   await check('Run 10,000 neutral progression copy', async context => {
@@ -575,6 +625,37 @@ try {
     await assertFocusInside(page, '.xray-moment', 'X-Ray');
   });
 
+  await check('My Reality opens as a summary before edit controls', async context => {
+    const p = profile('slots');
+    await context.addInitScript(({ profile }) => {
+      localStorage.setItem('spinout.v2', JSON.stringify({
+        version: 2,
+        profile,
+        runs: [],
+        pingLearning: {},
+        events: [],
+        account: {},
+      }));
+    }, { profile: p });
+    const page = await context.newPage();
+    await page.goto(base, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: 'My reality' }).first().click();
+    await page.locator('.reality-context-dialog').waitFor();
+
+    assert(await page.locator('.reality-context-summary').count() === 1,
+      'My Reality did not open in summary mode');
+    assert(await page.getByText(/Car payment/i).count() >= 1,
+      'My Reality summary did not expose the current obligation');
+    assert(await page.getByText('$430', { exact: true }).count() >= 1,
+      'My Reality summary did not expose the current obligation amount');
+    assert(await page.locator('.reality-context-dialog input:visible, .reality-context-dialog select:visible').count() === 0,
+      'My Reality exposed edit fields before the user chose to edit');
+
+    await page.getByRole('button', { name: 'Edit', exact: true }).click();
+    assert(await page.locator('.reality-context-dialog input:visible, .reality-context-dialog select:visible').count() > 0,
+      'My Reality Edit action did not reveal the existing controls');
+  });
+
   await check('My Reality focus', async context => {
     const p = profile('slots');
     await context.addInitScript(({ profile }) => {
@@ -611,6 +692,10 @@ try {
     const summary = await page.locator('.post-card').innerText();
     assert(!/\bPROTECTED\b/.test(summary), 'post-run summary overclaimed that self-reported money was protected');
     assert(/\bAVAILABLE\b/i.test(summary), 'post-run summary did not use truthful availability language');
+    assert(await page.getByRole('button', { name: 'Back home', exact: true }).count() === 1,
+      'post-run summary did not expose a literal Back home destination');
+    assert(await page.getByRole('button', { name: 'Done', exact: true }).count() === 0,
+      'ambiguous Done action remained on the post-run summary');
   });
 
   if (failures.length) {
