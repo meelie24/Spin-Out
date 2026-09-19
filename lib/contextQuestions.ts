@@ -91,7 +91,58 @@ export function getManualContextKeys(profile: RealityProfile) {
   });
 }
 
-export function nextPostRunContextQuestion(profile: RealityProfile): OnboardingQuestionKey | null {
+export interface PostRunContextSignals {
+  runCount: number;
+  moneyKeptCents: number;
+  exitedAfterPing: boolean;
+  limitExceeded: boolean;
+  financialPressure: boolean;
+  paydaySoon: boolean;
+}
+
+export function nextPostRunContextQuestion(
+  profile: RealityProfile,
+  context: PostRunContextSignals,
+): OnboardingQuestionKey | null {
   const completed = completedContextKeys(profile);
-  return completed.has('money-goal') ? null : 'money-goal';
+
+  if (!completed.has('money-goal') && context.moneyKeptCents > 0) {
+    return 'money-goal';
+  }
+
+  if (!completed.has('quit-reason') && (context.exitedAfterPing || context.limitExceeded)) {
+    return 'quit-reason';
+  }
+
+  if (!completed.has('difficult-times') && context.runCount >= 2) {
+    return 'difficult-times';
+  }
+
+  if (!completed.has('quit-reason') && context.runCount >= 3) {
+    return 'quit-reason';
+  }
+
+  if (!completed.has('payday-plan') && context.runCount >= 2 && context.paydaySoon) {
+    return 'payday-plan';
+  }
+
+  if (!context.financialPressure || context.runCount < 3) return null;
+
+  if (!completed.has('lender-name')) {
+    return 'lender-name';
+  }
+
+  if (profile.recentLenderName?.trim() && !completed.has('lender-helped')) {
+    return 'lender-helped';
+  }
+
+  if (
+    profile.recentLenderName?.trim()
+    && profile.recentLenderHelpedRecently
+    && !completed.has('lender-amount')
+  ) {
+    return 'lender-amount';
+  }
+
+  return null;
 }
