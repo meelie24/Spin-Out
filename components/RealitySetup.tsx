@@ -217,7 +217,8 @@ export function RealitySetup({
         </> : null}
 
         {step === 'obligation' ? <>
-          <h1>{"Realistically, what is this money for? If it's not for anything, what could it be put towards to make the next 1-3 months easier for you?"}</h1>
+          <h1>Realistically, what is this money for?</h1>
+          <p className="setup-question-support">{"If it's not for anything, what could it be put towards to make the next 1-3 months easier for you?"}</p>
           <div className="obligation-grid">
             {obligations.map(choice => chip(choice.value, choice.label, () => setObligation(choice.value)))}
           </div>

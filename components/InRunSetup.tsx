@@ -23,7 +23,6 @@ interface SetupQuestion {
   options?: ChoiceOption[];
   placeholder?: string;
   skipLabel?: string;
-  scroll?: boolean;
 }
 
 const financialKeys: OnboardingQuestionKey[] = [
@@ -132,7 +131,6 @@ function pendingQuestions(profile: RealityProfile): SetupQuestion[] {
       { value: 'pick-date', label: 'Pick a date' },
       { value: 'not-sure', label: 'Not sure' },
     ],
-    scroll: true,
   });
 
   push({
@@ -163,8 +161,7 @@ function pendingQuestions(profile: RealityProfile): SetupQuestion[] {
         { value: 'pick-date', label: 'Pick a date' },
         { value: 'not-sure', label: 'Not sure' },
       ],
-      scroll: true,
-    });
+      });
   }
 
   push({
@@ -172,7 +169,7 @@ function pendingQuestions(profile: RealityProfile): SetupQuestion[] {
     title: 'What are you trying to stop from happening again?',
     kind: 'text',
     placeholder: 'A few words is enough',
-    skipLabel: 'Skip',
+    skipLabel: 'Not sure',
   });
 
   push({
@@ -187,7 +184,6 @@ function pendingQuestions(profile: RealityProfile): SetupQuestion[] {
       { value: 'Something else', label: 'Something else' },
       { value: 'skip', label: 'Not sure' },
     ],
-    scroll: true,
   });
 
   push({
@@ -195,7 +191,6 @@ function pendingQuestions(profile: RealityProfile): SetupQuestion[] {
     title: 'When does gambling usually get harder to ignore?',
     kind: 'choices',
     options: difficultOptions,
-    scroll: true,
   });
 
   push({
@@ -233,7 +228,6 @@ function pendingQuestions(profile: RealityProfile): SetupQuestion[] {
     title: 'When payday hits, what would help keep the money where you want it?',
     kind: 'choices',
     options: paydayOptions,
-    scroll: true,
   });
 
   return questions;
@@ -262,13 +256,11 @@ export function InRunSetup({
   const [customDate, setCustomDate] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [showComplete, setShowComplete] = useState(false);
   const timerRef = useRef<number | null>(null);
-  const completionTimerRef = useRef<number | null>(null);
   const [openAtSignal, setOpenAtSignal] = useState(collapseSignal);
+  const [choicePager, setChoicePager] = useState<{ key: OnboardingQuestionKey | null; page: number }>({ key: null, page: 0 });
 
   const current = consumingQuestion ?? questions[0] ?? null;
-  const remaining = questions.length;
   const forcedCollapsed = foregroundOpen || collapseSignal > openAtSignal;
   const effectiveExpanded = expanded && !forcedCollapsed;
 
@@ -282,7 +274,6 @@ export function InRunSetup({
 
   useEffect(() => () => {
     if (timerRef.current != null) window.clearTimeout(timerRef.current);
-    if (completionTimerRef.current != null) window.clearTimeout(completionTimerRef.current);
   }, []);
 
   const complete = (question: SetupQuestion, value: string | number | boolean | null) => {
@@ -346,19 +337,12 @@ export function InRunSetup({
     onProfileChange(next);
 
     const duration = reducedMotion ? 130 : 960;
-    const finishesSetup = pendingQuestions(next).length === 0;
     timerRef.current = window.setTimeout(() => {
       setConsuming(false);
       setConsumingQuestion(null);
       setCustomDate(false);
       setInputValue('');
-      if (finishesSetup) {
-        setShowComplete(true);
-        completionTimerRef.current = window.setTimeout(
-          () => setShowComplete(false),
-          reducedMotion ? 250 : 1_200,
-        );
-      }
+      setChoicePager({ key: null, page: 0 });
     }, duration);
   };
 
@@ -375,15 +359,64 @@ export function InRunSetup({
     else complete(current, null);
   };
 
-  if (!current) {
-    if (!showComplete) return null;
+  const answerChoice = (option: ChoiceOption) => {
+    if (!current) return;
+    if (current.kind === 'yes-no') complete(current, option.value === 'yes');
+    else if (current.key === 'difficult-times') complete(current, option.value as DifficultTime);
+    else if (current.key === 'payday-plan') complete(current, option.value === 'skip' ? null : option.value);
+    else complete(current, option.value);
+  };
+
+  const currentChoicePage = current && choicePager.key === current.key ? choicePager.page : 0;
+
+  const pagedOptions = (options: ChoiceOption[]) => {
+    if (options.length <= 4) {
+      return { visible: options, canBack: false, canMore: false };
+    }
+
+    if (currentChoicePage === 0) {
+      return { visible: options.slice(0, 3), canBack: false, canMore: true };
+    }
+
+    const start = 3 + (currentChoicePage - 1) * 2;
+    const remainingOptions = options.length - start;
+    const canMore = remainingOptions > 3;
+    return {
+      visible: options.slice(start, start + (canMore ? 2 : 3)),
+      canBack: true,
+      canMore,
+    };
+  };
+
+  const renderChoicePage = (
+    options: ChoiceOption[],
+    onSelect: (option: ChoiceOption) => void,
+  ) => {
+    const page = pagedOptions(options);
     return (
-      <aside className="in-run-setup setup-complete" data-state="collapsed" aria-live="polite">
-        <span>Setup finished</span>
-        <strong>You’re all set.</strong>
-      </aside>
+      <div className="setup-choice-row is-paged">
+        {page.canBack ? (
+          <button
+            type="button"
+            className="setup-page-control"
+            onClick={() => setChoicePager({ key: current?.key ?? null, page: Math.max(0, currentChoicePage - 1) })}
+          >Back</button>
+        ) : null}
+        {page.visible.map(option => (
+          <button type="button" key={option.value} onClick={() => onSelect(option)}>{option.label}</button>
+        ))}
+        {page.canMore ? (
+          <button
+            type="button"
+            className="setup-page-control"
+            onClick={() => setChoicePager({ key: current?.key ?? null, page: currentChoicePage + 1 })}
+          >More</button>
+        ) : null}
+      </div>
     );
-  }
+  };
+
+  if (!current) return null;
 
   const state = forcedCollapsed ? 'collapsed' : consuming ? 'consuming' : effectiveExpanded ? 'expanded' : 'collapsed';
 
@@ -393,14 +426,13 @@ export function InRunSetup({
         <button
           type="button"
           className="setup-rail"
-          aria-label={`Finish your setup, ${remaining} left`}
+          aria-label="Make it more immersive"
           onClick={() => {
             setOpenAtSignal(collapseSignal);
             setExpanded(true);
           }}
         >
-          <span>Finish your setup</span>
-          <small>{remaining} left</small>
+          <span>Make it more immersive</span>
           <b aria-hidden="true">↑</b>
         </button>
       </aside>
@@ -412,22 +444,18 @@ export function InRunSetup({
       className="in-run-setup"
       data-state={state}
       data-reduced-motion={reducedMotion ? 'true' : 'false'}
-      aria-label="Finish your setup"
+      aria-label="Make it more immersive"
     >
       <div className={`setup-question ${consuming ? 'is-consuming' : ''}`}>
-        <div className="setup-question-head">
-          <span>Finish your setup</span>
-          <small>{remaining} left</small>
+        <div className="setup-question-top">
+          <h2 className="setup-question-title">{current.title}</h2>
           <button
             type="button"
-            className="setup-collapse"
-            aria-label="Collapse finish your setup"
+            className="setup-not-now"
             onClick={() => setExpanded(false)}
             disabled={consuming}
-          >⌄</button>
+          >Not now</button>
         </div>
-
-        <h2 className="setup-question-title">{current.title}</h2>
 
         {current.kind === 'date' ? (
           customDate ? (
@@ -443,13 +471,7 @@ export function InRunSetup({
               <button type="submit">Use</button>
               <button type="button" className="setup-quiet" onClick={() => setCustomDate(false)}>Back</button>
             </form>
-          ) : (
-            <div className="setup-choice-row is-scroll">
-              {current.options?.map(option => (
-                <button type="button" key={option.value} onClick={() => answerDate(option.value)}>{option.label}</button>
-              ))}
-            </div>
-          )
+          ) : renderChoicePage(current.options ?? [], option => answerDate(option.value))
         ) : null}
 
         {current.kind === 'money' ? (
@@ -494,24 +516,9 @@ export function InRunSetup({
           </form>
         ) : null}
 
-        {current.kind === 'choices' || current.kind === 'yes-no' ? (
-          <div className={`setup-choice-row ${current.scroll ? 'is-scroll' : ''}`}>
-            {current.options?.map(option => (
-              <button
-                type="button"
-                key={option.value}
-                onClick={() => {
-                  if (current.kind === 'yes-no') complete(current, option.value === 'yes');
-                  else if (current.key === 'difficult-times') complete(current, option.value as DifficultTime);
-                  else if (current.key === 'payday-plan') complete(current, option.value === 'skip' ? null : option.value);
-                  else complete(current, option.value);
-                }}
-              >{option.label}</button>
-            ))}
-          </div>
-        ) : null}
-
-        {current.kind === 'yes-no' ? null : null}
+        {current.kind === 'choices' || current.kind === 'yes-no'
+          ? renderChoicePage(current.options ?? [], answerChoice)
+          : null}
       </div>
 
       {consuming ? (

@@ -82,7 +82,7 @@ export function AuthControl() {
         {status ? <p role="status" className="provider-note">{status}</p> : null}
         <div className="modal-actions">
           <button className="soft-button" type="button" onClick={closeDialog}>Cancel</button>
-          <button className="primary-button" type="button" disabled={!email.includes('@')} onClick={signIn}>Email sign-in link</button>
+          <button className="primary-button" type="button" disabled={!email.includes('@')} onClick={signIn}>Send me the link</button>
         </div>
       </section>
     </div> : null}
