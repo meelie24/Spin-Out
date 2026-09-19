@@ -121,9 +121,9 @@ async function startKnownGameRealityRun(page, game = 'slots') {
   await finishKnownGameCoreSetup(page, game);
   assert(await page.locator('.deposit-terminal').count() === 0,
     'old deposit gate appeared after the five core questions');
-  const mobileHook = page.locator('.run-intro-dialog .intro-copy-mobile');
-  assert(await mobileHook.isVisible()
-    && /The more context you add, the more immersive your experience will be\./i.test(await mobileHook.innerText()),
+  const visibleHook = page.locator('.run-intro-dialog .intro-copy-mobile:visible, .run-intro-dialog .intro-copy-desktop:visible');
+  assert(await visibleHook.count() === 1
+    && /The more context you add, the more immersive your experience will be\./i.test(await visibleHook.innerText()),
     'pre-run explanation did not include the visible immersive-context hook');
   await page.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
