@@ -81,6 +81,7 @@ export async function mountRealityGame(
     constructor() { super('RealityScene'); }
 
     preload() {
+      this.load.image('room-scene', `/game-art/${options.gameType}-scene.webp`);
       if (options.gameType === 'slots' || options.gameType === 'other') {
         for (const symbol of SYMBOLS) this.load.svg(symbol, `/symbols/${symbol}.svg`, { width: 180, height: 180 });
       }
@@ -92,11 +93,10 @@ export async function mountRealityGame(
       this.outcomeGlow = this.add.rectangle(500, 315, 850, 400, 0xd4aa67, 0).setBlendMode(Phaser.BlendModes.ADD);
       this.balanceText = this.add.text(500, 65, money(options.initialBalanceCents), {
         fontFamily: uiFont, fontSize: '23px', fontStyle: '600', color: '#fff7e8'
-      }).setOrigin(.5);
-      this.add.text(500, 41, 'BALANCE', { fontFamily: uiFont, fontSize: '10px', color: '#bcae99', letterSpacing: 2 }).setOrigin(.5);
-      this.add.text(500, 595, 'SIMULATION', { fontFamily: uiFont, fontSize: '10px', color: '#907f6e', letterSpacing: 1.5 }).setOrigin(.5);
+      }).setOrigin(.5).setVisible(false);
+      // Balance and controls are readable HTML in the HUD; the canvas owns the game.
       this.resultText = this.add.text(500, 540, '', {
-        fontFamily: uiFont, fontSize: '20px', fontStyle: '600', color: '#ead4ad', align: 'center'
+        fontFamily: uiFont, fontSize: '32px', fontStyle: '600', color: '#ead4ad', align: 'center'
       }).setOrigin(.5).setAlpha(0);
 
       switch (options.gameType) {
@@ -117,6 +117,23 @@ export async function mountRealityGame(
     private drawRoom(P: PhaserModule) {
       const g = this.add.graphics();
       g.fillStyle(0x0b0706, 1).fillRect(0, 0, 1000, 640);
+      this.add.image(500, 320, 'room-scene').setDisplaySize(1000, 1000).setAlpha(.34);
+
+      if (options.gameType !== 'slots' && options.gameType !== 'other') {
+        const stage = this.add.graphics();
+        if (options.gameType === 'sports') {
+          stage.fillStyle(0x0c1715, .68).fillRect(0, 0, 1000, 640);
+          stage.lineStyle(2, 0xd8ba7a, .26).lineBetween(74, 100, 926, 100);
+          stage.lineStyle(1, 0xa0c5af, .18).lineBetween(74, 522, 926, 522);
+        } else if (options.gameType === 'lottery') {
+          stage.fillStyle(0x432719, .46).fillRect(0, 0, 1000, 640);
+        } else {
+          stage.fillStyle(0x0c251d, .7).fillEllipse(500, 330, 1120, 760);
+          stage.lineStyle(12, 0x5e3927, .85).strokeEllipse(500, 330, 1100, 690);
+          stage.lineStyle(2, 0xd3af73, .35).strokeEllipse(500, 330, 1068, 657);
+        }
+        return;
+      }
 
       // Deep lacquer room with non-repeating environmental depth.
       g.fillStyle(0x21110e, 1).fillRoundedRect(42, 74, 916, 494, 34);

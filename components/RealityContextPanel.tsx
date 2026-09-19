@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { syncProfileIfSignedIn } from '@/lib/sync';
 import { updateData } from '@/lib/storage';
+import { useModalFocus } from '@/lib/useModalFocus';
 import type { DifficultTime, ObligationType, PaydayPlanAction, RealityProfile } from '@/lib/types';
 
 const obligations: Array<{ value: ObligationType; label: string }> = [
@@ -47,7 +48,9 @@ function moneyLabel(cents: number | null) {
 }
 
 function cents(value: string) {
-  const parsed = Number(value.replace(/[^0-9.]/g,''));
+  const numeric = value.replace(/[^0-9.]/g,'');
+  if (!numeric) return null;
+  const parsed = Number(numeric);
   return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed * 100) : null;
 }
 
@@ -69,15 +72,17 @@ export function RealityContextPanel({
   const dialogRef = useRef<HTMLElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    dialogRef.current?.focus();
-  }, []);
+  useModalFocus(dialogRef, onClose);
 
   useEffect(() => {
-    if (!editingSection) return;
-    window.setTimeout(() => {
-      editorRef.current?.querySelector<HTMLElement>('select,input,button')?.focus();
+    const timer = window.setTimeout(() => {
+      if (editingSection) {
+        editorRef.current?.querySelector<HTMLElement>('select,input,button')?.focus();
+      } else {
+        dialogRef.current?.focus();
+      }
     }, 0);
+    return () => window.clearTimeout(timer);
   }, [editingSection]);
 
   const selectedPlans = useMemo(() => draft?.paydayPlanActions ?? [], [draft?.paydayPlanActions]);
@@ -110,19 +115,43 @@ export function RealityContextPanel({
   };
 
   const save = () => {
-    const next: RealityProfile = {
-      ...draft,
-      obligationAmountCents: draft.obligationType === 'none' ? null : cents(amount),
-      availableUntilIncomeCents: cents(available),
-      difficultTimes: (draft.difficultTimes ?? []).slice(0, 8),
-      paydayPlanActions: (draft.paydayPlanActions ?? []).slice(0, 2),
-      difficultTimeCustom: draft.difficultTimeCustom?.trim().slice(0, 80) || null,
-      paydayPlanCustom: draft.paydayPlanCustom?.trim().slice(0, 120) || null,
-      personalMoneyGoal: draft.personalMoneyGoal?.trim().slice(0, 100) || null,
-      quitReason: draft.quitReason?.trim().slice(0, 160) || null,
-      recentLenderName: draft.recentLenderName?.trim().slice(0, 40) || null,
-      financialContextUpdatedAt: new Date().toISOString(),
-    };
+    if (!editingSection) return;
+    const next: RealityProfile = { ...committed };
+
+    switch (editingSection) {
+      case 'obligation':
+        next.obligationType = draft.obligationType;
+        next.obligationAmountCents = draft.obligationType === 'none' ? null : cents(amount);
+        next.obligationDueDate = draft.obligationDueDate;
+        break;
+      case 'income':
+        next.availableUntilIncomeCents = cents(available);
+        next.nextIncomeDate = draft.nextIncomeDate;
+        break;
+      case 'goal':
+        next.personalMoneyGoal = draft.personalMoneyGoal?.trim().slice(0, 100) || null;
+        break;
+      case 'difficult':
+        next.difficultTimes = (draft.difficultTimes ?? []).slice(0, 8);
+        next.difficultTimeCustom = draft.difficultTimeCustom?.trim().slice(0, 80) || null;
+        break;
+      case 'lender':
+        next.recentLenderName = draft.recentLenderName?.trim().slice(0, 40) || null;
+        next.recentLenderHelpedRecently = draft.recentLenderHelpedRecently;
+        next.recentLenderAmountCents = draft.recentLenderAmountCents;
+        break;
+      case 'reason':
+        next.quitReason = draft.quitReason?.trim().slice(0, 160) || null;
+        break;
+      case 'payday':
+        next.paydayPlanActions = (draft.paydayPlanActions ?? []).slice(0, 2);
+        next.paydayPlanCustom = draft.paydayPlanCustom?.trim().slice(0, 120) || null;
+        break;
+    }
+
+    if (editingSection === 'obligation' || editingSection === 'income') {
+      next.financialContextUpdatedAt = new Date().toISOString();
+    }
 
     const stored = updateData(data => ({ ...data, profile: next }));
     void syncProfileIfSignedIn(stored.profile);

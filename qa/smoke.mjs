@@ -86,6 +86,15 @@ async function assertA11y(page, label) {
   assert(serious.length === 0, `${label}: axe violations ${JSON.stringify(serious.map(v => ({ id:v.id, impact:v.impact, nodes:v.nodes.length })))}`);
 }
 
+async function capture(page, path) {
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForFunction(() => {
+    const panel = document.querySelector('.setup-panel');
+    return !panel || Number(getComputedStyle(panel).opacity) >= .999;
+  });
+  await page.screenshot({ path, fullPage: true, animations: 'disabled' });
+}
+
 const browser = await chromium.launch({ headless: true });
 try {
   // Shared anonymous presence is verified when the production server secret is configured.
@@ -158,7 +167,7 @@ try {
     await page.locator('[data-type-role="intervention"]').first().waitFor({ timeout: 3000 });
     assert(await page.locator('[data-type-role="intervention"]').count() >= 1, `${name}: intervention typography role is missing`);
     await noHorizontalOverflow(page, name);
-    await page.screenshot({ path: `${out}/home-${name}.png`, fullPage: true });
+    await capture(page, `${out}/home-${name}.png`);
     if (name === 'desktop-1440' || name === 'mobile-390') await assertA11y(page, name);
     await context.close();
   }
@@ -235,7 +244,7 @@ try {
   const authBox = await authDialog.boundingBox();
   assert(Boolean(authBox) && authBox.width >= 360 && authBox.x > 170 && authBox.x + authBox.width < 940,
     `auth dialog is visually trapped outside the main viewport: ${JSON.stringify(authBox)}`);
-  await authPage.screenshot({ path: `${out}/auth-dialog-1024.png`, fullPage: true });
+  await capture(authPage, `${out}/auth-dialog-1024.png`);
   await authPage.keyboard.press('Escape');
   assert(await authDialog.count() === 0, 'Escape did not close auth dialog');
   assert(await signIn.evaluate(el => document.activeElement === el), 'auth focus did not return to trigger');
@@ -248,12 +257,12 @@ try {
   await brandPage.goto(`${base}/plus`, { waitUntil: 'domcontentloaded' });
   await brandPage.getByRole('heading', { name: /Your full history/i }).waitFor();
   await noHorizontalOverflow(brandPage, 'Plus 390');
-  await brandPage.screenshot({ path: `${out}/plus-gate-390.png`, fullPage: true });
+  await capture(brandPage, `${out}/plus-gate-390.png`);
 
   await brandPage.goto(`${base}/research`, { waitUntil: 'domcontentloaded' });
   await brandPage.getByRole('heading', { name: /Why Spin Out works this way/i }).waitFor();
   await noHorizontalOverflow(brandPage, 'Research 390');
-  await brandPage.screenshot({ path: `${out}/research-390.png`, fullPage: true });
+  await capture(brandPage, `${out}/research-390.png`);
 
   await brandPage.goto(`${base}/help`, { waitUntil: 'domcontentloaded' });
   await brandPage.getByRole('heading', { name: /Put more distance between you and gambling/i }).waitFor();
@@ -268,17 +277,17 @@ try {
     && helpNameBox.width >= 90
     && helpNameBox.x + helpNameBox.width <= helpArrowBox.x,
     `Help 390 resource title is auto-placed into the wrong/clipped grid column: ${JSON.stringify({ helpNameBox, helpArrowBox })}`);
-  await brandPage.screenshot({ path: `${out}/help-390.png`, fullPage: true });
+  await capture(brandPage, `${out}/help-390.png`);
 
   await brandPage.goto(`${base}/privacy`, { waitUntil: 'domcontentloaded' });
   await brandPage.getByRole('heading', { name: /Your data stays limited to what Spin Out needs/i }).waitFor();
   await noHorizontalOverflow(brandPage, 'Privacy 390');
-  await brandPage.screenshot({ path: `${out}/privacy-390.png`, fullPage: true });
+  await capture(brandPage, `${out}/privacy-390.png`);
 
   await brandPage.goto(`${base}/terms`, { waitUntil: 'domcontentloaded' });
   await brandPage.getByRole('heading', { name: /Spin Out is a simulation/i }).waitFor();
   await noHorizontalOverflow(brandPage, 'Terms 390');
-  await brandPage.screenshot({ path: `${out}/terms-390.png`, fullPage: true });
+  await capture(brandPage, `${out}/terms-390.png`);
   await brandContext.close();
 
   const supportDesktopContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
@@ -286,14 +295,14 @@ try {
   await supportDesktopPage.goto(`${base}/research`, { waitUntil: 'domcontentloaded' });
   await supportDesktopPage.getByRole('heading', { name: /Why Spin Out works this way/i }).waitFor();
   await noHorizontalOverflow(supportDesktopPage, 'Research 1280');
-  await supportDesktopPage.screenshot({ path: `${out}/research-1280.png`, fullPage: true });
+  await capture(supportDesktopPage, `${out}/research-1280.png`);
   await supportDesktopContext.close();
 
   const plusDesktopContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const plusDesktopPage = await plusDesktopContext.newPage();
   await plusDesktopPage.goto(`${base}/plus`, { waitUntil: 'domcontentloaded' });
   await plusDesktopPage.getByRole('heading', { name: /Your full history/i }).waitFor();
-  await plusDesktopPage.screenshot({ path: `${out}/plus-gate-1280.png`, fullPage: true });
+  await capture(plusDesktopPage, `${out}/plus-gate-1280.png`);
   await plusDesktopContext.close();
 
   // Visual audit: every setup state must hold the reference system, not only the transition.
@@ -301,19 +310,19 @@ try {
   const setupAudit = await setupAuditContext.newPage();
   await setupAudit.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await setupAudit.getByRole('heading', { name: /How much were you about to put in/i }).waitFor();
-  await setupAudit.screenshot({ path: `${out}/setup-wager-390.png`, fullPage: true });
+  await capture(setupAudit, `${out}/setup-wager-390.png`);
   await setupAudit.getByRole('button', { name: '$100' }).click();
   await setupAudit.getByRole('heading', { name: /What were you about to play/i }).waitFor();
-  await setupAudit.screenshot({ path: `${out}/setup-game-390.png`, fullPage: true });
+  await capture(setupAudit, `${out}/setup-game-390.png`);
   await setupAudit.getByRole('button', { name: /Slots/i }).click();
   await setupAudit.getByRole('heading', { name: /What were you hoping would happen/i }).waitFor();
-  await setupAudit.screenshot({ path: `${out}/setup-intent-390.png`, fullPage: true });
+  await capture(setupAudit, `${out}/setup-intent-390.png`);
   await setupAudit.getByRole('button', { name: 'Win back what I lost', exact: true }).click();
   await setupAudit.getByRole('heading', { name: /Realistically, what is this money for/i }).waitFor();
-  await setupAudit.screenshot({ path: `${out}/setup-obligation-390.png`, fullPage: true });
+  await capture(setupAudit, `${out}/setup-obligation-390.png`);
   await setupAudit.getByRole('button', { name: 'Car payment', exact: true }).click();
   await setupAudit.getByRole('heading', { name: /Before you start, where do you want to stop/i }).waitFor();
-  await setupAudit.screenshot({ path: `${out}/setup-limit-390.png`, fullPage: true });
+  await capture(setupAudit, `${out}/setup-limit-390.png`);
   await noHorizontalOverflow(setupAudit, 'setup states 390');
   await setupAuditContext.close();
 
@@ -322,7 +331,7 @@ try {
   await setupDesktop.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await setupDesktop.getByRole('button', { name: '$100' }).click();
   await setupDesktop.getByRole('heading', { name: /What were you about to play/i }).waitFor();
-  await setupDesktop.screenshot({ path: `${out}/setup-game-1280.png`, fullPage: true });
+  await capture(setupDesktop, `${out}/setup-game-1280.png`);
   await noHorizontalOverflow(setupDesktop, 'setup game 1280');
   await setupDesktopContext.close();
 
@@ -342,7 +351,7 @@ try {
 
   await page.locator('.run-intro').waitFor();
   assert(await page.locator('.deposit-terminal').count() === 0, 'retired deposit gate appeared after the five-question setup');
-  await page.screenshot({ path: `${out}/transition-390.png`, fullPage: true });
+  await capture(page, `${out}/transition-390.png`);
   await page.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   assert(await page.locator('.run-shell[data-environment="layered-casino"]').count() === 1,
@@ -369,7 +378,7 @@ try {
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15000 });
   await page.getByRole('button', { name: 'Unmute sound' }).waitFor();
-  await page.screenshot({ path: `${out}/run-390.png`, fullPage: true });
+  await capture(page, `${out}/run-390.png`);
   await page.getByRole('button', { name: "I'm done" }).click();
   await page.getByText(/You left\./i).waitFor();
   assert(await page.locator('.post-shell[data-material="quiet-lacquer"]').count() === 1,
@@ -377,14 +386,14 @@ try {
   assert(await page.locator('.exit-receipt > div').count() === 4, 'Reality Receipt did not show the four core session facts');
   assert(await page.getByText('started', { exact: true }).isVisible(), 'Reality Receipt missing starting balance');
   assert(await page.getByText('ended', { exact: true }).isVisible(), 'Reality Receipt missing ending balance');
-  await page.screenshot({ path: `${out}/exit-receipt-390.png`, fullPage: true });
+  await capture(page, `${out}/exit-receipt-390.png`);
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('heading', { name: /How bad do you want to play now/i }).waitFor();
   await page.getByRole('button', { name: '5' }).click();
   await page.getByRole('heading', { name: /Did you end up gambling/i }).waitFor();
   await page.getByRole('button', { name: 'No' }).click();
   await page.locator('.money-kept').waitFor();
-  await page.screenshot({ path: `${out}/money-kept-390.png`, fullPage: true });
+  await capture(page, `${out}/money-kept-390.png`);
 
   // Post-run Plus placement is allowed, but signed-out users cannot buy/unlock Plus.
   await page.getByRole('button', { name: 'Spin Out+' }).click();
@@ -434,7 +443,7 @@ try {
   const ping = pingPage.locator('.reality-ping');
   await ping.waitFor({ timeout: 7000 });
   assert(await ping.getAttribute('data-material') === 'oxblood-glass', 'Reality Ping is missing its reference-locked oxblood-glass material identity');
-  await pingPage.screenshot({ path: `${out}/reality-ping-390.png`, fullPage: true });
+  await capture(pingPage, `${out}/reality-ping-390.png`);
   assert(await ping.getByText(/Reality Ping/i).isVisible(), 'Reality Ping label missing');
   await ping.getByRole('button', { name: 'Got it' }).click();
   await ping.waitFor({ state: 'detached' });
@@ -467,7 +476,7 @@ try {
   await stale.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
   await stale.locator('.in-run-setup').waitFor({ timeout: 5000 });
   await stale.getByRole('heading', { name: /When's more money coming in/i }).waitFor();
-  await stale.screenshot({ path: `${out}/stale-returning-390.png`, fullPage: true });
+  await capture(stale, `${out}/stale-returning-390.png`);
   await staleContext.close();
 
   // Custom wager extremes.
@@ -478,7 +487,7 @@ try {
     await custom.getByRole('textbox', { name: 'Other wager amount' }).fill(amount);
     await custom.getByRole('button', { name: 'Use' }).click();
     await custom.getByRole('heading', { name: /What were you about to play/i }).waitFor();
-    await custom.screenshot({ path: `${out}/custom-${label}-390.png`, fullPage: true });
+    await capture(custom, `${out}/custom-${label}-390.png`);
     await customContext.close();
   }
 
@@ -585,7 +594,12 @@ try {
     }, null, { timeout: gameType === 'casino' ? 9000 : 7000 });
 
     assert(errors.length === 0, `${gameType} environment errors: ${JSON.stringify(errors)}`);
-    await envPage.screenshot({ path: `${out}/environment-${gameType}-390.png`, fullPage: true });
+    for (const width of [320, 390, 430]) {
+      await envPage.setViewportSize({ width, height: 844 });
+      await noHorizontalOverflow(envPage, `${gameType} ${width}`);
+      await capture(envPage, `${out}/environment-${gameType}-${width}.png`);
+    }
+    await envPage.setViewportSize({ width: 390, height: 844 });
 
     const beforeReload = await envPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
     assert(beforeReload, `${gameType} active run missing before refresh`);
@@ -640,7 +654,7 @@ try {
   await limitPing.waitFor({ timeout: 9000 });
   assert(await limitPing.getByText(/You decided on 5\. This is 7\./i).isVisible(), 'chosen-limit Ping did not reference the exact user limit');
   assert(await limitPing.getByRole('button', { name: "I'm done" }).isVisible(), 'strong limit intervention did not offer an immediate exit');
-  await limitPage.screenshot({ path: `${out}/reality-ping-limit-390.png`, fullPage: true });
+  await capture(limitPage, `${out}/reality-ping-limit-390.png`);
   await limitContext.close();
 
   // Behavior-driven intervention: raising the simulated amount after a loss fires before another play.
@@ -675,7 +689,7 @@ try {
   assert(await stakePing.getAttribute('data-material') === 'lacquer-cut', 'X-Ray is missing its distinct lacquer-cut material identity');
   assert(await stakePing.getByText(/You lost, then raised it\./i).isVisible(), 'stake-escalation X-Ray did not fire immediately');
   assert(await stakePage.getByRole('button', { name: "I'm done" }).count() === 1, 'X-Ray exposed duplicate exit actions');
-  await stakePage.screenshot({ path: `${out}/xray-stake-390.png`, fullPage: true });
+  await capture(stakePage, `${out}/xray-stake-390.png`);
   const afterStake = await stakePage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
   assert(afterStake?.actionCount === 3, 'stake-escalation intervention required another play before firing');
   await stakeContext.close();
@@ -745,7 +759,7 @@ try {
     && sampleBox.y + sampleBox.height <= longBox.y + longBox.height
     && modelBox.y + modelBox.height <= longBox.y + longBox.height,
     'Run 10,000 sample/model comparison exists in the DOM but is clipped outside the visible panel');
-  await longPage.screenshot({ path: `${out}/longrun-10000-390.png`, fullPage: true });
+  await capture(longPage, `${out}/longrun-10000-390.png`);
   const duringLong = await longPage.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null')?.run || null);
   assert(duringLong?.actionCount === 2 && duringLong?.balanceCents === 8000, 'Run 10,000 mutated the live Reality Run');
   await longPage.getByRole('button', { name: 'Close' }).click();
@@ -775,7 +789,7 @@ try {
   const contextPage = await contextHome.newPage();
   await contextPage.goto(base, { waitUntil: 'domcontentloaded' });
   await contextPage.getByText(/Payday's tomorrow\./i).waitFor();
-  await contextPage.screenshot({ path: `${out}/payday-shield-390.png`, fullPage: true });
+  await capture(contextPage, `${out}/payday-shield-390.png`);
   await contextPage.getByRole('button', { name: 'My reality' }).click();
   await contextPage.getByRole('heading', { name: /What Spin Out knows right now/i }).waitFor();
   assert(await contextPage.locator('.reality-context-summary').count() === 1,
@@ -784,7 +798,7 @@ try {
     'My Reality summary exposed edit controls before the user asked for them');
   assert(await contextPage.locator('.reality-context-dialog[data-material="smoked-lacquer"]').count() === 1,
     'My Reality is not using the reference-locked smoked-lacquer material surface');
-  await contextPage.screenshot({ path: `${out}/my-reality-390.png`, fullPage: true });
+  await capture(contextPage, `${out}/my-reality-390.png`);
   await contextPage.getByRole('button', { name: 'Edit what this money is for', exact: true }).click();
   const realitySave = contextPage.getByRole('button', { name: 'Save' });
   await realitySave.waitFor();

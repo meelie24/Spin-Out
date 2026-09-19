@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatMoney } from '@/lib/engine';
+import { useModalFocus } from '@/lib/useModalFocus';
 import type { LongRunResult } from '@/lib/realityEngine/longRun';
 
 const phases = [1, 100, 1000, 10_000] as const;
@@ -21,9 +22,7 @@ export function LongRunExperience({
   const reduced = typeof window !== 'undefined'
     && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
 
-  useEffect(() => {
-    panelRef.current?.focus();
-  }, []);
+  useModalFocus(panelRef, onClose);
 
   useEffect(() => {
     if (reduced) {

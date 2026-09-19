@@ -217,7 +217,7 @@ try {
         };
       });
       if (!/Manrope/i.test(observed.uiFont)) findings.push(width + ': run UI font fell back: ' + observed.uiFont);
-      if (!/Barlow/i.test(observed.displayFont)) findings.push(width + ': run display font fell back: ' + observed.displayFont);
+      if (!/Manrope/i.test(observed.displayFont)) findings.push(width + ': run display font fell back: ' + observed.displayFont);
       if (observed.titleClipped || observed.questionOverlapsChoices) findings.push(width + ': optional question is clipped or overlaps answers');
       if (!observed.soundFits || !observed.soundTarget) findings.push(width + ': sound control overflows or has a small touch target');
       if (observed.dockHeight > 140) findings.push(width + ': optional dock exceeds 140px');

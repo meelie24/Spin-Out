@@ -696,7 +696,7 @@ export function RealityRun({
   const sportsPotentialReturn = Math.round(run.stakeCents * selectedSports.odds);
 
   return (
-    <main className={`run-shell ambient-${ambientMode}`} data-environment="layered-casino" data-intervention-surface={interventionSurface ?? 'none'} style={{ '--reality': intensity } as React.CSSProperties}>
+    <main className={`run-shell ambient-${ambientMode}`} data-environment="layered-casino" data-game={profile.gamblingType} data-intervention-surface={interventionSurface ?? 'none'} style={{ '--reality': intensity } as React.CSSProperties}>
       <div className="reality-background" aria-hidden="true">
         {financeFresh && obligation && profile.obligationAmountCents ? <div className="context-ghost ghost-a"><span>{obligation}</span><strong>{formatMoney(profile.obligationAmountCents)}</strong></div> : null}
         {days != null ? <div className="context-ghost ghost-b"><strong>{days}</strong><span>DAYS UNTIL MONEY</span></div> : null}
@@ -725,10 +725,13 @@ export function RealityRun({
           <button type="button" className="sound-button" aria-label={muted ? 'Unmute sound' : 'Mute sound'} onClick={() => { const next = !muted; setMuted(next); spinAudio.setMuted(next); if (!next) spinAudio.startAmbient(); }}>{muted ? 'Sound off' : 'Sound on'}</button>
         </div>
 
+        <div className="game-stage-heading"><h1>{gameLabel}</h1></div>
         <div className="casino-frame">
+          {profile.gamblingType === 'slots' || profile.gamblingType === 'other' ? <>
           <div className="bulbs bulbs-top" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i}/>)}</div>
           <div className="bulbs bulbs-left" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
           <div className="bulbs bulbs-right" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
+          </> : null}
           <RealityGame ref={game} gameType={profile.gamblingType} reducedMotion={reducedMotion} initialBalanceCents={run.balanceCents}/>
           {ping && interventionSurface === 'xray'
             ? <XRayMoment

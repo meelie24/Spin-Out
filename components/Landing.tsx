@@ -241,18 +241,8 @@ export function Landing() {
             </nav>
           </div>
 
-          <div className="hero-machine" aria-hidden="true">
-            <div className="hero-machine-top"><span>Reality Run</span><b>Live practice</b></div>
-            <div className="hero-reel-window">
-              <div><Image src="/symbols/seven.svg" alt="" width={84} height={84} /></div>
-              <div><Image src="/symbols/cherry.svg" alt="" width={84} height={84} /></div>
-              <div><Image src="/symbols/gem.svg" alt="" width={84} height={84} /></div>
-            </div>
-            <div className="hero-machine-bottom">
-              <span>Balance</span>
-              <strong>{returning ? formatMoney(Math.max(kept, 0)) : '$100'}</strong>
-              <i>QUIT stays in view.</i>
-            </div>
+          <div className="hero-machine hero-scene" aria-hidden="true">
+            <Image src="/game-art/slots-scene.webp" alt="" fill priority sizes="(max-width: 700px) 92vw, 42vw" />
           </div>
 
           <PromptCard prompt={prompts[0]} {...promptProps('money')} className="prompt-hero" />
