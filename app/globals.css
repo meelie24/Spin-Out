@@ -6451,3 +6451,370 @@ body:has(.loading-page[data-material="casino-loading"])>.site-header nav{color:#
     font-size:64px;
   }
 }
+
+
+/* =========================================================
+   PREMIUM DATA SURFACES + MOBILE RUN DEPTH
+   Reference convergence for My Reality / Run 10,000 / run floor
+   ========================================================= */
+
+/* My Reality becomes a compact private ledger, not a vertical settings list. */
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"]{
+  width:min(760px,calc(100% - 24px));
+  max-height:min(88vh,860px);
+  border-radius:5px 42px 5px 24px;
+  background:
+    linear-gradient(120deg,rgba(255,244,220,.065),transparent 18% 72%,rgba(105,43,34,.07)),
+    radial-gradient(circle at 82% 10%,rgba(123,49,36,.17),transparent 18rem),
+    linear-gradient(150deg,rgba(44,24,20,.985),rgba(14,9,8,.995));
+  box-shadow:0 48px 120px rgba(0,0,0,.62),inset 1px 1px rgba(255,255,255,.06);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .reality-context-head{
+  padding-bottom:22px;
+  border-bottom:1px solid rgba(229,188,123,.12);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .reality-context-head h2{
+  max-width:12ch;
+  font-size:clamp(42px,5.4vw,64px);
+  line-height:.8;
+  font-weight:700;
+  text-transform:uppercase;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-top{
+  padding:18px 0 20px;
+  border-bottom:0;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-top p{
+  max-width:44ch;
+  color:#b19780;
+  font-size:13px;
+  line-height:1.6;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-top small{
+  max-width:54ch;
+  color:#6f5c4e;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  gap:0;
+  border-top:1px solid rgba(229,188,123,.11);
+  border-left:1px solid rgba(229,188,123,.07);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card{
+  min-width:0;
+  min-height:116px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  gap:8px;
+  padding:18px 17px 17px;
+  border:0;
+  border-right:1px solid rgba(229,188,123,.07);
+  border-bottom:1px solid rgba(229,188,123,.09);
+  border-radius:0;
+  background:linear-gradient(180deg,rgba(255,244,220,.018),transparent 68%);
+  box-shadow:none;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card:hover{
+  background:linear-gradient(145deg,rgba(106,38,34,.13),rgba(255,244,220,.018));
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation{
+  grid-column:span 7;
+  min-height:184px;
+  padding:23px 22px 20px;
+  background:
+    linear-gradient(135deg,rgba(112,37,34,.2),transparent 54%),
+    linear-gradient(180deg,rgba(255,244,220,.025),transparent);
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-income{
+  grid-column:span 5;
+  min-height:184px;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-goal{grid-column:span 5}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-difficult{grid-column:span 7}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-lender,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-reason,
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-payday{
+  grid-column:span 4;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card-head{
+  position:absolute;
+  top:14px;
+  left:17px;
+  right:14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card-head>span{
+  color:#796455;
+  font:700 7px/1.2 var(--so-ui);
+  letter-spacing:.15em;
+  text-transform:uppercase;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-card-edit{
+  min-height:30px;
+  padding:0 5px;
+  border:0;
+  background:transparent;
+  color:#bd8a4e;
+  font:700 7px/1 var(--so-ui);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card>strong{
+  color:#dac09a;
+  font:700 23px/.95 var(--so-display);
+  letter-spacing:-.025em;
+  text-transform:uppercase;
+  text-wrap:balance;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation>strong{
+  max-width:8ch;
+  font-size:38px;
+  line-height:.82;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-money{
+  position:absolute;
+  right:20px;
+  bottom:22px;
+  color:#e7bf79;
+  font:700 46px/.8 var(--so-display);
+  letter-spacing:-.04em;
+}
+.reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card>small{
+  color:#745f50;
+  font-size:8px;
+  letter-spacing:.04em;
+}
+
+/* Run 10,000 becomes an authored long-run instrument, not a compact stats card. */
+.longrun-panel[data-material="long-run-stage"]{
+  inset:7px;
+  padding:24px 24px 20px;
+  border-radius:4px 34px 4px 18px;
+  background:
+    linear-gradient(115deg,rgba(255,244,220,.055),transparent 16% 72%,rgba(113,47,33,.07)),
+    radial-gradient(circle at 86% 12%,rgba(128,53,37,.19),transparent 20rem),
+    linear-gradient(145deg,#22110e,#0b0706 72%);
+}
+.longrun-panel[data-material="long-run-stage"]::before{
+  content:"10,000";
+  right:-16px;
+  top:23%;
+  font-size:clamp(130px,25vw,270px);
+  color:rgba(231,190,127,.024);
+  transform:rotate(-6deg);
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-head{
+  padding-bottom:18px;
+  border-bottom:1px solid rgba(229,188,123,.11);
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-head span{
+  color:#8a715e;
+  font:700 7px/1 var(--so-ui);
+  letter-spacing:.17em;
+  text-transform:uppercase;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-head strong{
+  display:block;
+  margin-top:7px;
+  font-size:clamp(54px,8vw,84px);
+  line-height:.73;
+  text-transform:uppercase;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-stream{
+  min-height:62px;
+  margin:17px 0 18px;
+  padding:12px 0;
+  gap:4px;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-stream i{
+  min-height:38px;
+  border-radius:2px 2px 0 0;
+  border:1px solid rgba(255,255,255,.025);
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-stream i.is-win{
+  background:linear-gradient(180deg,#b18c51,#674026);
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-stream i.is-loss{
+  background:linear-gradient(180deg,#52201f,#2c1011);
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-stream i.is-push{
+  background:linear-gradient(180deg,#645342,#302820);
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-stream i.is-near{
+  box-shadow:inset 0 -3px #c58d50;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-net-pair{
+  position:relative;
+  display:grid;
+  grid-template-columns:1.08fr .92fr;
+  gap:0;
+  margin:0;
+  padding:0;
+  border:1px solid rgba(229,188,123,.11);
+  background:rgba(8,5,4,.22);
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-net-pair::after{
+  content:"VS";
+  position:absolute;
+  left:54%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  border:1px solid rgba(229,188,123,.16);
+  background:#160c0a;
+  color:#826a57;
+  font:700 7px/1 var(--so-ui);
+  letter-spacing:.1em;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-net-pair>div{
+  min-height:132px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:22px 21px 20px;
+  border:0;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-net-pair>div:first-child{
+  background:
+    linear-gradient(145deg,rgba(112,37,35,.2),transparent 68%);
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-net-pair .longrun-expectation{
+  border-left:1px solid rgba(229,188,123,.09);
+  background:
+    linear-gradient(145deg,rgba(192,139,72,.08),transparent 68%);
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-net-pair span{
+  color:#7e6858;
+  font:700 7px/1.2 var(--so-ui);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-net-pair strong{
+  margin-top:10px;
+  font-size:clamp(38px,6.3vw,58px);
+  line-height:.8;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-net-pair>div:first-child strong{
+  color:#d89583;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-expectation strong{
+  color:#e0b875;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-readout{
+  max-width:48ch;
+  margin:18px 0 16px;
+  color:#a58d79!important;
+  line-height:1.6;
+}
+.longrun-panel[data-material="long-run-stage"] .longrun-details-toggle{
+  min-height:42px;
+  padding:0 14px;
+  border:1px solid rgba(229,188,123,.14);
+  border-radius:3px 12px 3px 12px;
+  background:rgba(255,244,220,.035);
+  color:#c3a789;
+}
+
+/* Give the lower mobile run stage enough authored presence to match the game frame. */
+@media(max-width:700px){
+  .run-shell[data-environment="layered-casino"]::before{
+    opacity:.13;
+    filter:sepia(.28) saturate(.82) brightness(.9);
+    background-position:
+      -92px 18%,
+      calc(100% + 62px) 40%,
+      -25px calc(100% + 24px),
+      calc(100% + 35px) 82%,
+      calc(100% + 118px) calc(100% + 112px),
+      center;
+  }
+  .run-shell[data-environment="layered-casino"]::after{
+    color:rgba(233,194,132,.038);
+  }
+  .run-shell[data-environment="layered-casino"] .run-controls{
+    margin-left:6px;
+    margin-right:6px;
+    padding:14px 12px 12px;
+    border:1px solid rgba(229,188,123,.075);
+    border-radius:4px 20px 4px 15px;
+    background:
+      linear-gradient(120deg,rgba(255,244,220,.025),transparent 20% 76%,rgba(111,43,35,.05)),
+      rgba(20,12,10,.54);
+    box-shadow:0 20px 48px rgba(0,0,0,.18),inset 1px 1px rgba(255,255,255,.018);
+  }
+  .run-shell[data-environment="layered-casino"] .run-controls::after{
+    content:"";
+    position:absolute;
+    left:12%;
+    right:12%;
+    bottom:-32px;
+    height:72px;
+    background:
+      radial-gradient(ellipse at 20% 50%,rgba(193,129,65,.08),transparent 38%),
+      radial-gradient(ellipse at 78% 50%,rgba(110,38,35,.08),transparent 40%);
+    filter:blur(10px);
+    pointer-events:none;
+  }
+
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"]{
+    width:calc(100% - 16px);
+    max-height:92vh;
+    border-radius:4px 28px 4px 17px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation,
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-difficult,
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-payday{
+    grid-column:1/-1;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-income,
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-goal,
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-lender,
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-reason{
+    grid-column:auto;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card{
+    min-height:118px;
+    padding:17px 13px 14px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation{
+    min-height:164px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card-head{
+    left:13px;right:10px;top:12px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-card>strong{
+    font-size:20px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-obligation>strong{
+    font-size:34px;
+  }
+  .reference-locked .reality-context-dialog[data-material="smoked-lacquer"] .context-summary-money{
+    right:14px;bottom:17px;font-size:40px;
+  }
+
+  .longrun-panel[data-material="long-run-stage"]{
+    inset:6px;
+    padding:18px 14px 15px;
+  }
+  .longrun-panel[data-material="long-run-stage"] .longrun-head strong{
+    font-size:54px;
+  }
+  .longrun-panel[data-material="long-run-stage"] .longrun-net-pair>div{
+    min-height:112px;
+    padding:18px 14px 15px;
+  }
+  .longrun-panel[data-material="long-run-stage"] .longrun-net-pair strong{
+    font-size:37px;
+  }
+}
