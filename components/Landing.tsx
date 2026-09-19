@@ -297,9 +297,6 @@ export function Landing() {
                 <div className="game-enter"><span>Enter Reality Run</span><b aria-hidden="true">↗</b></div>
               </Link>
             ))}
-            <div className="library-ping library-ping-a">
-              <PromptCard prompt={prompts[2]} {...promptProps('exit')} className="prompt-grid" />
-            </div>
           </div>
 
           <div className="games-bottom-row">

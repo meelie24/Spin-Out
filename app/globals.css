@@ -2909,31 +2909,31 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   border-radius:5px 48px 5px 26px;
   background:linear-gradient(138deg,#4c2018,#2b120f 55%,#120a08);
 }
-.reference-locked .game-sports{
+.reference-locked .game-tile.game-sports{
   grid-column:8 / 13;
   grid-row:1;
   border-radius:34px 6px 22px 6px;
   background:linear-gradient(133deg,#2a211b,#15100d 62%,#0d0908);
 }
-.reference-locked .game-casino{
+.reference-locked .game-tile.game-casino{
   grid-column:8 / 13;
   grid-row:2;
   border-radius:6px 34px 6px 22px;
   background:linear-gradient(133deg,#391815,#190d0c 62%,#0c0807);
 }
-.reference-locked .game-poker{
+.reference-locked .game-tile.game-poker{
   grid-column:1 / 5;
   grid-row:3;
   border-radius:30px 8px 8px 8px;
   background:linear-gradient(145deg,#221514,#120c0a 70%);
 }
-.reference-locked .game-lottery{
+.reference-locked .game-tile.game-lottery{
   grid-column:5 / 9;
   grid-row:3;
   border-radius:8px 8px 30px 8px;
   background:linear-gradient(145deg,#3b2a1e,#160e0b 72%);
 }
-.reference-locked .game-other{
+.reference-locked .game-tile.game-other{
   grid-column:9 / 13;
   grid-row:3;
   border-radius:8px 30px 8px 30px;
@@ -3292,11 +3292,11 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   }
   .reference-locked .game-tile,
   .reference-locked .game-tile-featured,
-  .reference-locked .game-sports,
-  .reference-locked .game-casino,
-  .reference-locked .game-poker,
-  .reference-locked .game-lottery,
-  .reference-locked .game-other{
+  .reference-locked .game-tile.game-sports,
+  .reference-locked .game-tile.game-casino,
+  .reference-locked .game-tile.game-poker,
+  .reference-locked .game-tile.game-lottery,
+  .reference-locked .game-tile.game-other{
     grid-column:auto;
     grid-row:auto;
   }
@@ -3308,7 +3308,7 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .reference-locked .game-tile-supporting{
     min-height:260px;
   }
-  .reference-locked .game-poker{grid-column:1 / -1;min-height:280px}
+  .reference-locked .game-tile.game-poker{grid-column:1 / -1;min-height:280px}
   .reference-locked .game-tile-meta{padding:16px 16px 0;max-width:100%}
   .reference-locked .game-tile-featured .game-tile-meta{padding:22px 22px 0;max-width:68%}
   .reference-locked .game-tile h3{font-size:30px}
@@ -3327,7 +3327,7 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .reference-locked .game-library{gap:7px}
   .reference-locked .game-tile-featured{min-height:350px}
   .reference-locked .game-tile-supporting{min-height:225px}
-  .reference-locked .game-poker{min-height:250px}
+  .reference-locked .game-tile.game-poker{min-height:250px}
   .reference-locked .game-tile h3{font-size:25px}
   .reference-locked .game-tile-featured h3{font-size:47px}
   .reference-locked .game-tile small{max-width:23ch}
@@ -3345,7 +3345,7 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .reference-locked .hero-copy h1{font-size:48px}
   .reference-locked .game-tile-featured{min-height:330px}
   .reference-locked .game-tile-supporting{min-height:208px}
-  .reference-locked .game-poker{min-height:235px}
+  .reference-locked .game-tile.game-poker{min-height:235px}
   .reference-locked .game-tile h3{font-size:22px}
   .reference-locked .game-tile-featured h3{font-size:43px}
   .reference-locked .game-tile small{font-size:7.5px}
@@ -3450,3 +3450,11 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .post-context-money{grid-template-columns:auto minmax(0,1fr) auto}
   .post-context-money .post-context-quiet{grid-column:1/-1}
 }
+
+/* Reference pass 2: keep compact chooser isolated from full tile layout. */
+.reference-locked .mobile-game-option{
+  grid-column:auto!important;
+  grid-row:auto!important;
+  min-height:52px!important;
+}
+.reference-locked .mobile-game-option.game-poker{min-height:52px!important}

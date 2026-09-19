@@ -510,7 +510,7 @@ try {
     const page = await context.newPage();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(base, { waitUntil: 'domcontentloaded' });
-    await page.locator('.home-game-card').first().waitFor();
+    await page.locator('.game-tile').first().waitFor();
 
     const quickPick = page.locator('.mobile-game-quickpick');
     await quickPick.waitFor();
@@ -547,15 +547,15 @@ try {
     assert(await page.locator('.games-top-prompt:visible').count() === 0,
       'a second Reality Ping preview still interrupted the game catalog on mobile');
 
-    assert(await page.locator('.home-game-card').count() === 6,
+    assert(await page.locator('.game-tile').count() === 6,
       'mobile homepage did not keep all six games discoverable');
 
-    const columns = await page.locator('.home-game-grid').first().evaluate(el =>
+    const columns = await page.locator('.game-library').first().evaluate(el =>
       getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length
     );
     assert(columns === 2, `mobile game grid used ${columns} columns instead of a compact two-column layout`);
 
-    const visibleDescriptions = await page.locator('.home-game-card .game-card-copy > p').evaluateAll(nodes =>
+    const visibleDescriptions = await page.locator('.game-tile p').evaluateAll(nodes =>
       nodes.filter(node => getComputedStyle(node).display !== 'none').length
     );
     assert(visibleDescriptions === 0,
