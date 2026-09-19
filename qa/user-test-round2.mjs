@@ -512,6 +512,35 @@ try {
     await page.goto(base, { waitUntil: 'domcontentloaded' });
     await page.locator('.home-game-card').first().waitFor();
 
+    const quickPick = page.locator('.mobile-game-quickpick');
+    await quickPick.waitFor();
+    assert(await quickPick.isVisible(),
+      'mobile homepage did not expose an early compact game chooser');
+
+    const quickLinks = quickPick.locator('a');
+    assert(await quickLinks.count() === 6,
+      'early mobile game chooser did not expose all six games');
+
+    const hero = page.locator('.hub-hero');
+    const machine = page.locator('.hero-machine');
+    const quickBox = await quickPick.boundingBox();
+    const machineBox = await machine.boundingBox();
+    assert(Boolean(quickBox) && Boolean(machineBox), 'mobile hero elements were not measurable');
+    assert(quickBox.y < machineBox.y,
+      'mobile game chooser appeared after the decorative machine instead of before it');
+    assert(quickBox.y < 844,
+      `first actionable game chooser started below the initial viewport at y=${quickBox.y}`);
+
+    const quickOverflow = await quickPick.evaluate(el => el.scrollWidth - el.clientWidth);
+    assert(quickOverflow <= 1,
+      `mobile game chooser required ${quickOverflow}px of horizontal scrolling`);
+
+    assert(await page.locator('.hero-actions .primary-cta:visible').count() === 0,
+      'mobile hero still used a redundant Choose a game anchor after exposing direct game choices');
+
+    assert(await page.locator('.games-top-prompt:visible').count() === 0,
+      'a second Reality Ping preview still interrupted the game catalog on mobile');
+
     assert(await page.locator('.home-game-card').count() === 6,
       'mobile homepage did not keep all six games discoverable');
 
