@@ -3458,3 +3458,87 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   min-height:52px!important;
 }
 .reference-locked .mobile-game-option.game-poker{min-height:52px!important}
+
+
+/* Research-first quality pass: focused My Reality editing */
+.context-summary-top>div{display:grid;gap:4px}
+.context-summary-top small{
+  color:#907d70;
+  font-size:10px;
+  line-height:1.45;
+}
+.context-summary-card-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.context-summary-card-head>span{min-width:0}
+.context-card-edit{
+  flex:0 0 auto;
+  min-height:30px;
+  border:0;
+  background:transparent;
+  color:#8c725f;
+  padding:0 2px 0 8px;
+  font-size:9px;
+  font-weight:680;
+  letter-spacing:0;
+  text-transform:none;
+}
+.context-card-edit:hover{color:#4e392f}
+.context-focused-editor{
+  display:grid;
+  gap:13px;
+  padding-top:4px;
+}
+.context-focused-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding-bottom:11px;
+  border-bottom:1px solid rgba(75,50,39,.1);
+}
+.context-focused-title>span{
+  color:#4b352c;
+  font-size:13px;
+  font-weight:680;
+}
+.context-focused-editor label{
+  display:grid;
+  gap:6px;
+  color:#806c60;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+}
+.context-focused-editor>input,
+.context-focused-editor label>input,
+.context-focused-editor select{
+  width:100%;
+  min-height:44px;
+  border:1px solid rgba(71,47,37,.13);
+  border-radius:10px;
+  background:rgba(255,251,244,.78);
+  color:#4f392f;
+  padding:0 11px;
+  font-size:12px;
+  text-transform:none;
+  letter-spacing:0;
+}
+.context-focused-actions{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  margin-top:4px;
+}
+.context-focused-actions .primary-button{min-width:108px}
+.context-focused-actions .bare-link{min-height:44px}
+@media(max-width:560px){
+  .context-summary-card-head{align-items:center}
+  .context-card-edit{min-height:36px}
+  .context-focused-actions{align-items:stretch;flex-direction:column}
+  .context-focused-actions .primary-button{width:100%}
+  .context-focused-actions .bare-link{align-self:center}
+}
