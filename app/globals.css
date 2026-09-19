@@ -7573,3 +7573,39 @@ body:has(.plain-page[data-editorial="ledger"]){
   .reference-locked .tile-scene img{transition:none;}
   .reference-locked .game-tile:hover .tile-scene img{transform:none;}
 }
+
+/* Render review: keep action text and monetary values legible on the smallest screens. */
+.run-shell[data-environment="layered-casino"] .game-stage-heading .cashout-button{
+  position:static;flex:none;min-height:44px;margin-left:12px;
+}
+.game-stage-heading{padding:8px 4px;min-height:60px;}
+@media(min-width:901px){
+  .reference-locked .game-sports::after{
+    background:linear-gradient(180deg,rgba(12,7,5,.02) 0%,rgba(12,7,5,.66) 32%,rgba(12,7,5,.87) 64%,#0c0705 100%);
+  }
+}
+@media(max-width:700px){
+  .run-shell[data-environment="layered-casino"] .run-hud{
+    grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) minmax(0,.55fr) minmax(0,.7fr) 44px;
+  }
+  .run-shell[data-environment="layered-casino"] .run-hud strong{
+    font-size:clamp(16px,4.8vw,19px);white-space:nowrap;overflow-wrap:normal;
+  }
+}
+@media(max-width:900px){
+  .in-run-setup[data-state="expanded"] .setup-question-title,
+  .in-run-setup[data-state="consuming"] .setup-question-title{
+    line-height:1.25!important;padding-bottom:3px;
+  }
+}
+.reference-locked .game-tile h3{overflow-wrap:anywhere;}
+.setup-choice-row button{overflow-wrap:anywhere;}
+.scratch-result-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;
+  margin:0 14px 14px;border:1px solid #c5a67650;border-radius:12px;overflow:hidden;
+  background:#1f150ff2;color:#f1ddba;font-size:16px;line-height:1.4;font-variant-numeric:tabular-nums;
+}
+.scratch-result-grid span{min-width:0;min-height:34px;padding:6px 4px;text-align:center;overflow-wrap:anywhere;}
+.scratch-result-grid span:nth-child(n+4){border-top:1px solid #c5a67626;}
+.scratch-result-grid span:not(:nth-child(3n)){border-right:1px solid #c5a67626;}
+@media(max-width:340px){.scratch-result-grid{font-size:14px;margin-inline:10px;}}

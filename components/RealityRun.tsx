@@ -725,7 +725,10 @@ export function RealityRun({
           <button type="button" className="sound-button" aria-label={muted ? 'Unmute sound' : 'Mute sound'} onClick={() => { const next = !muted; setMuted(next); spinAudio.setMuted(next); if (!next) spinAudio.startAmbient(); }}>{muted ? 'Sound off' : 'Sound on'}</button>
         </div>
 
-        <div className="game-stage-heading"><h1>{gameLabel}</h1></div>
+        <div className="game-stage-heading">
+          <h1>{gameLabel}</h1>
+          {!ping?.requiresChoice && interventionSurface !== 'xray' && !longRun ? <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button> : null}
+        </div>
         <div className="casino-frame">
           {profile.gamblingType === 'slots' || profile.gamblingType === 'other' ? <>
           <div className="bulbs bulbs-top" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i}/>)}</div>
@@ -743,7 +746,6 @@ export function RealityRun({
             : ping
               ? <RealityPing ping={ping} reducedMotion={reducedMotion} onDismiss={dismissPing} onExit={leaveFromPing}/>
               : null}
-          {!ping?.requiresChoice && interventionSurface !== 'xray' && !longRun ? <button type="button" className="cashout-button" onClick={() => finish('voluntary')}>{exitLabel(profile.gamblingType)}</button> : null}
         </div>
 
         {profile.gamblingType === 'sports' ? <>

@@ -3,6 +3,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { GamblingType } from '@/lib/types';
 import type { AnimatedOutcome, RealityGameBridge } from '@/lib/phaserGame';
+import { formatMoney } from '@/lib/engine';
 
 export interface RealityGameHandle {
   playOutcome(outcome: AnimatedOutcome): Promise<void>;
@@ -17,9 +18,14 @@ export const RealityGame = forwardRef<RealityGameHandle, { gameType: GamblingTyp
     const initialBalance = useRef(initialBalanceCents);
     const pendingPoker = useRef<{ hand:string[]; held:boolean[] } | null>(null);
     const [ready, setReady] = useState(false);
+    const [scratchAmounts, setScratchAmounts] = useState<number[] | null>(null);
 
     useImperativeHandle(ref, () => ({
-      playOutcome: async outcome => { if (bridge.current) await bridge.current.playOutcome(outcome); },
+      playOutcome: async outcome => {
+        if (!bridge.current) return;
+        await bridge.current.playOutcome(outcome);
+        if (outcome.visual?.kind === 'scratch') setScratchAmounts([...outcome.visual.cells]);
+      },
       setBalance: balanceCents => bridge.current?.setContext(balanceCents),
       setPokerHand: (hand, held) => {
         pendingPoker.current = { hand:[...hand], held:[...held] };
@@ -54,8 +60,12 @@ export const RealityGame = forwardRef<RealityGameHandle, { gameType: GamblingTyp
       bridge.current?.setContext(initialBalanceCents);
     }, [initialBalanceCents]);
 
-    return <div className="phaser-stage" data-ready={ready ? 'true' : 'false'} ref={host}>
+    return <><div className="phaser-stage" data-ready={ready ? 'true' : 'false'} ref={host}>
       {!ready ? <div className="game-loading">Building the table…</div> : null}
-    </div>;
+    </div>
+      {gameType === 'lottery' ? <div className="scratch-result-grid" role="group" aria-label="Revealed scratch amounts" aria-live="polite">
+        {Array.from({ length: 9 }, (_, index) => <span key={index}>{scratchAmounts ? formatMoney(scratchAmounts[index]) : '—'}</span>)}
+      </div> : null}
+    </>;
   },
 );

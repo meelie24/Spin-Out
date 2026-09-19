@@ -31,6 +31,7 @@ type SceneApi = {
 const SYMBOLS: SlotSymbol[] = ['cherry', 'bell', 'bar', 'seven', 'plum', 'lemon', 'gem'];
 const ROULETTE_WHEEL = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
 const RED_NUMBERS = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+const SLOT_LAYOUT = { reelW: 142, rowH: 84, startX: 145, startY: 210, symbolSize: 75 };
 
 function defaultSlotGrid(): SlotSymbol[][] {
   return [
@@ -96,8 +97,9 @@ export async function mountRealityGame(
         fontFamily: uiFont, fontSize: '23px', fontStyle: '600', color: '#fff7e8'
       }).setOrigin(.5).setVisible(false);
       // Balance and controls are readable HTML in the HUD; the canvas owns the game.
+      this.resultPlate = this.add.rectangle(500, 542, 850, 62, 0x13100d, .92).setAlpha(0);
       this.resultText = this.add.text(500, 540, '', {
-        fontFamily: uiFont, fontSize: '32px', fontStyle: '600', color: '#ead4ad', align: 'center'
+        fontFamily: uiFont, fontSize: '48px', fontStyle: '600', color: '#ead4ad', align: 'center'
       }).setOrigin(.5).setAlpha(0);
 
       switch (options.gameType) {
@@ -167,13 +169,13 @@ export async function mountRealityGame(
       [104, 536].forEach((y, row) => {
         for (let x = 92, i = 0; x <= 908; x += 48, i++) {
           const bulb = this.add.circle(x, y, 4.1, 0xffd77c, .36);
-          this.tweens.add({ targets: bulb, alpha: { from: .24, to: .9 }, duration: 880 + ((i + row) % 5) * 120, yoyo: true, repeat: -1, delay: i * 38 });
+          if (!options.reducedMotion) this.tweens.add({ targets: bulb, alpha: { from: .24, to: .9 }, duration: 880 + ((i + row) % 5) * 120, yoyo: true, repeat: -1, delay: i * 38 });
         }
       });
       for (let y = 150, i = 0; y <= 490; y += 48, i++) {
         [80, 920].forEach((x, side) => {
           const bulb = this.add.circle(x, y, 3.8, 0xffd77c, .3);
-          this.tweens.add({ targets: bulb, alpha: { from: .2, to: .75 }, duration: 980 + i * 55, yoyo: true, repeat: -1, delay: side * 120 });
+          if (!options.reducedMotion) this.tweens.add({ targets: bulb, alpha: { from: .2, to: .75 }, duration: 980 + i * 55, yoyo: true, repeat: -1, delay: side * 120 });
         });
       }
 
@@ -204,7 +206,7 @@ export async function mountRealityGame(
       }).setOrigin(.5));
 
       const grid = defaultSlotGrid();
-      const reelW = 142, rowH = 84, startX = 145, startY = 210;
+      const { reelW, rowH, startX, startY, symbolSize } = SLOT_LAYOUT;
       for (let col = 0; col < 5; col++) {
         const centerX = startX + col * reelW + reelW / 2;
         root.add(this.add.rectangle(centerX + 3, startY + rowH * 1.5 + 7, reelW - 6, rowH * 3 + 10, 0x000000, .34));
@@ -226,7 +228,7 @@ export async function mountRealityGame(
         this.reelContainers[col] = reel;
         for (let row = 0; row < 3; row++) {
           const glow = this.add.circle(reelW/2, row*rowH + rowH/2, 39, 0xd7ad69, .035);
-          const image = this.add.image(reelW / 2, row * rowH + rowH / 2, grid[row][col]).setDisplaySize(75, 75);
+          const image = this.add.image(reelW / 2, row * rowH + rowH / 2, grid[row][col]).setDisplaySize(symbolSize, symbolSize);
           reel.add([glow,image]);
         }
       }
@@ -506,14 +508,14 @@ export async function mountRealityGame(
 
     private animateSlots(outcome: AnimatedOutcome) {
       const grid = outcome.visual?.kind === 'slots' ? outcome.visual.grid : defaultSlotGrid();
-      const reelW = 156, rowH = 112, startX = 110, startY = 148;
+      const { reelW, rowH, startX, startY, symbolSize } = SLOT_LAYOUT;
       const finalize = () => {
         for (let col = 0; col < 5; col++) {
           const reel = this.reelContainers[col];
           if (!reel) continue;
           reel.y = startY;
           reel.removeAll(true);
-          for (let row=0; row<3; row++) reel.add(this.add.image(reelW/2,row*rowH+rowH/2,grid[row][col]).setDisplaySize(98,98));
+          for (let row=0; row<3; row++) reel.add(this.add.image(reelW/2,row*rowH+rowH/2,grid[row][col]).setDisplaySize(symbolSize,symbolSize));
         }
       };
 
@@ -527,7 +529,7 @@ export async function mountRealityGame(
         const sequence: SlotSymbol[]=[];
         for(let i=0;i<9;i++) sequence.push(SYMBOLS[(i+col*2)%SYMBOLS.length]);
         sequence.push(grid[0][col],grid[1][col],grid[2][col]);
-        sequence.forEach((symbol,i)=>reel.add(this.add.image(reelW/2,i*rowH+rowH/2,symbol).setDisplaySize(98,98)));
+        sequence.forEach((symbol,i)=>reel.add(this.add.image(reelW/2,i*rowH+rowH/2,symbol).setDisplaySize(symbolSize,symbolSize)));
         reel.y=startY-9*rowH;
         if(!options.reducedMotion) this.tweens.add({targets:reel,y:startY,duration:760+col*90,ease:'Cubic.easeOut'});
       }

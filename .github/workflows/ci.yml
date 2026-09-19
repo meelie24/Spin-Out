@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - run: npm run test:core
+      - run: npm test
       - run: node qa/install-visual-fixture.mjs
       - run: npm run typecheck
       - run: npm run lint
@@ -38,9 +38,7 @@ jobs:
           npm run qa || qa_status=$?
           fixture_status=0
           node qa/visual-fixtures.mjs || fixture_status=$?
-          test_status=0
-          npm test || test_status=$?
-          test "$qa_status" -eq 0 && test "$fixture_status" -eq 0 && test "$test_status" -eq 0
+          test "$qa_status" -eq 0 && test "$fixture_status" -eq 0
       - uses: actions/upload-artifact@v7
         if: always()
         with:
