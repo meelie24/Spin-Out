@@ -268,6 +268,36 @@ try {
   await plusDesktopPage.screenshot({ path: `${out}/plus-gate-1280.png`, fullPage: true });
   await plusDesktopContext.close();
 
+  // Visual audit: every setup state must hold the reference system, not only the transition.
+  const setupAuditContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const setupAudit = await setupAuditContext.newPage();
+  await setupAudit.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  await setupAudit.getByRole('heading', { name: /How much were you about to put in/i }).waitFor();
+  await setupAudit.screenshot({ path: `${out}/setup-wager-390.png`, fullPage: true });
+  await setupAudit.getByRole('button', { name: '$100' }).click();
+  await setupAudit.getByRole('heading', { name: /What were you about to play/i }).waitFor();
+  await setupAudit.screenshot({ path: `${out}/setup-game-390.png`, fullPage: true });
+  await setupAudit.getByRole('button', { name: /Slots/i }).click();
+  await setupAudit.getByRole('heading', { name: /What were you hoping would happen/i }).waitFor();
+  await setupAudit.screenshot({ path: `${out}/setup-intent-390.png`, fullPage: true });
+  await setupAudit.getByRole('button', { name: 'Win back what I lost', exact: true }).click();
+  await setupAudit.getByRole('heading', { name: /Realistically, what is this money for/i }).waitFor();
+  await setupAudit.screenshot({ path: `${out}/setup-obligation-390.png`, fullPage: true });
+  await setupAudit.getByRole('button', { name: 'Car payment', exact: true }).click();
+  await setupAudit.getByRole('heading', { name: /Before you start, where do you want to stop/i }).waitFor();
+  await setupAudit.screenshot({ path: `${out}/setup-limit-390.png`, fullPage: true });
+  await noHorizontalOverflow(setupAudit, 'setup states 390');
+  await setupAuditContext.close();
+
+  const setupDesktopContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const setupDesktop = await setupDesktopContext.newPage();
+  await setupDesktop.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+  await setupDesktop.getByRole('button', { name: '$100' }).click();
+  await setupDesktop.getByRole('heading', { name: /What were you about to play/i }).waitFor();
+  await setupDesktop.screenshot({ path: `${out}/setup-game-1280.png`, fullPage: true });
+  await noHorizontalOverflow(setupDesktop, 'setup game 1280');
+  await setupDesktopContext.close();
+
   // Full first-run flow on mobile.
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
