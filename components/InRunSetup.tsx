@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { isFinancialContextStale } from '@/lib/engine';
+import { useEffect, useState } from 'react';
+import { completedContextKeys, getAutomaticInRunContextKeys, getManualContextKeys } from '@/lib/contextQuestions';
 import type {
   DifficultTime,
   OnboardingQuestionKey,
@@ -24,13 +24,6 @@ interface SetupQuestion {
   placeholder?: string;
   skipLabel?: string;
 }
-
-const financialKeys: OnboardingQuestionKey[] = [
-  'income-date',
-  'available-money',
-  'obligation-amount',
-  'obligation-date',
-];
 
 const difficultOptions: ChoiceOption[] = [
   { value: 'payday', label: 'Payday' },
@@ -75,48 +68,12 @@ function isoInDays(days: number) {
   return date.toISOString().slice(0, 10);
 }
 
-function inferredCompletion(profile: RealityProfile) {
-  const set = new Set<OnboardingQuestionKey>(profile.onboardingCompleted ?? []);
-
-  if (!profile.onboardingCompleted) {
-    if (profile.nextIncomeDate) set.add('income-date');
-    if (profile.availableUntilIncomeCents != null) set.add('available-money');
-
-    if (profile.obligationType === 'none') {
-      set.add('obligation-amount');
-      set.add('obligation-date');
-    } else {
-      if (profile.obligationAmountCents != null) set.add('obligation-amount');
-      if (profile.obligationDueDate) set.add('obligation-date');
-    }
-
-    if (profile.quitReason?.trim()) set.add('quit-reason');
-    if (profile.personalMoneyGoal?.trim()) set.add('money-goal');
-    if (profile.difficultTimes?.length) set.add('difficult-times');
-
-    if (profile.recentLenderName?.trim()) {
-      set.add('lender-name');
-      set.add('lender-helped');
-      if (!profile.recentLenderHelpedRecently || profile.recentLenderAmountCents != null) {
-        set.add('lender-amount');
-      }
-    }
-
-    if (profile.paydayPlanActions?.length) set.add('payday-plan');
-  }
-
-  if (isFinancialContextStale(profile)) {
-    financialKeys.forEach(key => set.delete(key));
-  }
-
-  return set;
-}
-
-function pendingQuestions(profile: RealityProfile): SetupQuestion[] {
-  const complete = inferredCompletion(profile);
+function pendingQuestions(profile: RealityProfile, allowedKeys: OnboardingQuestionKey[]): SetupQuestion[] {
+  const complete = completedContextKeys(profile);
+  const allowed = new Set(allowedKeys);
   const questions: SetupQuestion[] = [];
   const push = (question: SetupQuestion) => {
-    if (!complete.has(question.key)) questions.push(question);
+    if (allowed.has(question.key) && !complete.has(question.key)) questions.push(question);
   };
 
   push({
@@ -249,7 +206,10 @@ export function InRunSetup({
   collapseSignal: number;
   onProfileChange: (next: RealityProfile) => void;
 }) {
-  const questions = useMemo(() => pendingQuestions(profile), [profile]);
+  const automaticQuestions = pendingQuestions(profile, getAutomaticInRunContextKeys(profile));
+  const manualQuestions = pendingQuestions(profile, getManualContextKeys(profile));
+  const [manualMode, setManualMode] = useState(false);
+  const questions = manualMode ? manualQuestions : automaticQuestions;
   const [expanded, setExpanded] = useState(true);
   const [consuming, setConsuming] = useState(false);
   const [consumingQuestion, setConsumingQuestion] = useState<SetupQuestion | null>(null);
@@ -274,7 +234,7 @@ export function InRunSetup({
   const complete = (question: SetupQuestion, value: string | number | boolean | null) => {
     if (consuming) return;
 
-    const completed = inferredCompletion(profile);
+    const completed = completedContextKeys(profile);
     completed.add(question.key);
 
     let next: RealityProfile = {
@@ -363,7 +323,26 @@ export function InRunSetup({
     };
   };
 
-  if (!activeQuestion) return null;
+  if (!activeQuestion) {
+    if (!manualQuestions.length) return null;
+    return (
+      <aside className="in-run-setup" data-state="collapsed" data-reduced-motion={reducedMotion ? 'true' : 'false'}>
+        <button
+          type="button"
+          className="setup-rail"
+          aria-label="Make it more immersive"
+          onClick={() => {
+            setManualMode(true);
+            setOpenAtSignal(collapseSignal);
+            setExpanded(true);
+          }}
+        >
+          <span>Make it more immersive</span>
+          <b aria-hidden="true">↑</b>
+        </button>
+      </aside>
+    );
+  }
 
   const state = forcedCollapsed ? 'collapsed' : consuming ? 'consuming' : effectiveExpanded ? 'expanded' : 'collapsed';
 
@@ -375,6 +354,7 @@ export function InRunSetup({
           className="setup-rail"
           aria-label="Make it more immersive"
           onClick={() => {
+            setManualMode(true);
             setOpenAtSignal(collapseSignal);
             setExpanded(true);
           }}
