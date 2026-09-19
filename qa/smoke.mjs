@@ -232,10 +232,38 @@ try {
   const authDialog = authPage.getByRole('dialog', { name: 'Sign in' });
   await authDialog.waitFor();
   assert(await authPage.evaluate(() => document.querySelector('[role="dialog"]')?.contains(document.activeElement)), 'auth dialog did not receive focus');
+  await authPage.screenshot({ path: `${out}/auth-dialog-1024.png`, fullPage: true });
   await authPage.keyboard.press('Escape');
   assert(await authDialog.count() === 0, 'Escape did not close auth dialog');
   assert(await signIn.evaluate(el => document.activeElement === el), 'auth focus did not return to trigger');
   await authContext.close();
+
+  // Brand-system render audit for surfaces not covered by the gameplay journey.
+  const brandContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const brandPage = await brandContext.newPage();
+
+  await brandPage.goto(`${base}/plus`, { waitUntil: 'domcontentloaded' });
+  await brandPage.getByRole('heading', { name: /Your full history/i }).waitFor();
+  await noHorizontalOverflow(brandPage, 'Plus 390');
+  await brandPage.screenshot({ path: `${out}/plus-gate-390.png`, fullPage: true });
+
+  await brandPage.goto(`${base}/research`, { waitUntil: 'domcontentloaded' });
+  await brandPage.getByRole('heading', { name: /Why Spin Out works this way/i }).waitFor();
+  await noHorizontalOverflow(brandPage, 'Research 390');
+  await brandPage.screenshot({ path: `${out}/research-390.png`, fullPage: true });
+
+  await brandPage.goto(`${base}/help`, { waitUntil: 'domcontentloaded' });
+  await brandPage.getByRole('heading', { name: /Put more distance between you and gambling/i }).waitFor();
+  await noHorizontalOverflow(brandPage, 'Help 390');
+  await brandPage.screenshot({ path: `${out}/help-390.png`, fullPage: true });
+  await brandContext.close();
+
+  const plusDesktopContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const plusDesktopPage = await plusDesktopContext.newPage();
+  await plusDesktopPage.goto(`${base}/plus`, { waitUntil: 'domcontentloaded' });
+  await plusDesktopPage.getByRole('heading', { name: /Your full history/i }).waitFor();
+  await plusDesktopPage.screenshot({ path: `${out}/plus-gate-1280.png`, fullPage: true });
+  await plusDesktopContext.close();
 
   // Full first-run flow on mobile.
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
