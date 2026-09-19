@@ -258,10 +258,16 @@ try {
   await brandPage.goto(`${base}/help`, { waitUntil: 'domcontentloaded' });
   await brandPage.getByRole('heading', { name: /Put more distance between you and gambling/i }).waitFor();
   await noHorizontalOverflow(brandPage, 'Help 390');
-  const helpResourceName = brandPage.getByRole('link', { name: /Gambling Therapy/i }).locator('strong');
-  const helpNameBox = await helpResourceName.boundingBox();
-  assert(Boolean(helpNameBox) && helpNameBox.x >= 0 && helpNameBox.x + helpNameBox.width <= 390,
-    `Help 390 resource name is clipped outside the visible ledger: ${JSON.stringify(helpNameBox)}`);
+  const helpResourceLink = brandPage.getByRole('link', { name: /Gambling Therapy/i });
+  const helpResourceName = helpResourceLink.locator('strong');
+  const helpResourceArrow = helpResourceLink.locator('b');
+  const [helpNameBox, helpArrowBox] = await Promise.all([helpResourceName.boundingBox(), helpResourceArrow.boundingBox()]);
+  assert(Boolean(helpNameBox && helpArrowBox)
+    && helpNameBox.x >= 45
+    && helpNameBox.x < helpArrowBox.x - 20
+    && helpNameBox.width >= 90
+    && helpNameBox.x + helpNameBox.width <= helpArrowBox.x,
+    `Help 390 resource title is auto-placed into the wrong/clipped grid column: ${JSON.stringify({ helpNameBox, helpArrowBox })}`);
   await brandPage.screenshot({ path: `${out}/help-390.png`, fullPage: true });
 
   await brandPage.goto(`${base}/privacy`, { waitUntil: 'domcontentloaded' });
