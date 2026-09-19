@@ -232,6 +232,9 @@ try {
   const authDialog = authPage.getByRole('dialog', { name: 'Sign in' });
   await authDialog.waitFor();
   assert(await authPage.evaluate(() => document.querySelector('[role="dialog"]')?.contains(document.activeElement)), 'auth dialog did not receive focus');
+  const authBox = await authDialog.boundingBox();
+  assert(Boolean(authBox) && authBox.width >= 360 && authBox.x > 170 && authBox.x + authBox.width < 940,
+    `auth dialog is visually trapped outside the main viewport: ${JSON.stringify(authBox)}`);
   await authPage.screenshot({ path: `${out}/auth-dialog-1024.png`, fullPage: true });
   await authPage.keyboard.press('Escape');
   assert(await authDialog.count() === 0, 'Escape did not close auth dialog');

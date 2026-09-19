@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { RevenueCatCheckout } from './RevenueCatCheckout';
 import { createBrowserSupabase, supabaseConfigured } from '@/lib/supabase/client';
 
@@ -63,7 +64,7 @@ export function PlusPanel({ onClose }: { onClose: () => void }) {
   const trial = access?.source === 'trial';
   const eligible = access?.trial?.eligible === true;
 
-  return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
+  const panel = <div className="modal-backdrop plus-backdrop" role="presentation" onMouseDown={onClose}>
     <section ref={dialog} className="glass-dialog plus-dialog" role="dialog" aria-modal="true" aria-labelledby="plus-title" onMouseDown={e => e.stopPropagation()}>
       <p className="kicker">Spin Out+</p>
       <h2 id="plus-title">Full history and trends.</h2>
@@ -126,4 +127,6 @@ export function PlusPanel({ onClose }: { onClose: () => void }) {
       <button className="bare-link plus-close" type="button" onClick={onClose}>Close</button>
     </section>
   </div>;
+
+  return typeof document !== 'undefined' ? createPortal(panel, document.body) : null;
 }
