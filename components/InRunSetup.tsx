@@ -338,6 +338,7 @@ export function InRunSetup({
       setCustomDate(false);
       setInputValue('');
       setChoicePager({ key: null, page: 0 });
+      setExpanded(false);
     }, duration);
   };
 
