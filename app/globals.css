@@ -7087,3 +7087,12 @@ body:has(.plain-page[data-editorial="ledger"]){
     opacity:.04;
   }
 }
+
+
+/* Editorial environmental art must never participate in page geometry. */
+body:has(.plain-page[data-editorial="ledger"]){
+  overflow-x:hidden;
+}
+.plain-page[data-editorial="ledger"]{
+  overflow:clip;
+}
