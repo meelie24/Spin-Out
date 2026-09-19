@@ -34,6 +34,7 @@ jobs:
             if curl -fsS http://127.0.0.1:3000 >/dev/null; then break; fi
             sleep 1
           done
+          node qa/hud-reflow.mjs
           qa_status=0
           npm run qa || qa_status=$?
           fixture_status=0
