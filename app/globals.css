@@ -2324,3 +2324,116 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
   .setup-choice-row button,
   .setup-choice-row.is-paged button{font-size:11px;padding-inline:3px}
 }
+
+
+/* Research-first quality pass: mobile home hierarchy */
+@media(max-width:700px){
+  .home-game-grid,
+  .home-game-grid-second{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px;
+  }
+  .home-game-card,
+  .home-game-card.game-slots,
+  .home-game-card.game-poker,
+  .home-game-card.game-other{
+    min-height:188px!important;
+    padding:14px 12px 12px;
+    border-radius:17px;
+  }
+  .game-card-top{font-size:7px}
+  .game-symbols{min-height:70px!important;gap:3px}
+  .game-symbols img{width:40px;height:40px}
+  .game-card-copy h3{font-size:19px;margin-bottom:5px}
+  .game-card-copy>p{display:none}
+  .game-purpose{
+    display:block;
+    font-size:9px;
+    line-height:1.35;
+    color:#9c8775;
+  }
+  .game-enter{padding-top:10px;font-size:7px}
+  .games-mid-prompt,
+  .prompt-bottom{display:none!important}
+  .games-bottom-row{padding-top:8px}
+  .hero-machine{transform:scale(.94);transform-origin:50% 0}
+}
+
+/* Research-first quality pass: My Reality summary first */
+.reality-context-summary{display:grid;gap:14px}
+.context-summary-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:4px 0 2px;
+}
+.context-summary-top p{
+  margin:0;
+  max-width:42ch;
+  color:#746257;
+  font-size:13px;
+  line-height:1.5;
+}
+.context-summary-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.context-summary-grid article{
+  min-width:0;
+  padding:15px 14px;
+  border:1px solid rgba(75,50,39,.1);
+  border-radius:14px;
+  background:rgba(255,251,244,.5);
+  display:grid;
+  gap:5px;
+}
+.context-summary-grid span{
+  color:#8c7769;
+  font-size:9px;
+  line-height:1.3;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+}
+.context-summary-grid strong{
+  color:#473228;
+  font-size:15px;
+  line-height:1.25;
+  letter-spacing:-.018em;
+  overflow-wrap:anywhere;
+}
+.context-summary-grid small{
+  color:#8a7567;
+  font-size:11px;
+  line-height:1.35;
+}
+.context-saved-note{margin:0;color:#765b43;font-size:11px}
+.reality-context-editor{display:grid}
+.context-cancel-edit{justify-self:center;margin-top:10px}
+@media(max-width:560px){
+  .context-summary-grid{grid-template-columns:1fr}
+  .context-summary-grid article{padding:13px}
+  .context-summary-top p{font-size:12px}
+}
+
+/* Research-first quality pass: Run 10,000 gist first */
+.longrun-readout{
+  margin:2px 0 0!important;
+  color:#d7c6b5!important;
+  font-size:12px!important;
+  line-height:1.5!important;
+}
+.longrun-details-toggle{
+  min-height:42px;
+  border:1px solid rgba(233,198,139,.2);
+  border-radius:11px;
+  background:rgba(255,255,255,.05);
+  color:#ead3b1;
+  padding:0 13px;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.03em;
+}
+.longrun-details{display:grid;gap:7px}
+.longrun-details>small{display:block}

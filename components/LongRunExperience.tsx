@@ -16,6 +16,7 @@ export function LongRunExperience({
   onClose: () => void;
 }) {
   const [phaseIndex, setPhaseIndex] = useState(0);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const reduced = typeof window !== 'undefined'
     && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
@@ -80,18 +81,28 @@ export function LongRunExperience({
               <strong className={result.expectedNetCents < 0 ? 'is-negative' : ''}>{result.expectedNetCents >= 0 ? '+' : ''}{formatMoney(result.expectedNetCents)}</strong>
             </div>
           </div>
-          <div className="longrun-stats">
-            <div><span>Wins</span><strong>{result.wins.toLocaleString()}</strong></div>
-            <div><span>Losses</span><strong>{result.losses.toLocaleString()}</strong></div>
-            <div><span>Near misses</span><strong>{result.nearMisses.toLocaleString()}</strong></div>
-            <div><span>Longest losing stretch</span><strong>{result.longestLossStreak}</strong></div>
-          </div>
-          <p>{result.netCents >= 0
-            ? 'This sample finished ahead. That can happen. It does not change the game model.'
-            : 'This sample finished down. Individual runs still move around a lot.'}</p>
-          <small>{result.expectationBasis}: about {(result.modelReturnRate * 100).toFixed(1)}¢ back per $1 over repeated play.</small>
-          <small>Sample staked: {formatMoney(result.totalStakedCents)} · Sample returned: {formatMoney(result.totalReturnedCents)}</small>
-          {result.strategyNote ? <small>{result.strategyNote}</small> : null}
+          <p className="longrun-readout">{result.netCents >= 0
+            ? 'This sample finished ahead. That can happen. One sample does not change what the game is expected to return over time.'
+            : 'This sample finished down. Individual samples move around; the model expectation is the long-run comparison.'}</p>
+          <button
+            type="button"
+            className="longrun-details-toggle"
+            aria-expanded={detailsOpen}
+            onClick={() => setDetailsOpen(open => !open)}
+          >{detailsOpen ? 'Hide the numbers' : 'See the numbers'}</button>
+          {detailsOpen ? (
+            <div className="longrun-details">
+              <div className="longrun-stats">
+                <div><span>Wins</span><strong>{result.wins.toLocaleString()}</strong></div>
+                <div><span>Losses</span><strong>{result.losses.toLocaleString()}</strong></div>
+                <div><span>Near misses</span><strong>{result.nearMisses.toLocaleString()}</strong></div>
+                <div><span>Longest losing stretch</span><strong>{result.longestLossStreak}</strong></div>
+              </div>
+              <small>{result.expectationBasis}: about {(result.modelReturnRate * 100).toFixed(1)}¢ back per $1 over repeated play.</small>
+              <small>Sample staked: {formatMoney(result.totalStakedCents)} · Sample returned: {formatMoney(result.totalReturnedCents)}</small>
+              {result.strategyNote ? <small>{result.strategyNote}</small> : null}
+            </div>
+          ) : null}
         </div>
       )}
     </section>

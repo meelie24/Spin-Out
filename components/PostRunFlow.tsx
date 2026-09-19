@@ -266,7 +266,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
           ) : null}
 
           <div className="summary-actions">
-            <button className="primary-button" type="button" onClick={() => void finishAndLeave()}>Done</button>
+            <button className="primary-button" type="button" onClick={() => void finishAndLeave()}>Back home</button>
             <button className="bare-link" type="button" onClick={() => setPlusOpen(true)}>Spin Out+</button>
           </div>
           {plusOpen ? <PlusPanel onClose={() => setPlusOpen(false)} /> : null}
