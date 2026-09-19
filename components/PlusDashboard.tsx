@@ -82,12 +82,33 @@ export function PlusDashboard({ authenticated, premium, accessSource, trialEligi
 
   if (!premium) {
     return <main className="plus-page">
-      <section className="plus-gate">
-        <p className="kicker">Spin Out+</p>
-        <h1>Your full history.</h1>
-        <p>{authenticated ? trialEligible ? 'Your first Reality Run includes the full Plus feature set. Start any game to claim it.' : 'Core Reality Runs stay free. Subscribe to restore cross-device history, trends and deeper personalization.' : 'Sign in to claim your one-run Plus trial or use paid Plus across devices.'}</p>
-        {authenticated ? <button className="primary-button" type="button" onClick={() => setUpgradeOpen(true)}>See Plus</button> : <Link className="primary-button" href="/">Sign in</Link>}
-        <Link className="bare-link" href="/">Back home</Link>
+      <section className="plus-gate plus-gate-composed">
+        <div className="plus-gate-copy">
+          <p className="kicker">Spin Out+</p>
+          <h1>Your full history.</h1>
+          <p>{authenticated ? trialEligible ? 'Your first Reality Run includes the full Plus feature set. Start any game to claim it.' : 'Core Reality Runs stay free. Subscribe to restore cross-device history, trends and deeper personalization.' : 'Sign in to claim your one-run Plus trial or use paid Plus across devices.'}</p>
+          <div className="plus-gate-actions">
+            {authenticated ? <button className="primary-button" type="button" onClick={() => setUpgradeOpen(true)}>See Plus</button> : <Link className="primary-button" href="/">Sign in</Link>}
+            <Link className="bare-link" href="/">Back home</Link>
+          </div>
+        </div>
+
+        <aside className="plus-gate-visual" aria-label="What Spin Out Plus helps you review">
+          <span className="plus-gate-mark" aria-hidden="true">+</span>
+          <div className="plus-preview-title">
+            <small>Across runs</small>
+            <strong>See what keeps changing.</strong>
+          </div>
+          <div className="plus-preview-tracks" aria-hidden="true">
+            <i/><i/><i/><i/><i/><i/><i/><i/>
+          </div>
+          <div className="plus-preview-ledger">
+            <div><span>Money kept</span><b>Across time</b></div>
+            <div><span>Time to leave</span><b>First vs recent</b></div>
+            <div><span>Patterns</span><b>What keeps showing up</b></div>
+          </div>
+          <p>History is useful when it helps you notice what repeats.</p>
+        </aside>
       </section>
       {authenticated && upgradeOpen ? <PlusPanel onClose={() => setUpgradeOpen(false)} /> : null}
     </main>;
