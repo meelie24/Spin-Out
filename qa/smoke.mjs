@@ -651,11 +651,16 @@ try {
   await contextPage.getByText(/Payday's tomorrow\./i).waitFor();
   await contextPage.screenshot({ path: `${out}/payday-shield-390.png`, fullPage: true });
   await contextPage.getByRole('button', { name: 'My reality' }).click();
-  await contextPage.getByRole('heading', { name: /What should Spin Out keep in mind/i }).waitFor();
+  await contextPage.getByRole('heading', { name: /What Spin Out knows right now/i }).waitFor();
+  assert(await contextPage.locator('.reality-context-summary').count() === 1,
+    'My Reality did not open on the summary-first surface');
+  assert(await contextPage.locator('.reality-context-dialog input:visible, .reality-context-dialog select:visible').count() === 0,
+    'My Reality summary exposed edit controls before the user asked for them');
+  await contextPage.screenshot({ path: `${out}/my-reality-390.png`, fullPage: true });
+  await contextPage.getByRole('button', { name: 'Edit', exact: true }).click();
   const realitySave = contextPage.getByRole('button', { name: 'Save' });
   await realitySave.waitFor();
-  assert(await realitySave.isVisible(), 'My Reality save action is not visible on mobile');
-  await contextPage.screenshot({ path: `${out}/my-reality-390.png`, fullPage: true });
+  assert(await realitySave.isVisible(), 'My Reality save action is not visible after entering edit mode');
   await contextHome.close();
 
   // Reduced motion stays playable.
