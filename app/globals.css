@@ -7239,7 +7239,7 @@ body:has(.plain-page[data-editorial="ledger"]){
    FINAL MOBILE LEGIBILITY + LONG-RUN DENSITY
    Close the last visible deductions from the green render.
    ========================================================= */
-@media(max-width:700px){
+@media(max-width:900px){
   .in-run-setup[data-state="expanded"] .setup-question-title,
   .in-run-setup[data-state="consuming"] .setup-question-title{
     max-height:none!important;
@@ -7248,6 +7248,7 @@ body:has(.plain-page[data-editorial="ledger"]){
     line-height:1.15!important;
     letter-spacing:-.025em!important;
     overflow:visible!important;
+    overflow-wrap:anywhere;
     text-wrap:balance;
   }
   .in-run-setup[data-state="expanded"] .setup-question-top,
@@ -7255,7 +7256,8 @@ body:has(.plain-page[data-editorial="ledger"]){
     min-height:39px!important;
     align-items:start!important;
   }
-
+}
+@media(max-width:700px){
   .reference-locked .game-tile small{
     display:none!important;
   }
@@ -7335,6 +7337,8 @@ body:has(.plain-page[data-editorial="ledger"]){
   .run-shell[data-environment="layered-casino"] .in-run-setup{
     position:fixed;
     z-index:20;
+    overflow-y:auto;
+    overscroll-behavior:contain;
   }
   .setup-not-now{
     min-height:44px;
