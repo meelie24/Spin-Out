@@ -5807,12 +5807,12 @@ body:has(.plain-page){
     rgba(26,15,13,.74);
 }
 .setup-shell[data-material="casino-setup"][data-step="limit"] .limit-setup-grid .choice-card:before{
-  content:"STOP";
+  content:"";
   position:absolute;
-  top:14px;left:14px;
-  color:#9c7145;
-  font:700 7px/1 var(--so-ui);
-  letter-spacing:.18em;
+  top:15px;left:14px;
+  width:30px;height:2px;
+  background:linear-gradient(90deg,#b77d43,rgba(183,125,67,.08));
+  box-shadow:0 5px 0 rgba(183,125,67,.18);
 }
 .setup-shell[data-material="casino-setup"][data-step="limit"] .limit-setup-grid .choice-card span{
   max-width:10ch;
@@ -5832,6 +5832,7 @@ body:has(.plain-page){
 }
 .setup-shell[data-material="casino-setup"][data-step="limit"] .limit-setup-grid .choice-card:last-child:before{
   position:static;
+  flex:0 0 30px;
   margin-right:16px;
 }
 .setup-shell[data-material="casino-setup"][data-step="limit"] .limit-setup-grid .choice-card:last-child span{
