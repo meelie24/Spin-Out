@@ -521,6 +521,12 @@ try {
     assert(await quickLinks.count() === 6,
       'early mobile game chooser did not expose all six games');
 
+    const quickColumns = await quickPick.evaluate(el =>
+      getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length
+    );
+    assert(quickColumns === 2,
+      `390px quick game chooser used ${quickColumns} columns instead of a readable two-column grid`);
+
     const hero = page.locator('.hub-hero');
     const machine = page.locator('.hero-machine');
     const quickBox = await quickPick.boundingBox();
