@@ -163,7 +163,7 @@ export function RealitySetup({
         <Image className="setup-symbol setup-symbol-coin" src="/symbols/cash-coin.svg" alt="" width={170} height={170} />
       </div>
       <div className="setup-top">
-        <span className="brand-quiet">Spin Out</span>
+        <span className="brand-quiet">Reality Run</span>
         <span>{firstRun ? 'Quick setup' : 'Before this run'}</span>
       </div>
 
