@@ -259,7 +259,25 @@ try {
   await brandPage.getByRole('heading', { name: /Put more distance between you and gambling/i }).waitFor();
   await noHorizontalOverflow(brandPage, 'Help 390');
   await brandPage.screenshot({ path: `${out}/help-390.png`, fullPage: true });
+
+  await brandPage.goto(`${base}/privacy`, { waitUntil: 'domcontentloaded' });
+  await brandPage.getByRole('heading', { name: /Your data stays limited to what Spin Out needs/i }).waitFor();
+  await noHorizontalOverflow(brandPage, 'Privacy 390');
+  await brandPage.screenshot({ path: `${out}/privacy-390.png`, fullPage: true });
+
+  await brandPage.goto(`${base}/terms`, { waitUntil: 'domcontentloaded' });
+  await brandPage.getByRole('heading', { name: /Spin Out is a simulation/i }).waitFor();
+  await noHorizontalOverflow(brandPage, 'Terms 390');
+  await brandPage.screenshot({ path: `${out}/terms-390.png`, fullPage: true });
   await brandContext.close();
+
+  const supportDesktopContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const supportDesktopPage = await supportDesktopContext.newPage();
+  await supportDesktopPage.goto(`${base}/research`, { waitUntil: 'domcontentloaded' });
+  await supportDesktopPage.getByRole('heading', { name: /Why Spin Out works this way/i }).waitFor();
+  await noHorizontalOverflow(supportDesktopPage, 'Research 1280');
+  await supportDesktopPage.screenshot({ path: `${out}/research-1280.png`, fullPage: true });
+  await supportDesktopContext.close();
 
   const plusDesktopContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const plusDesktopPage = await plusDesktopContext.newPage();
