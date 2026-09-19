@@ -2437,3 +2437,5 @@ body:has(.home-hub){background:#120b09;color:#f5ead9}
 }
 .longrun-details{display:grid;gap:7px}
 .longrun-details>small{display:block}
+
+.context-summary-money{font-size:22px;line-height:1;color:#3f2c23;letter-spacing:-.035em;font-variant-numeric:tabular-nums}

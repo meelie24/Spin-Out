@@ -494,6 +494,8 @@ try {
     const page = await context.newPage();
     await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
     await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.locator('.in-run-setup[data-state="collapsed"]').waitFor();
+    await page.getByRole('button', { name: 'Make it more immersive', exact: true }).click();
     await page.getByRole('heading', { name: /Has Alex had to help you recently/i }).waitFor();
     await page.getByRole('button', { name: 'Yeah', exact: true }).click();
     await page.waitForTimeout(1_100);

@@ -138,13 +138,9 @@ export function RealityContextPanel({
   };
 
   const obligationLabel = obligations.find(option => option.value === draft.obligationType)?.label ?? 'Not set';
-  const dueBits = [
-    moneyLabel(draft.obligationAmountCents),
-    draft.obligationDueDate || null,
-  ].filter(Boolean);
   const moneyDue = draft.obligationType === 'none'
     ? 'Nothing specific'
-    : dueBits.join(' · ') || 'Details not set';
+    : draft.obligationDueDate || 'Due date not set';
 
   const incomeBits = [
     moneyLabel(draft.availableUntilIncomeCents)
@@ -183,6 +179,9 @@ export function RealityContextPanel({
             <article>
               <span>What this money is for</span>
               <strong>{obligationLabel}</strong>
+              {draft.obligationType !== 'none' && draft.obligationAmountCents != null
+                ? <b className="context-summary-money">{moneyLabel(draft.obligationAmountCents)}</b>
+                : null}
               <small>{moneyDue}</small>
             </article>
             <article>
