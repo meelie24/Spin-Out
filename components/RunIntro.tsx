@@ -12,14 +12,16 @@ export function RunIntro({
   profile: RealityProfile;
   onStart: () => void;
 }) {
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    typeof window !== 'undefined'
+      && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+  );
   const startButton = useRef<HTMLButtonElement>(null);
   const stake = stakeOptionsFor(profile.intendedWagerCents)[1];
 
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     const sync = () => setReducedMotion(Boolean(media?.matches));
-    sync();
     media?.addEventListener?.('change', sync);
     const timer = window.setTimeout(() => startButton.current?.focus(), 80);
     return () => {
