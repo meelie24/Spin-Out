@@ -357,6 +357,7 @@ try {
     await page.getByRole('textbox', { name: 'Amount' }).fill('430');
     await page.getByRole('button', { name: 'Use', exact: true }).click();
     await page.waitForTimeout(1_100);
+    await page.getByRole('button', { name: 'Make it more immersive', exact: true }).click();
 
     await page.getByRole('heading', { name: /When does it have to be paid\?/i }).waitFor();
     await page.getByRole('button', { name: 'This week', exact: true }).click();
@@ -477,6 +478,7 @@ try {
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.v2') || 'null'));
     assert(stored?.profile?.recentLenderHelpedRecently === true,
       'lender follow-up lost the affirmative answer');
+    await page.getByRole('button', { name: 'Make it more immersive', exact: true }).click();
     await page.getByRole('heading', { name: /About how much did they have to cover/i }).waitFor();
   });
 
