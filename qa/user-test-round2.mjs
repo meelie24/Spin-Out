@@ -1281,6 +1281,8 @@ await check('poker result remains legible above the table artwork', async contex
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
   await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+  await page.locator('.game-action').click();
+  await page.getByRole('button', { name: 'Draw', exact: true }).waitFor();
   await completeOneObservedPlay(page);
   const capture = await page.locator('.phaser-stage canvas').screenshot();
   const visibleTextPixels = await page.evaluate(async source => {

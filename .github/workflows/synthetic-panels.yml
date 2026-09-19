@@ -1,0 +1,119 @@
+name: Synthetic panels
+
+on:
+  push:
+    branches: ['release/final-production-pass']
+    paths:
+      - 'qa/synthetic/**'
+      - '.github/workflows/synthetic-panels.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  normal-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Require green normal QA on this exact revision
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_REPOSITORY: ${{ github.repository }}
+          RUN_REVISION: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os, time, urllib.request
+          repository = os.environ['RUN_REPOSITORY']
+          revision = os.environ['RUN_REVISION']
+          url = f'https://api.github.com/repos/{repository}/actions/runs?head_sha={revision}&per_page=20'
+          previous = None
+          for attempt in range(100):
+              request = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  runs = json.load(response)['workflow_runs']
+              candidates = [run for run in runs if run['name'] == 'CI' and run['head_sha'] == revision]
+              current = max(candidates, key=lambda run: run['id']) if candidates else None
+              status = (current['status'], current['conclusion']) if current else ('waiting for CI', None)
+              if status != previous:
+                  print('Normal QA:', status, flush=True)
+                  previous = status
+              if current and current['status'] == 'completed':
+                  if current['conclusion'] != 'success':
+                      raise SystemExit('Normal QA did not pass; synthetic panels will not start')
+                  print('Normal QA passed:', current['html_url'], flush=True)
+                  break
+              time.sleep(10)
+          else:
+              raise SystemExit('Timed out waiting for normal QA')
+          PY
+  product:
+    needs: normal-qa
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: baseline
+            revision: 09d5778fd9c906c424ce14cfc3c462e57f5b0e52
+          - label: candidate
+            revision: ''
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ matrix.revision || github.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Use the same frozen panel tooling
+        if: matrix.label == 'baseline'
+        env:
+          PANEL_REVISION: ${{ github.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$PANEL_REVISION"
+          mkdir -p qa/synthetic
+          for file in panel-config browser-observations product-panel uiux-panel; do
+            git show "$PANEL_REVISION:qa/synthetic/$file.mjs" > "qa/synthetic/$file.mjs"
+          done
+      - run: npm install
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Freeze identical profiles
+        run: |
+          node qa/synthetic/panel-config.mjs --out qa-artifacts/synthetic/frozen-panel.json
+          node --input-type=module -e "import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('qa-artifacts/synthetic/frozen-panel.json')); if(p.sha256!=='2cbaef58ba5a817e26765ed52faf4aebb6f153c75a66b90e42c31e0f85c3cdb3') throw Error('Unexpected panel manifest');"
+      - name: Execute browser journeys
+        env:
+          PANEL_LABEL: ${{ matrix.label }}
+        run: |
+          npm start > /tmp/spinout-synthetic.log 2>&1 &
+          panel_server_pid=$!
+          trap 'kill "$panel_server_pid" || true' EXIT
+          for attempt in {1..45}; do
+            if curl -fsS http://127.0.0.1:3000 >/dev/null; then break; fi
+            sleep 1
+          done
+          panel_revision=$(git rev-parse HEAD)
+          set +e
+          node qa/synthetic/product-panel.mjs --panel qa-artifacts/synthetic/frozen-panel.json --base http://127.0.0.1:3000 --label smoke --revision "$panel_revision" --limit 2 --workers 1 --out qa-artifacts/synthetic-smoke
+          smoke_status=$?
+          set -e
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('qa-artifacts/synthetic-smoke/smoke-product-report.json')); if(r.failures.length) throw Error('Panel integration failed; inspect retained smoke traces');"
+          echo "Smoke exit: $smoke_status. Technical journey errors are gated above; geometry remains in the report."
+          set +e
+          node qa/synthetic/product-panel.mjs --panel qa-artifacts/synthetic/frozen-panel.json --base http://127.0.0.1:3000 --label "$PANEL_LABEL" --revision "$panel_revision" --workers 4 --out qa-artifacts/synthetic
+          panel_status=$?
+          set -e
+          echo "Full panel exit: $panel_status"
+          if [ "$PANEL_LABEL" = candidate ]; then exit "$panel_status"; fi
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('qa-artifacts/synthetic/baseline-product-report.json')); if(!r.completePanel) throw Error('Baseline panel incomplete'); console.log('Baseline retained findings:',r.failures.length,r.geometryFindings.length);"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: spin-out-synthetic-${{ matrix.label }}
+          path: |
+            qa-artifacts
+            /tmp/spinout-synthetic.log
+          if-no-files-found: error

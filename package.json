@@ -10,7 +10,10 @@
     "test": "npm run test:core",
     "test:core": "tsc -p tsconfig.core.json && node --test .core-test/tests/*.test.js",
     "qa": "node qa/smoke.mjs && node qa/user-test-round2.mjs",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "qa:synthetic:product": "node qa/synthetic/product-panel.mjs",
+    "qa:synthetic:uiux": "node qa/synthetic/uiux-panel.mjs --observations qa-artifacts/synthetic/uiux-observations.json",
+    "qa:synthetic": "npm run qa:synthetic:product && npm run qa:synthetic:uiux"
   },
   "dependencies": {
     "gsap": "^3.13.0",

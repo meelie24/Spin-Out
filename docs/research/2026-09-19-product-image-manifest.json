@@ -1,0 +1,56 @@
+[
+  {
+    "name": "health",
+    "url": "https://cdsassets.apple.com/live/7WUAS350/images/health/ios-26-iphone-16-pro-health-summary-highlights.png",
+    "path": "/tmp/spin-visual-health.png",
+    "type": "image/png",
+    "bytes": 352987,
+    "sha256": "fe5561657f94d8df211db634fec58cba09993b61f4a4a9823102c76bd8ec59c7",
+    "retrieved_utc": "2026-09-19T22:00:30.056604+00:00"
+  },
+  {
+    "name": "airbnb",
+    "url": "https://news-assets.withairbnb.com/wp-content/uploads/sites/21/2025/05/Services-flow-P0-US.jpg?quality=75&w=2560",
+    "path": "/tmp/spin-visual-airbnb.jpg",
+    "type": "image/jpeg",
+    "bytes": 132270,
+    "sha256": "8c8d41fe1a9efc311bb5d31d96cae6ee88a460763b14add020bf0fc5712147db",
+    "retrieved_utc": "2026-09-19T22:00:31.731063+00:00"
+  },
+  {
+    "name": "oura-today",
+    "url": "https://ouraringhelp.zendesk.com/hc/article_attachments/51439914251283",
+    "path": "/tmp/spin-visual-oura-today.png",
+    "type": "image/png",
+    "bytes": 1304930,
+    "sha256": "f125718256b743a5db9d7206edd0a090d92f897b36787756e2b010f6521503a8",
+    "retrieved_utc": "2026-09-19T22:00:31.343799+00:00"
+  },
+  {
+    "name": "oura-vitals",
+    "url": "https://ouraringhelp.zendesk.com/hc/article_attachments/51439914253459",
+    "path": "/tmp/spin-visual-oura-vitals.png",
+    "type": "image/png",
+    "bytes": 132552,
+    "sha256": "1aaf6db358dca3ef9a494937a07a69a1054bd385c94cf89152c80d61b261ed2c",
+    "retrieved_utc": "2026-09-19T22:00:31.394574+00:00"
+  },
+  {
+    "name": "ynab",
+    "url": "https://cdn.prod.website-files.com/640f69143ec11b21d42015c6/67aa6769519aa08294a66fce_37ba3f930e7ce2e32463ae3da6e69492_features_hero_test%20%281%29.avif",
+    "path": "/tmp/spin-visual-ynab.avif",
+    "type": "image/avif",
+    "bytes": 87776,
+    "sha256": "6e784bd969b0bbcf48a08c52f3fae158b972235964e3fa99b2cd8c951c82daba",
+    "retrieved_utc": "2026-09-19T22:00:32.733290+00:00"
+  },
+  {
+    "name": "todoist",
+    "url": "https://res.cloudinary.com/imagist/image/fetch/q_auto,f_auto,c_scale,w_800/https%3A%2F%2Fget.todoist.help%2Fhc%2Farticle_attachments%2F11379373873180",
+    "path": "/tmp/spin-visual-todoist.png",
+    "type": "image/png",
+    "bytes": 24114,
+    "sha256": "6283cd90f8eedaf513822c676ac9d1df5995d9a0d231bbe84b5f6675f382d526",
+    "retrieved_utc": "2026-09-19T22:00:32.383546+00:00"
+  }
+]
