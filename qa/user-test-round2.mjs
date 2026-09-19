@@ -105,7 +105,7 @@ async function finishKnownGameCoreSetup(page, game = 'slots') {
   await page.getByRole('heading', { name: 'What were you hoping would happen?' }).waitFor();
   await page.getByRole('button', { name: 'Win back what I lost', exact: true }).click();
 
-  await page.getByRole('heading', { name: 'What does this money need to make it past?' }).waitFor();
+  await page.getByRole('heading', { name: 'What do you still need this money for?' }).waitFor();
   await page.getByRole('button', { name: 'Car payment', exact: true }).click();
 
   await page.getByRole('heading', { name: 'How bad do you want to play right now?' }).waitFor();
@@ -158,6 +158,14 @@ try {
       'continuation setup did not begin expanded after the run started');
     assert(await page.locator('.in-run-setup .setup-question').count() === 1,
       'continuation setup rendered more than one question at once');
+
+    const scrollRow = page.locator('.in-run-setup .setup-choice-row.is-scroll');
+    const maskImage = await scrollRow.evaluate(el => {
+      const style = getComputedStyle(el);
+      return style.maskImage || style.webkitMaskImage || 'none';
+    });
+    assert(maskImage && maskImage !== 'none',
+      'horizontal setup choices ended in a raw clipped chip instead of a deliberate edge fade');
 
     const openBox = await setup.boundingBox();
     assert(Boolean(openBox), 'mobile continuation setup had no measurable bounding box');
@@ -282,6 +290,71 @@ try {
       'continuation setup stayed open while a foreground intervention was active');
   });
 
+
+
+  await check('first game action gets optional setup out of the way', async context => {
+    const page = await context.newPage();
+    await startKnownGameRealityRun(page, 'slots');
+    await page.locator('.in-run-setup[data-state="expanded"]').waitFor();
+    await page.locator('.game-action').click();
+    await page.locator('.in-run-setup[data-state="collapsed"]').waitFor({ timeout: 5_000 });
+    assert(await page.locator('.reality-ping, .xray-moment').count() === 0,
+      'first-action collapse test was masked by a foreground intervention');
+  });
+
+  await check('new context changes the live run immediately', async context => {
+    const completed = [
+      'income-date','available-money','quit-reason','money-goal','difficult-times',
+      'lender-name','lender-helped','lender-amount','payday-plan'
+    ];
+    const p = profile('slots', {
+      obligationType: 'car',
+      obligationAmountCents: null,
+      obligationDueDate: null,
+      onboardingCompleted: completed,
+    });
+    await seedActive(context, p, runFor(p));
+    const page = await context.newPage();
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+
+    await page.getByRole('heading', { name: /You said the car payment\. How much is it\?/i }).waitFor();
+    await page.getByRole('textbox', { name: 'Amount' }).fill('430');
+    await page.getByRole('button', { name: 'Use', exact: true }).click();
+    await page.waitForTimeout(1_100);
+
+    await page.getByRole('heading', { name: /When does it have to be paid\?/i }).waitFor();
+    await page.getByRole('button', { name: 'This week', exact: true }).click();
+    await page.waitForTimeout(1_100);
+
+    const liveContext = page.locator('.context-ghost.ghost-a');
+    await liveContext.waitFor();
+    const liveText = (await liveContext.innerText()).replace(/\s+/g, ' ');
+    assert(/CAR PAYMENT/i.test(liveText) && /\$430/.test(liveText),
+      `current Reality Run did not adopt the newly saved car-payment context: ${liveText}`);
+
+    const active = await page.evaluate(() => JSON.parse(localStorage.getItem('spinout.active.v2') || 'null'));
+    assert(active?.profile?.obligationAmountCents === 43_000 && Boolean(active?.profile?.obligationDueDate),
+      'active-run envelope did not persist the newly added context');
+  });
+
+  await check('desktop setup card stays beside the game', async context => {
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await startKnownGameRealityRun(page, 'slots');
+
+    const setup = page.locator('.in-run-setup');
+    const game = page.locator('.run-card');
+    await setup.waitFor();
+    const setupBox = await setup.boundingBox();
+    const gameBox = await game.boundingBox();
+    assert(Boolean(setupBox) && Boolean(gameBox), 'desktop setup or game had no measurable box');
+    assert(setupBox.x + setupBox.width <= gameBox.x + 2,
+      'desktop setup card overlapped the game instead of sitting beside it');
+    assert(setupBox.width >= 220 && setupBox.width <= 280,
+      `desktop setup card width was ${setupBox.width}px; expected a compact side card`);
+    await page.screenshot({ path: 'qa-artifacts/in-run-setup-desktop-1280.png', fullPage: true });
+  });
 
   await check('returning profile keeps known continuation context', async context => {
     const p = profile('slots', {
