@@ -41,7 +41,7 @@ export function PostRunFlow({ profile, end, onDone }: { profile: RealityProfile;
   const saved = useRef(false);
 
   const durationSeconds = Math.max(0, Math.round((end.endedAt - end.run.startedAt) / 1000));
-  const receipt = useMemo(() => buildRealityReceipt(profile, end.run, end.endedAt), [profile, end.run, end.endedAt]);
+  const receipt = useMemo(() => buildRealityReceipt(profile, end.run, end.endedAt, end.reason), [profile, end.run, end.endedAt, end.reason]);
   const lastPing = end.run.pings[end.run.pings.length - 1];
   const exitedAfterPing = end.reason === 'voluntary' && Boolean(lastPing && end.endedAt - lastPing.shownAt <= 60_000);
   const previousComparable = [...initialRuns].reverse().find(run =>

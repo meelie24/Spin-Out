@@ -120,7 +120,13 @@ export function buildRealityInsights(runs: RunRecord[]): RealityInsights {
     (run.pings ?? []).some(ping => ['stake-up','loss-streak','rapid-loop'].includes(ping.type))
   );
   if (recentChaseRuns.length >= 3) {
-    const exitedAfter=recentChaseRuns.filter(run => run.exitedAfterPing).length;
+    const exitedAfter=recentChaseRuns.filter(run => {
+      const lastPing=run.pings?.[run.pings.length-1];
+      if(run.exitReason!=='voluntary' || !lastPing) return false;
+      const elapsed=run.endedAt-lastPing.shownAt;
+      return ['stake-up','loss-streak','rapid-loop'].includes(lastPing.type)
+        && elapsed>=0 && elapsed<=60_000;
+    }).length;
     if (exitedAfter >= 2) {
       recovery.push({
         key:'left-after-chase',

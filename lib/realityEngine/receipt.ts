@@ -1,4 +1,4 @@
-import type { ActiveRun, RealityProfile } from '../types';
+import type { ActiveRun, ExitReason, RealityProfile } from '../types';
 
 export interface RealityReceipt {
   durationSeconds: number;
@@ -31,17 +31,21 @@ function obligationLabel(profile:RealityProfile){
 
 function raisedAfterLoss(run:ActiveRun){
   let lastActionNet:number|null=null;
+  let previousStake:number|undefined;
   for(const event of run.timeline){
     if(event.kind==='action'){
-      lastActionNet=event.netCents ?? 0;
-    } else if(event.kind==='stake' && lastActionNet!=null && lastActionNet<0){
-      return true;
+      lastActionNet=event.netCents ?? null;
+      previousStake=event.stakeCents;
+    } else if(event.kind==='stake'){
+      if(lastActionNet!=null && lastActionNet<0 && previousStake!=null
+        && event.stakeCents!=null && event.stakeCents>previousStake) return true;
+      previousStake=event.stakeCents;
     }
   }
   return false;
 }
 
-function behaviorFor(run:ActiveRun, endedAt:number){
+function behaviorFor(run:ActiveRun, endedAt:number, reason:ExitReason){
   if(run.chosenLimitRounds!=null && run.actionCount>run.chosenLimitRounds){
     const over=run.actionCount-run.chosenLimitRounds;
     return `You went ${over} round${over===1?'':'s'} past the limit you chose.`;
@@ -63,7 +67,7 @@ function behaviorFor(run:ActiveRun, endedAt:number){
   }
 
   const lastPing=run.pings[run.pings.length-1];
-  if(lastPing && endedAt-lastPing.shownAt<=60_000){
+  if(reason==='voluntary' && lastPing && endedAt>=lastPing.shownAt && endedAt-lastPing.shownAt<=60_000){
     return 'You left after the last Reality Ping.';
   }
 
@@ -82,6 +86,7 @@ export function buildRealityReceipt(
   profile:RealityProfile,
   run:ActiveRun,
   endedAt:number,
+  reason:ExitReason = 'voluntary',
 ):RealityReceipt{
   const durationSeconds=Math.max(0,Math.round((endedAt-run.startedAt)/1000));
   const hasLimit=run.chosenLimitRounds!=null||run.chosenLimitMinutes!=null;
@@ -93,7 +98,7 @@ export function buildRealityReceipt(
     rounds:run.actionCount,
     startedCents:run.initialBalanceCents,
     endedCents:run.balanceCents,
-    behavior:behaviorFor(run,endedAt),
+    behavior:behaviorFor(run,endedAt,reason),
     translation:translationFor(profile,run),
     respectedLimit:hasLimit?respectedRounds&&respectedTime:null,
   };

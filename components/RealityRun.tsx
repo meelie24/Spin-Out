@@ -6,13 +6,13 @@ import { RealityPing } from './RealityPing';
 import { XRayMoment } from './XRayMoment';
 import { LongRunExperience } from './LongRunExperience';
 import { InRunSetup } from './InRunSetup';
-import { buildPingCandidates, selectPing } from '@/lib/pings';
+import { buildPingCandidates } from '@/lib/pings';
 import { computeReality, formatMoney, shouldAutoEnd, stakeOptionsFor, daysUntil, isFinancialContextStale } from '@/lib/engine';
 import { dealPoker, drawPoker, resolveSimpleGame, SPORTS_MARKETS, type ResolvedGameOutcome } from '@/lib/gameEngines';
 import { clearActiveRun, loadData, saveActiveRun, track, updateData } from '@/lib/storage';
 import { spinAudio } from '@/lib/audio';
 import { createRunLease } from '@/lib/runLease';
-import { decideIntervention, initialDirectorState, interventionFamily, type AmbientMode, type InterventionSurface } from '@/lib/realityEngine/director';
+import { decideIntervention, initialDirectorState, interventionFamily, selectInterventionCandidates, type AmbientMode, type InterventionSurface } from '@/lib/realityEngine/director';
 import { simulateLongRun, type LongRunResult } from '@/lib/realityEngine/longRun';
 import type { ActiveRun, ExitReason, PingCandidate, RealityProfile, SessionLimit } from '@/lib/types';
 
@@ -260,7 +260,7 @@ export function RealityRun({
   }, [onEnd]);
 
   useEffect(() => {
-    if (!pokerRound && run.balanceCents < stakes[0] && !ended.current) {
+    if (!pokerRound && !animating && !ping && !longRun && !pendingBalanceEnd && run.balanceCents < stakes[0] && !ended.current) {
       const timer = window.setTimeout(() => finish('balance'), 80);
       return () => window.clearTimeout(timer);
     }
@@ -268,9 +268,9 @@ export function RealityRun({
       if (shouldAutoEnd(runRef.current.startedAt, Date.now())) finish('timeout');
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [finish, pokerRound, run.balanceCents, stakes]);
+  }, [finish, pokerRound, animating, ping, longRun, pendingBalanceEnd, run.balanceCents, stakes]);
 
-  const showPing = useCallback((next: ActiveRun) => {
+  const showPing = useCallback((next: ActiveRun, clockOnly = false) => {
     const data = loadData();
     const candidates = buildPingCandidates(profile, {
       initialBalanceCents: next.initialBalanceCents,
@@ -296,18 +296,11 @@ export function RealityRun({
       limitExceededAt: next.limitExceededAt ?? null,
       returnedAfterMs: next.returnedAfterMs ?? null,
       totalStakedCents: next.totalStakedCents ?? 0,
-    });
+    }).filter(candidate => !clockOnly || interventionFamily(candidate.type) === 'limit');
 
+    if (!candidates.length) return false;
     const recentTypes = next.pings.slice(-3).map(item => item.type);
-    const byFamily = new Map<string, PingCandidate[]>();
-    for (const candidate of candidates) {
-      const family = interventionFamily(candidate.type);
-      byFamily.set(family, [...(byFamily.get(family) ?? []), candidate]);
-    }
-
-    const representatives = [...byFamily.values()]
-      .map(group => selectPing(group, data.pingLearning, recentTypes))
-      .filter((candidate): candidate is PingCandidate => Boolean(candidate));
+    const representatives = selectInterventionCandidates(candidates, data.pingLearning, recentTypes);
 
     const decision = decideIntervention({
       now: Date.now(),
@@ -374,6 +367,16 @@ export function RealityRun({
     });
     return true;
   }, [longRun, ping, profile]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (ended.current || blockedByOtherTab || animating || pokerRound || ping || longRun) return;
+      const current = runRef.current;
+      if (current.chosenLimitMinutes == null || current.balanceCents < stakes[0]) return;
+      if (Date.now() - current.startedAt >= current.chosenLimitMinutes * 60_000) showPing(current, true);
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [animating, blockedByOtherTab, longRun, ping, pokerRound, showPing, stakes]);
 
   const notePostPingContinuation = (next: ActiveRun, outcome: ResolvedGameOutcome) => {
     const recentPing = lastDismissedPing.current;
@@ -736,14 +739,14 @@ export function RealityRun({
           <div className="bulbs bulbs-right" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
           </> : null}
           <RealityGame ref={game} gameType={profile.gamblingType} reducedMotion={reducedMotion} initialBalanceCents={run.balanceCents}/>
-          {ping && interventionSurface === 'xray'
+          {!longRun && ping && interventionSurface === 'xray'
             ? <XRayMoment
                 insight={ping}
                 onContinue={dismissPing}
                 onExit={leaveFromPing}
                 onRunLong={['near-miss','win-after-losses','loss-streak'].includes(ping.type) ? openLongRun : undefined}
               />
-            : ping
+            : !longRun && ping
               ? <RealityPing ping={ping} reducedMotion={reducedMotion} onDismiss={dismissPing} onExit={leaveFromPing}/>
               : null}
         </div>

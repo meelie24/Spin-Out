@@ -81,8 +81,44 @@ test('real-life translation uses only entered obligation numbers',()=>{
   assert.equal(receipt.translation,'$130 is about 30% of the car payment you entered.');
 });
 
+test('lowering or keeping a stake after a loss is not reported as raising it',()=>{
+  for (const stakeCents of [1_000, 2_000]) {
+    const receipt=buildRealityReceipt(profile,run({
+      chosenLimitRounds:null,
+      timeline:[
+        {kind:'action',at:1,stakeCents:2_000,netCents:-2_000},
+        {kind:'stake',at:2,stakeCents},
+      ],
+    }),200_000);
+    assert.equal(receipt.behavior,null);
+  }
+});
+
+test('receipt compares consecutive stake changes and requires known amounts',()=>{
+  const timeline:ActiveRun['timeline']=[
+    {kind:'action',at:1,stakeCents:4_000,netCents:-4_000},
+    {kind:'stake',at:2,stakeCents:1_000},
+    {kind:'stake',at:3,stakeCents:2_000},
+  ];
+  assert.equal(buildRealityReceipt(profile,run({chosenLimitRounds:null,timeline}),200_000).behavior,
+    'You raised the amount after a loss.');
+  assert.equal(buildRealityReceipt(profile,run({chosenLimitRounds:null,timeline:[
+    {kind:'action',at:1,netCents:-2_000},
+    {kind:'stake',at:2,stakeCents:4_000},
+  ]}),200_000).behavior,null);
+});
+
 test('receipt omits real-life translation without a meaningful loss or obligation',()=>{
   const noBill={...profile,obligationType:'none' as const,obligationAmountCents:null};
   const receipt=buildRealityReceipt(noBill,run({balanceCents:30_000}),200_000);
   assert.equal(receipt.translation,null);
+});
+
+test('automatic endings are not described as choosing to leave after a Ping',()=>{
+  const current=run({chosenLimitRounds:null,pings:[{
+    id:'ping',type:'obligation',level:2,message:'Bill',shownAt:190_000,dismissedAt:null,
+  }]});
+  assert.equal(buildRealityReceipt(profile,current,200_000,'timeout').behavior,null);
+  assert.equal(buildRealityReceipt(profile,current,200_000,'balance').behavior,null);
+  assert.equal(buildRealityReceipt(profile,current,200_000,'voluntary').behavior,'You left after the last Reality Ping.');
 });

@@ -114,3 +114,20 @@ test('shorter exit progress only appears from a real multi-session pattern', () 
   ];
   assert.equal(buildRealityInsights(mixed).recovery.some(item=>item.key==='shorter-exits'),false);
 });
+
+test('chase recovery attributes only a recent chase Ping followed by voluntary exit', () => {
+  const records = [1,2,3].map(id => {
+    const record=run(String(id),{exitedAfterPing:true});
+    return {...record,pings:[
+      {id:'chase',type:'stake-up',level:2,message:'Chase',shownAt:record.endedAt-90_000,dismissedAt:null},
+      {id:'later',type:'obligation',level:2,message:'Bill',shownAt:record.endedAt-10_000,dismissedAt:null},
+    ]};
+  });
+  const hasChaseInsight=(values:RunRecord[]) => buildRealityInsights(values).recovery.some(value=>value.key==='left-after-chase');
+  assert.equal(hasChaseInsight(records),false);
+  const recent=records.map(record=>({...record,pings:[{...record.pings[0],shownAt:record.endedAt-60_000}]}));
+  assert.equal(hasChaseInsight(recent),true);
+  assert.equal(hasChaseInsight(recent.map(record=>({...record,exitReason:'timeout' as const}))),false);
+  assert.equal(hasChaseInsight(recent.map(record=>({...record,endedAt:record.endedAt+1}))),false);
+  assert.equal(hasChaseInsight(recent.map(record=>({...record,pings:[{...record.pings[0],shownAt:record.endedAt+1}]}))),false);
+});

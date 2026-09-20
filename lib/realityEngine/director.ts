@@ -1,4 +1,5 @@
-import type { InterventionDirectorState, PingCandidate } from '../types';
+import type { InterventionDirectorState, PingCandidate, PingLearning } from '../types';
+import { selectPing } from '../pings';
 
 export type InterventionSurface = 'ping' | 'xray' | 'strong';
 export type AmbientMode = 'normal' | 'cooling' | 'ledger' | 'strong';
@@ -147,6 +148,20 @@ function surfaceFor(candidate: PingCandidate): InterventionSurface {
 function priority(candidate: PingCandidate) {
   const family = interventionFamily(candidate.type);
   return (FAMILY_PRIORITY[family] ?? 25) + candidate.level + (TYPE_PRIORITY[candidate.type] ?? 0);
+}
+
+export function selectInterventionCandidates(candidates: PingCandidate[], learning: PingLearning, recentTypes: string[]) {
+  const families = new Map<string, PingCandidate[]>();
+  for (const candidate of candidates) {
+    const family = interventionFamily(candidate.type);
+    families.set(family, [...(families.get(family) ?? []), candidate]);
+  }
+  return [...families.values()].map(group => {
+    const highestPriority = Math.max(...group.map(priority));
+    // Learning can choose between equivalent moments, never weaken urgency.
+    return selectPing(group.filter(candidate => priority(candidate) === highestPriority), learning, recentTypes);
+  })
+    .filter((candidate): candidate is PingCandidate => candidate != null);
 }
 
 function ambientFor(candidates: PingCandidate[]): AmbientMode {

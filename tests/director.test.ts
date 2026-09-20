@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   decideIntervention,
   initialDirectorState,
+  selectInterventionCandidates,
   type DirectorInput,
 } from '../lib/realityEngine/director';
 import type { PingCandidate } from '../lib/types';
@@ -32,6 +33,16 @@ test('director can intentionally do nothing', () => {
   const decision=decideIntervention(input());
   assert.equal(decision.foreground,null);
   assert.equal(decision.ambientMode,'normal');
+});
+
+test('family selection cannot demote urgent limits because their type was repeated', () => {
+  const candidates=selectInterventionCandidates([
+    candidate('limit-exceeded',5,{requiresChoice:true}),
+    candidate('time-limit-reached',4),
+  ],{},['limit-exceeded']);
+  const decision=decideIntervention(input({candidates}));
+  assert.equal(decision.foreground?.candidate.type,'limit-exceeded');
+  assert.equal(decision.foreground?.surface,'strong');
 });
 
 test('only one foreground intervention wins when several conditions qualify', () => {
