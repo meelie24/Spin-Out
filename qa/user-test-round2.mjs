@@ -272,6 +272,8 @@ try {
 
   await check('five-question entry reaches game without deposit gate', async context => {
     const page = await context.newPage();
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
     await finishKnownGameCoreSetup(page, 'slots');
 
     assert(await page.locator('.deposit-terminal').count() === 0,
@@ -282,6 +284,11 @@ try {
       'pre-run explanation did not expose one Start Reality Run action');
     assert(await page.getByText(/The rest of your setup will stay with you while you play\./i).count() === 1,
       'mobile pre-run explanation did not explain that setup continues during play');
+    await page.getByRole('button', { name: 'Start Reality Run', exact: true }).click();
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    assert(await page.locator('.phaser-stage canvas').count() === 1,
+      'transition from preview left multiple game canvases mounted');
+    assert(pageErrors.length === 0, 'game startup raised a browser error: ' + pageErrors.join('; '));
   });
 
   await check('run typography and optional questions remain readable at phone widths', async context => {
@@ -525,6 +532,28 @@ try {
 
 
 
+  await check('ordinary desktop Reality Ping dismisses without intercepting its button', async context => {
+    const p = profile('slots', {
+      triggerType: 'other', obligationType: 'none', availableUntilIncomeCents: null,
+      nextIncomeDate: null, obligationAmountCents: null, obligationDueDate: null,
+      personalMoneyGoal: null, quitReason: null,
+    });
+    await seedActive(context, p, runFor(p, { actionCount: 2, chosenLimitRounds: 3, lastPingAction: -10 }));
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${base}/play`, { waitUntil: 'domcontentloaded' });
+    await page.locator('.phaser-stage[data-ready="true"]').waitFor({ timeout: 15_000 });
+    await page.locator('.game-action').click();
+    const ping = page.locator('.reality-ping');
+    await ping.waitFor({ timeout: 9_000 });
+    await ping.evaluate(async element => {
+      await Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished));
+    });
+    await ping.getByRole('button', { name: 'Got it', exact: true }).click({ timeout: 6_000 });
+    await ping.waitFor({ state: 'detached' });
+    assert(await page.locator('.game-action').isEnabled(), 'dismissed Ping left gameplay blocked');
+  });
+
   await check('first game action gets optional setup out of the way', async context => {
     const page = await context.newPage();
     await startKnownGameRealityRun(page, 'slots');
@@ -686,7 +715,7 @@ try {
     const page = await context.newPage();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(base, { waitUntil: 'domcontentloaded' });
-    await page.locator('.game-tile').first().waitFor();
+    await page.locator('.lobby-game').first().waitFor();
 
     const quickPick = page.locator('.mobile-game-quickpick');
     await quickPick.waitFor();
@@ -703,8 +732,7 @@ try {
     assert(quickColumns === 2,
       `390px quick game chooser used ${quickColumns} columns instead of a readable two-column grid`);
 
-    const hero = page.locator('.hub-hero');
-    const machine = page.locator('.hero-machine');
+    const machine = page.locator('.lobby-hero-art');
     const quickBox = await quickPick.boundingBox();
     const machineBox = await machine.boundingBox();
     assert(Boolean(quickBox) && Boolean(machineBox), 'mobile hero elements were not measurable');
@@ -717,28 +745,30 @@ try {
     assert(quickOverflow <= 1,
       `mobile game chooser required ${quickOverflow}px of horizontal scrolling`);
 
-    assert(await page.locator('.hero-actions .primary-cta:visible').count() === 0,
+    assert(await page.locator('.lobby-hero-actions a:visible').count() === 0,
       'mobile hero still used a redundant Choose a game anchor after exposing direct game choices');
 
-    assert(await page.locator('.games-top-prompt:visible').count() === 0,
+    assert(await page.locator('.lobby-secondary-prompt:visible').count() === 0,
       'a second Reality Ping preview still interrupted the game catalog on mobile');
 
-    assert(await page.locator('.game-tile').count() === 6,
+    assert(await page.locator('.lobby-game').count() === 6,
       'mobile homepage did not keep all six games discoverable');
 
-    const columns = await page.locator('.game-library').first().evaluate(el =>
+    const columns = await page.locator('.lobby-game-grid').first().evaluate(el =>
       getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length
     );
     assert(columns === 2, `mobile game grid used ${columns} columns instead of a compact two-column layout`);
 
-    const visibleDescriptions = await page.locator('.game-tile p').evaluateAll(nodes =>
+    const visibleDescriptions = await page.locator('.lobby-game p').evaluateAll(nodes =>
       nodes.filter(node => getComputedStyle(node).display !== 'none').length
     );
     assert(visibleDescriptions === 0,
       'mobile game cards still showed full descriptive paragraphs');
 
-    assert(await page.locator('.games-mid-prompt:visible, .prompt-bottom:visible').count() === 0,
-      'secondary homepage prompts still interrupted the six-game mobile scan');
+    const catalogBox = await page.locator('.lobby-game-grid').boundingBox();
+    const realityBox = await page.locator('.lobby-reality').boundingBox();
+    assert(catalogBox && realityBox && realityBox.y >= catalogBox.y + catalogBox.height,
+      'Reality check interrupted the six-game mobile catalog');
   });
 
   await check('same-visit home prompt dismissal', async context => {

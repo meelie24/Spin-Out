@@ -1,0 +1,215 @@
+/* Mahinur Rahman reference: compact rails, banner, feature panels and poster catalog.
+   Scoped to the lobby so existing game, account and intervention flows keep their contracts. */
+html:has(.casino-home) { color-scheme: dark; background: #100b09; }
+body:has(.casino-home) { background: #100b09; }
+body:has(.casino-home) > .site-header { display: none; }
+.casino-home {
+  --lobby-bg: #100b09;
+  --lobby-panel: #1b1210;
+  --lobby-raised: #281a15;
+  --lobby-line: #624534;
+  --lobby-subtle-line: #3b2a22;
+  --lobby-text: #f4efe6;
+  --lobby-muted: #c8b5a2;
+  --lobby-accent: #efd79a;
+  width: 100%; max-width: 1800px; min-height: 100dvh; margin: 0 auto;
+  display: grid; grid-template-columns: 184px minmax(0, 1fr) 208px;
+  grid-template-rows: 64px 1fr; color: var(--lobby-text); background: var(--lobby-bg);
+  font-family: var(--font-ui), sans-serif; font-size: 14px; line-height: 1.5;
+}
+.casino-home :is(a, button) { -webkit-tap-highlight-color: transparent; overflow-wrap: anywhere; }
+.casino-home h1 { overflow-wrap: anywhere; }
+.lobby-quick-game > span { min-width: 0; }
+.lobby-feature > span > * { max-width: 100%; }
+.casino-home :is(a, button):focus-visible { outline: 2px solid var(--lobby-accent); outline-offset: 3px; }
+.lobby-skip { position: fixed; top: -80px; left: 16px; z-index: 100; padding: 12px 16px; background: var(--lobby-accent); color: var(--lobby-bg); border-radius: 4px; }
+.lobby-skip:focus { top: 8px; }
+.lobby-topbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 24px; padding: 0 20px; border-bottom: 1px solid var(--lobby-subtle-line); background: var(--lobby-panel); }
+.lobby-brand { display: flex; align-items: center; gap: 10px; min-width: 140px; min-height: 44px; }
+.lobby-brand strong { font-size: 19px; font-weight: 800; letter-spacing: -.04em; }
+.lobby-brand-mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--gold-hi), var(--gold)); color: var(--espresso); font-weight: 850; box-shadow: inset 0 1px #fff8; }
+.lobby-mode { display: flex; gap: 16px; align-items: center; font-weight: 700; font-size: 13px; }
+.lobby-mode > span { padding-left: 16px; border-left: 1px solid var(--lobby-line); color: var(--lobby-muted); font-size: 11px; font-weight: 500; }
+.lobby-account { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.lobby-account > a { background: var(--wine); border: 1px solid var(--lobby-line); padding: 8px 16px; border-radius: 6px; min-height: 40px; display: grid; place-items: center; font-size: 12px; font-weight: 750; }
+.lobby-account .bare-link { color: var(--lobby-text); }
+.lobby-account > button { min-height: 44px; }
+.lobby-sidebar { padding: 24px 12px; border-right: 1px solid var(--lobby-subtle-line); background: var(--lobby-panel); display: flex; flex-direction: column; gap: 24px; }
+.lobby-label { margin: 0 0 12px; color: var(--lobby-muted); font-size: 10px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+.lobby-sidebar > .lobby-label { margin: 0 12px -16px; }
+.lobby-nav { display: grid; gap: 4px; }
+.lobby-nav :is(a, button), .lobby-sidebar-games > a { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--lobby-muted); font: inherit; font-size: 12px; text-align: left; }
+.lobby-nav :is(a, button):hover, .lobby-sidebar-games > a:hover { background: var(--lobby-raised); color: var(--lobby-text); }
+.lobby-nav .is-active { color: var(--lobby-text); background: linear-gradient(100deg, var(--wine), var(--lobby-raised)); border-color: var(--lobby-line); box-shadow: inset 3px 0 var(--gold); }
+.lobby-nav :is(a, button) > span { color: var(--lobby-accent); font-size: 10px; font-variant-numeric: tabular-nums; }
+.lobby-sidebar-games { border-top: 1px solid var(--lobby-subtle-line); padding-top: 20px; }
+.lobby-sidebar-games > .lobby-label { margin-left: 12px; }
+.lobby-sidebar-games > a { min-height: 40px; }
+.lobby-sidebar-games img { object-fit: contain; }
+.lobby-sidebar-foot { margin-top: auto; padding: 20px 12px 0; border-top: 1px solid var(--lobby-subtle-line); font-size: 11px; color: var(--lobby-muted); }
+.lobby-sidebar-foot > span { color: var(--lobby-accent); font-weight: 700; }
+.lobby-sidebar-foot p { line-height: 1.65; }
+.lobby-content { min-width: 0; padding: 20px; }
+.lobby-mobile-nav { display: none; }
+.lobby-hero { isolation: isolate; position: relative; overflow: hidden; min-height: 288px; border: 1px solid var(--lobby-line); border-radius: 10px; background: var(--wine); display: grid; grid-template-columns: 1fr 1fr; }
+.lobby-hero-copy { position: relative; z-index: 1; padding: 24px; align-self: center; }
+.lobby-hero-copy > .lobby-label { color: var(--lobby-accent); font-size: 10px; letter-spacing: .05em; }
+.lobby-hero h1 { margin: 0 0 12px; font-family: var(--font-display), sans-serif; font-size: clamp(42px, 4.2vw, 64px); font-weight: 800; text-transform: uppercase; letter-spacing: -.02em; line-height: .94; max-width: 10ch; text-wrap: balance; }
+.lobby-hero-copy > p:not(.lobby-label) { max-width: 38ch; margin: 0 0 20px; color: var(--lobby-text); font-size: 12px; line-height: 1.6; }
+.lobby-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.lobby-hero-actions > a { display: flex; gap: 20px; align-items: center; justify-content: space-between; min-height: 44px; padding: 8px 14px; border-radius: 5px; background: linear-gradient(135deg, var(--gold-hi), var(--gold)); color: var(--espresso); font-size: 12px; font-weight: 850; box-shadow: inset 0 1px #fff8, 0 4px 16px #0003; }
+.lobby-hero-actions > span { font-size: 10px; color: var(--lobby-muted); }
+.lobby-hero-art { position: absolute; inset: 0 0 0 38%; z-index: -1; }
+.lobby-hero-art img { object-fit: cover; object-position: 50% 44%; }
+.lobby-hero-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--wine), #401b1d00 38%), linear-gradient(0deg, #100b0980, transparent 45%); }
+.casino-home .mobile-game-quickpick { display: none; }
+.lobby-features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.lobby-feature { position: relative; isolation: isolate; overflow: hidden; min-height: 142px; padding: 16px; border: 1px solid var(--lobby-subtle-line); border-radius: 8px; text-align: left; color: var(--lobby-text); background: var(--lobby-panel); }
+.lobby-feature > img { z-index: -2; object-fit: cover; object-position: 60% 38%; }
+.lobby-feature::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #100b09ed 0%, #100b0980 40%, #100b0910); }
+.lobby-feature > span { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.lobby-feature small { color: var(--lobby-muted); font-size: 10px; }
+.lobby-feature strong { font-family: var(--font-display), sans-serif; font-size: 26px; line-height: 1.05; font-weight: 700; text-transform: uppercase; }
+.lobby-feature b { display: flex; align-items: center; gap: 16px; margin-top: 14px; font-size: 11px; color: var(--lobby-accent); }
+.lobby-feature i { font-style: normal; }
+.lobby-feature:hover { border-color: var(--gold); }
+.lobby-payday { margin-top: 16px; }
+.lobby-games { padding-top: 24px; scroll-margin-top: 16px; }
+.lobby-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.lobby-section-heading h2 { margin: 0; font-size: 16px; font-weight: 750; line-height: 1.4; letter-spacing: -.025em; }
+.lobby-section-heading > :is(span, a) { flex-shrink: 0; color: var(--lobby-muted); font-size: 11px; }
+.lobby-section-heading > a { display: flex; align-items: center; gap: 12px; min-height: 44px; }
+.lobby-game-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.lobby-game { position: relative; isolation: isolate; overflow: hidden; min-width: 0; min-height: 222px; border-radius: 8px; border: 1px solid var(--lobby-subtle-line); display: flex; flex-direction: column; justify-content: flex-end; background: var(--lobby-panel); }
+.casino-home .lobby-game .tile-art { position: absolute; inset: 0; width: 100%; height: 100%; transform: none; background: transparent; opacity: 1; z-index: -2; border: 0; border-radius: 0; mask-image: none; }
+.lobby-game .tile-art::before, .lobby-game .tile-art::after { display: none; }
+.lobby-game .tile-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+.lobby-game::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, #100b0910 10%, #100b0900 25%, #100b09bd 59%, #100b09 87%); }
+.lobby-game-number { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; min-width: 24px; height: 24px; border-radius: 4px; color: var(--lobby-accent); background: #100b09d9; font-size: 10px; font-variant-numeric: tabular-nums; }
+.lobby-game-meta { padding: 12px 10px 0; }
+.lobby-game-meta > span { font-size: 9px; color: var(--lobby-accent); letter-spacing: .02em; }
+.lobby-game h3 { margin: 4px 0 0; color: var(--lobby-text); font-family: var(--font-display), sans-serif; font-size: clamp(21px, 1.9vw, 28px); line-height: 1.05; font-weight: 750; text-transform: uppercase; overflow-wrap: anywhere; }
+.lobby-game p { display: none; }
+.lobby-game-enter { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 12px 10px; color: var(--lobby-muted); font-size: 10px; line-height: 1.3; }
+.lobby-game-enter b { font-size: 16px; color: var(--lobby-accent); }
+.lobby-game:hover { border-color: var(--gold); box-shadow: 0 4px 16px #0005; }
+.lobby-how { padding-top: 24px; }
+.lobby-how-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.lobby-how-grid > div { display: flex; gap: 12px; padding: 16px 12px; background: var(--lobby-panel); border-radius: 6px; border: 1px solid var(--lobby-subtle-line); }
+.lobby-how-grid b { color: var(--gold); font-family: var(--font-display), sans-serif; font-size: 24px; line-height: 1.2; }
+.lobby-how-grid strong { display: block; font-size: 12px; }
+.lobby-how-grid p { margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--lobby-muted); }
+.lobby-safety-note { margin: 16px 0 0; color: var(--lobby-muted); font-size: 11px; }
+.lobby-footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--lobby-subtle-line); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; color: var(--lobby-muted); font-size: 10px; }
+.lobby-footer > div { display: flex; gap: 20px; }
+.lobby-footer a { display: flex; min-height: 44px; align-items: center; }
+.lobby-reality { border-left: 1px solid var(--lobby-subtle-line); background: var(--lobby-panel); padding: 20px 12px; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.lobby-reality-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lobby-reality-heading h2 { font-size: 12px; margin: 0; }
+.lobby-reality-heading > span { font-size: 10px; color: var(--lobby-muted); }
+.lobby-prompt-list { display: grid; gap: 12px; }
+.lobby-prompt { position: relative; padding: 16px 24px 14px 12px; border: 1px solid var(--lobby-line); border-radius: 6px; background: linear-gradient(120deg, var(--wine), var(--lobby-panel)); color: var(--lobby-text); text-align: left; width: 100%; transition: opacity .2s, transform .2s; }
+.lobby-prompt > span { display: block; font-size: 12px; line-height: 1.55; font-weight: 650; }
+.lobby-prompt small { display: block; margin-top: 10px; font-size: 9px; line-height: 1.5; color: var(--lobby-muted); }
+.lobby-prompt .prompt-close { position: absolute; top: 8px; right: 8px; width: auto; height: auto; border: 0; font-size: 14px; color: var(--lobby-muted); }
+.lobby-prompt:hover { border-color: var(--gold); }
+.lobby-prompt.is-dismissing { opacity: 0; transform: translateY(4px); }
+.lobby-signal { padding: 20px 0; border-block: 1px solid var(--lobby-subtle-line); }
+.lobby-signal > strong { display: block; font-size: 22px; letter-spacing: -.04em; line-height: 1.2; }
+.lobby-signal > p:not(.lobby-label) { color: var(--lobby-muted); font-size: 11px; line-height: 1.7; margin: 8px 0 0; }
+.lobby-stat { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; margin-top: 20px; }
+.lobby-stat b { font-variant-numeric: tabular-nums; color: var(--lobby-accent); }
+.lobby-context-link { display: flex; justify-content: space-between; gap: 8px; min-height: 44px; padding: 10px 12px; border: 1px solid var(--lobby-line); border-radius: 6px; color: var(--lobby-text); background: var(--lobby-raised); font-size: 11px; text-align: left; }
+.lobby-insight { font-size: 11px; color: var(--lobby-muted); }
+.lobby-insight strong { display: block; margin-top: 8px; color: var(--lobby-text); }
+@media (max-width: 1250px) {
+  .casino-home { grid-template-columns: 168px minmax(0, 1fr); }
+  .lobby-reality { grid-column: 2; border-left: 0; border-top: 1px solid var(--lobby-subtle-line); display: grid; grid-template-columns: 1fr 1fr; margin: 0 20px 20px; padding: 16px; border-radius: 8px; }
+  .lobby-reality-heading { grid-column: 1 / -1; }
+  .lobby-prompt-list { grid-column: 1; }
+  .lobby-signal { grid-column: 2; grid-row: 2; border: 0; padding: 0; }
+  .lobby-context-link { grid-column: 2; align-self: end; }
+  .lobby-secondary-prompt { display: none; }
+  .lobby-sidebar { grid-row: 2 / 4; }
+  .lobby-game { min-height: 226px; }
+}
+@media (max-width: 1000px) {
+  .casino-home { grid-template-columns: 152px minmax(0, 1fr); }
+  .lobby-topbar { gap: 16px; padding: 0 16px; }
+  .lobby-brand { min-width: 120px; }
+  .lobby-content { padding: 16px; }
+  .lobby-game-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lobby-game { min-height: 248px; }
+  .lobby-hero-copy { padding: 20px; }
+  .lobby-hero { grid-template-columns: 1.15fr .85fr; }
+  .lobby-feature { min-height: 128px; padding: 12px; }
+  .lobby-feature strong { font-size: 23px; }
+  .lobby-how-grid { grid-template-columns: 1fr; gap: 8px; }
+  .lobby-how-grid > div { align-items: center; }
+  .lobby-how-grid p { margin-top: 2px; }
+}
+@media (max-width: 700px) {
+  .casino-home { display: block; }
+  .lobby-topbar { min-height: 60px; padding: 8px 16px; gap: 12px; flex-wrap: wrap; }
+  .lobby-brand { min-width: 0; }
+  .lobby-brand strong { font-size: 18px; }
+  .lobby-mode, .lobby-sidebar { display: none; }
+  .lobby-account { gap: 8px; }
+  .lobby-account > a { min-height: 44px; padding: 8px 12px; }
+  .lobby-content { padding: 0 16px; }
+  .lobby-mobile-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 8px 0 12px; }
+  .lobby-mobile-nav :is(a, button) { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 6px 2px; color: var(--lobby-muted); border: 0; border-radius: 5px; background: transparent; font-size: 11px; text-align: center; }
+  .lobby-mobile-nav [aria-current] { color: var(--lobby-text); background: var(--lobby-raised); box-shadow: inset 0 -2px var(--gold); }
+  .lobby-hero { display: flex; flex-direction: column; min-height: 0; }
+  .lobby-hero-copy { width: 100%; padding: 20px 16px 16px; }
+  .lobby-hero h1 { font-size: 48px; max-width: 12ch; line-height: .98; }
+  .lobby-hero-copy > .lobby-label { font-size: 9px; margin-bottom: 12px; }
+  .lobby-hero-copy > p:not(.lobby-label) { font-size: 12px; margin-bottom: 16px; }
+  .lobby-hero-actions { display: none; }
+  .casino-home .mobile-game-quickpick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; width: 100%; }
+  .lobby-quick-game { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px 10px; border: 1px solid var(--lobby-line); border-radius: 6px; background: var(--lobby-panel); color: var(--lobby-text); font-size: 12px; font-weight: 650; }
+  .lobby-quick-game img { width: 24px; height: 24px; flex: none; object-fit: contain; }
+  .lobby-hero-art { position: relative; inset: auto; min-height: 128px; width: 100%; z-index: 0; }
+  .lobby-hero-art img { object-position: center 33%; }
+  .lobby-hero-art::after { background: linear-gradient(180deg, var(--wine), transparent 35%, #100b0959); }
+  .lobby-features { gap: 8px; margin-top: 12px; }
+  .lobby-feature { min-height: 122px; padding: 12px 8px; }
+  .lobby-feature::after { background: linear-gradient(0deg, #100b09f2 20%, #100b0980 70%, #100b0960); }
+  .lobby-feature > span { min-height: 94px; justify-content: flex-end; }
+  .lobby-feature small { font-size: 9px; }
+  .lobby-feature strong { font-size: 22px; }
+  .lobby-feature b { margin-top: 8px; font-size: 10px; gap: 8px; }
+  .lobby-games { padding-top: 24px; }
+  .lobby-section-heading { align-items: flex-start; gap: 8px; }
+  .lobby-section-heading h2 { font-size: 17px; max-width: 20ch; }
+  .lobby-section-heading > span { font-size: 10px; padding-top: 4px; }
+  .lobby-game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .lobby-game { min-height: 248px; }
+  .lobby-game h3 { font-size: 29px; }
+  .lobby-game-meta { padding-inline: 12px; }
+  .lobby-game-meta > span { font-size: 10px; }
+  .lobby-game-enter { padding: 14px 12px; font-size: 11px; }
+  .lobby-reality { display: block; margin: 20px 16px; padding: 16px; }
+  .lobby-reality-heading { margin-bottom: 16px; }
+  .lobby-signal { border-top: 1px solid var(--lobby-subtle-line); padding-top: 16px; margin-top: 16px; }
+  .lobby-context-link { margin-top: 16px; width: 100%; }
+  .lobby-prompt > span { font-size: 13px; }
+  .lobby-prompt small { font-size: 10px; }
+  .lobby-how-grid { gap: 8px; }
+  .lobby-how-grid > div { padding: 12px; }
+  .lobby-footer { font-size: 11px; }
+}
+@media (max-width: 360px) {
+  .lobby-content { padding-inline: 12px; }
+  .lobby-hero h1 { font-size: 42px; }
+  .lobby-feature strong { font-size: 19px; }
+  .lobby-feature small { font-size: 9px; }
+  .lobby-game { min-height: 224px; }
+  .lobby-game h3 { font-size: 26px; }
+  .lobby-game-enter { font-size: 10px; padding-inline: 10px; }
+  .lobby-section-heading > span { display: none; }
+  .lobby-quick-game { padding-inline: 8px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .casino-home *, .casino-home *::before, .casino-home *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

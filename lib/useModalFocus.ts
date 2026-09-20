@@ -9,6 +9,7 @@ export function useModalFocus(
   onClose: () => void,
 ) {
   const closeRef = useRef(onClose);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     closeRef.current = onClose;
@@ -18,9 +19,13 @@ export function useModalFocus(
     const dialog = dialogRef.current;
     if (!dialog) return;
 
-    const previousFocus = document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : null;
+    const activeElement = document.activeElement;
+    // Strict Mode can replay this effect while focus is already in the dialog.
+    // Keep the outside trigger when that happens, including disabled triggers.
+    if (activeElement instanceof HTMLElement && !dialog.contains(activeElement)) {
+      returnFocusRef.current = activeElement;
+    }
+    const previousFocus = returnFocusRef.current;
     const background: Array<{ element: HTMLElement; wasInert: boolean }> = [];
 
     // The dialogs render inside the page, so exclude siblings at each ancestor.

@@ -40,6 +40,7 @@ export const RealityGame = forwardRef<RealityGameHandle, { gameType: GamblingTyp
       (async () => {
         if (!node) return;
         const { mountRealityGame } = await import('@/lib/phaserGame');
+        if (cancelled) return;
         const mounted = await mountRealityGame(node, { gameType, reducedMotion, initialBalanceCents: initialBalance.current });
         if (cancelled) mounted.destroy();
         else {
@@ -52,7 +53,6 @@ export const RealityGame = forwardRef<RealityGameHandle, { gameType: GamblingTyp
         cancelled = true;
         bridge.current?.destroy();
         bridge.current = null;
-        if (node) node.innerHTML = '';
       };
     }, [gameType, reducedMotion]);
 
@@ -60,7 +60,8 @@ export const RealityGame = forwardRef<RealityGameHandle, { gameType: GamblingTyp
       bridge.current?.setContext(initialBalanceCents);
     }, [initialBalanceCents]);
 
-    return <><div className="phaser-stage" data-ready={ready ? 'true' : 'false'} ref={host}>
+    return <><div className="phaser-stage" data-ready={ready ? 'true' : 'false'}>
+      <div ref={host} style={{ position: 'absolute', inset: 0 }} />
       {!ready ? <div className="game-loading">Building the table…</div> : null}
     </div>
       {gameType === 'lottery' ? <div className="scratch-result-grid" role="group" aria-label="Revealed scratch amounts" aria-live="polite">

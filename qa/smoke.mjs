@@ -157,10 +157,13 @@ try {
     assert(await page.getByRole('link', { name: /Enter Reality Run/i }).count() === 6, `${name}: homepage did not expose all six game choices`);
     assert(await page.locator('[data-game-art]').count() === 6, `${name}: each game did not expose dedicated authored artwork`);
     if (width >= 1024) {
-      assert(await page.locator('[data-game-layout="featured"]').count() === 1, `${name}: desktop game library has no featured composition`);
-      assert(await page.locator('[data-game-layout="supporting"]').count() === 5, `${name}: desktop supporting games are not explicitly composed`);
-      assert(await page.locator('.hub-sidebar[data-material="liquid-glass"]').count() === 1, `${name}: sidebar is not marked as the continuous liquid-glass material surface`);
-      assert(await page.locator('.hub-nav [data-nav-state="active"]').count() === 1, `${name}: liquid-glass nav has no integrated active state`);
+      assert(await page.locator('[data-game-layout="poster"]').count() === 6, `${name}: the reference catalog needs six poster tiles`);
+      const posterWidths = await page.locator('[data-game-layout="poster"]').evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().width));
+      assert(Math.max(...posterWidths) - Math.min(...posterWidths) <= 1, `${name}: poster tiles have inconsistent widths`);
+      assert(await page.locator('.lobby-sidebar[data-material="casino-rail"]').count() === 1, `${name}: compact casino navigation rail is missing`);
+      assert(await page.locator('.lobby-nav [data-nav-state="active"]').count() === 1, `${name}: navigation has no single active state`);
+      assert(await page.locator('.lobby-topbar').isVisible(), `${name}: reference top bar is missing`);
+      assert(await page.locator('.lobby-feature').count() === 3, `${name}: reference feature row is incomplete`);
     }
     assert(await page.locator('[data-type-role="display"]').count() >= 1, `${name}: display typography role is missing`);
     assert(await page.locator('[data-type-role="game-title"]').count() === 6, `${name}: game-title typography role is not explicit on all games`);
@@ -790,7 +793,7 @@ try {
   await contextPage.goto(base, { waitUntil: 'domcontentloaded' });
   await contextPage.getByText(/Payday's tomorrow\./i).waitFor();
   await capture(contextPage, `${out}/payday-shield-390.png`);
-  await contextPage.getByRole('button', { name: 'My reality' }).click();
+  await contextPage.getByRole('button', { name: 'My reality', exact: true }).click();
   await contextPage.getByRole('heading', { name: /What Spin Out knows right now/i }).waitFor();
   assert(await contextPage.locator('.reality-context-summary').count() === 1,
     'My Reality did not open on the summary-first surface');

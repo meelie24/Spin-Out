@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Barlow_Condensed, Manrope } from 'next/font/google';
 import Link from 'next/link';
 import './globals.css';
+import './casino-home.css';
 import { AccountSync } from '@/components/AccountSync';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://spinitout.com';
